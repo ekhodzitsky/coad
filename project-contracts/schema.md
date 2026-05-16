@@ -4,15 +4,34 @@ kind: module_contract
 module: schema
 level: root
 layer: tooling-contract
-purpose: Define executable JSON schemas for contracts, reports, and release manifests.
+purpose: Define executable JSON schemas for contracts, workcell authority fields, reports, and release manifests.
 status: pilot
 owners:
   - validator-maintainers
+workcell:
+  type: leaf
+  parent: project
+  children: []
+  owns_paths:
+    - schema/
+  context_budget:
+    max_files: 12
+    max_source_lines: 1500
+    max_contract_lines: 180
+    max_readme_lines: 120
+    max_todo_lines: 80
+authority:
+  write_policy: single_active_write_lease
+  orchestrator: project
+  read_agents: many_allowed
+  migration_lease_required:
+    - cross-workcell write
+    - public surface migration
 surface:
   - name: ContractSchemas
     kind: schema-set
     visibility: public
-    contract: Validates COAD contract frontmatter and report payloads.
+    contract: Validates COAD contract frontmatter, workcell authority fields, and report payloads.
     proof:
       kind: schema
       target: schema/*.json schema/reports/*.json

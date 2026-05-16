@@ -8,6 +8,25 @@ purpose: Capture repeatable agent orchestration workflows.
 status: pilot
 owners:
   - methodology-maintainers
+workcell:
+  type: leaf
+  parent: project
+  children: []
+  owns_paths:
+    - playbooks/
+  context_budget:
+    max_files: 12
+    max_source_lines: 1500
+    max_contract_lines: 180
+    max_readme_lines: 120
+    max_todo_lines: 80
+authority:
+  write_policy: single_active_write_lease
+  orchestrator: project
+  read_agents: many_allowed
+  migration_lease_required:
+    - cross-workcell write
+    - public surface migration
 surface:
   - name: OrchestrationPlaybooks
     kind: documentation-api

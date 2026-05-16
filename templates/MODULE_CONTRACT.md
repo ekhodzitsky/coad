@@ -8,6 +8,25 @@ purpose: <one sentence describing what this module owns>
 status: pilot
 owners:
   - <owner>
+workcell:
+  type: <project|composite|leaf>
+  parent: <parent workcell or empty>
+  children: []
+  owns_paths:
+    - <relative path owned by this workcell>
+  context_budget:
+    max_files: 12
+    max_source_lines: 1500
+    max_contract_lines: 180
+    max_readme_lines: 120
+    max_todo_lines: 80
+authority:
+  write_policy: single_active_write_lease
+  orchestrator: <parent workcell or owner>
+  read_agents: many_allowed
+  migration_lease_required:
+    - cross-workcell write
+    - public surface migration
 surface:
   - name: <surface-name>
     kind: <trait|struct|function|service|schema|endpoint|workflow>
@@ -53,6 +72,11 @@ agent_policy:
 ## Architecture
 
 Explain the module boundary, data flow, lifecycle, and tradeoffs.
+
+## Workcell Authority
+
+Explain whether this is a leaf or composite workcell, who may hold the write
+lease, and when changes must be delegated or escalated.
 
 ## Notes
 

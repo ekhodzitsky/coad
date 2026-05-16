@@ -8,6 +8,25 @@ purpose: Keep checkout decisions explicit for agents changing payment-adjacent c
 status: pilot
 owners:
   - product-platform
+workcell:
+  type: leaf
+  parent: project
+  children: []
+  owns_paths:
+    - onboarding-checkout/
+  context_budget:
+    max_files: 12
+    max_source_lines: 1500
+    max_contract_lines: 180
+    max_readme_lines: 120
+    max_todo_lines: 80
+authority:
+  write_policy: single_active_write_lease
+  orchestrator: product-platform
+  read_agents: many_allowed
+  migration_lease_required:
+    - cross-workcell write
+    - public surface migration
 surface:
   - name: CheckoutService
     kind: service

@@ -31,7 +31,8 @@ uv run --project tools/coad-validator coad check .
    ```
 
    Keep at least one `MODULE_CONTRACT.md` for the module being changed. The
-   module directory must include `README.md` and `TODO.md` for future agents.
+   module is a workcell: one bounded agent workspace. The module directory must
+   include `README.md` and `TODO.md` for future agents.
    ````
 
 2. Add one `MODULE_CONTRACT.md` for a real module.
@@ -71,6 +72,7 @@ passes `coad check .`.
 Start with module ownership. Add heavier contracts only when the workflow needs
 them:
 
+- workcell context budgets and write leases for parallel agent work;
 - proof on module invariants;
 - task and handoff contracts for multi-agent execution;
 - review and integration contracts for coordinated delivery;

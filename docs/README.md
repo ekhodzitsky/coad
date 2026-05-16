@@ -6,6 +6,9 @@ Public API:
 
 - `COAD_PROJECT_STANDARD.md`
 - `AGENT_FLOW.md`
+- `workcells.md`
+- `landscape.md`
+- `module-contract-checklist.md`
 - `agent-integration.md`
 - `validator.md`
 - `contract-graph.md`

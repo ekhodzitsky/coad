@@ -15,6 +15,7 @@ A COAD context pack SHOULD include:
 - the goal contract that owns the task;
 - the task contract;
 - module contracts listed by the task;
+- workcell authority and context-budget notes from those module contracts;
 - proof contracts required by the task;
 - review contracts targeting the task;
 - handoff contracts for the task when they exist;
@@ -23,7 +24,8 @@ A COAD context pack SHOULD include:
 ## Exclusions
 
 A context pack SHOULD NOT include unrelated modules, unrelated tasks, stale chat
-history, or broad repository dumps.
+history, broad repository dumps, or child implementation files when the assigned
+agent only has composite read-only orchestration authority.
 
 ## Reference Builder
 

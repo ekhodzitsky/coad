@@ -1,158 +1,175 @@
 # COAD: Contract-Orchestrated Agent Development
 
-Contract-Orchestrated Agent Development (COAD) is a methodology for orchestrated agentic software development.
+**Agent-Navigable Codebase Standard**
 
-It turns modules, tasks, proofs, handoffs, reviews, and integrations into machine-readable contracts so multiple agents can work on one system without relying on chat memory, guesses, or vague "looks done" claims.
+COAD is a lightweight methodology for making software repositories easy for AI
+agents to understand, change, verify, and hand off.
 
-## Core Idea
+COAD does not run agents. COAD makes a codebase understandable to agents.
 
-A COAD-native codebase is an agent-navigable codebase: every important module
-has enough local context for an agent to understand ownership, surfaces,
-consumers, invariants, proof, and safe write scope before reading the whole
-repository.
+It gives every important part of a project a small local contract: what it
+owns, what it exposes, who depends on it, what must stay true, who may write,
+and which proof is required before work can be called done.
 
-A software system can be changed safely by agents when every unit of work is bounded by explicit contracts:
+## Why COAD
 
-```text
-Goal
-  -> Task Contracts
-    -> Module Contracts
-    -> Proof Contracts
-    -> Handoff Contracts
-    -> Review Contracts
-  -> Integration Contract
-```
+Agentic development breaks down when agents:
 
-Agents do not own completion claims. Contracts and proof do.
+- read too much irrelevant context;
+- miss hidden consumers and invariants;
+- edit overlapping scopes in parallel;
+- hand off chat summaries instead of evidence;
+- claim completion without repeatable proof;
+- invent abstractions because real boundaries are invisible.
 
-## One Command
-
-The public integration surface is intentionally small:
+COAD turns those hidden assumptions into repo-native contracts and validates the
+result with one command.
 
 ```bash
 coad check .
 ```
 
-From a local clone:
+## Core Model
+
+A COAD-native project is a tree of **workcells**.
+
+A workcell is the smallest independently ownable, documentable, and verifiable
+unit of agent work. It may be a package, module, service, feature area, or docs
+area.
+
+```text
+Project Workcell
+  -> Composite Workcell
+    -> Leaf Workcell
+```
+
+Leaf workcells are the normal implementation unit. Each leaf workcell has at
+most one active write agent. Composite workcells are read-only orchestration
+units: they decompose work, assign write leases, collect proof, and delegate
+implementation to child workcells.
+
+`MODULE_CONTRACT.md` is the compatibility filename for a workcell contract.
+
+## What You Add
+
+Start with one real module:
+
+```text
+AGENTS.md
+src/
+  checkout/
+    MODULE_CONTRACT.md
+    README.md
+    TODO.md
+```
+
+The module contract defines:
+
+- ownership boundary;
+- public and internal surfaces;
+- dependencies and consumers;
+- invariants;
+- verification commands;
+- allowed and forbidden mutations;
+- workcell authority and write policy.
+
+Keep local docs short. If a module README becomes an encyclopedia, the workcell
+is probably too large and should be split.
+
+## One Command
+
+Install from a local clone:
+
+```bash
+cd tools/coad-validator
+uv tool install .
+```
+
+Run the public check:
+
+```bash
+coad check .
+```
+
+Expected output:
+
+```text
+coad check: pass
+```
+
+For structured agent/orchestrator output:
+
+```bash
+coad check . --format json
+```
+
+From this repository without installing:
 
 ```bash
 cd tools/coad-validator
 uv run coad check ../..
 ```
 
-For another repository, install the tool once and run the same check in that
-repository:
-
-```bash
-uv tool install /path/to/coad/tools/coad-validator
-coad check .
-```
-
-The command prints one line and exits non-zero on failure:
-
-```text
-coad check: pass
-```
-
-Agents that need structured output can use:
-
-```bash
-coad check . --format json
-```
-
-Everything else in `tools/` is supporting machinery for tests, CI, debugging,
-and deeper reports. A normal dev flow should start with `coad check .`.
-The validator bundles the COAD schemas, so integrated repositories do not need
-to carry a local `schema/` directory just to run the check.
-
 ## 2-Minute Onboarding
 
 1. Paste the COAD snippet into the repository `AGENTS.md`.
-2. Add one `MODULE_CONTRACT.md` for a real module.
-3. Give that module a `README.md` and `TODO.md`.
+2. Add one `MODULE_CONTRACT.md` for a real module/workcell.
+3. Add that module's `README.md` and `TODO.md`.
 4. Run `coad check .`.
 
-That is the first adoption bar. Repositories with only module contracts get a
-light structural check. When goal/task/proof/handoff contracts are added,
-`coad check .` automatically includes the orchestration evidence checks.
+That is the first adoption bar. Add task, proof, handoff, review, integration,
+and ledger contracts only when the workflow needs more orchestration.
 
-Use `GETTING_STARTED.md` for the copy-paste flow and `examples/onboarding/` for
-the smallest complete passing example.
-
-Use `COAD_PROJECT_STANDARD.md` for the project shape and `AGENT_FLOW.md` for the
-agent work protocol.
-
-## Why This Exists
-
-Agentic coding breaks down when agents:
-
-- read too much irrelevant context;
-- miss hidden consumers and invariants;
-- work in overlapping write scopes;
-- hand off with summaries instead of evidence;
-- accept completion without repeatable verification;
-- create abstractions because the real boundaries are invisible.
-
-COAD makes boundaries, permissions, proof, and readiness explicit enough for an orchestrator to route work and for agents to execute it safely.
-
-## Contract Types
-
-- **Goal Contract**: why the work exists, how readiness is decided, and what policy constrains orchestration.
-- **Module Contract**: what a module owns, exposes, depends on, and promises.
-- **Task Contract**: what one agent or worker must change, prove, and avoid.
-- **Proof Contract**: what evidence is required before a claim can be accepted.
-- **Handoff Contract**: what must be passed from one worker to the next.
-- **Review Contract**: what review gates block acceptance.
-- **Integration Contract**: when accepted slices can be combined and delivered.
-
-## Minimal Lifecycle
-
-1. Define the goal and terminal criteria.
-2. Decompose the goal into task contracts.
-3. Bind each task to module contracts and write scopes.
-4. Dispatch agents with bounded context packs.
-5. Require proof contracts before completion.
-6. Convert review findings into new task contracts.
-7. Integrate only after review, proof, and dependency gates pass.
-8. Update contracts when surfaces, dependencies, invariants, or verification change.
+See [GETTING_STARTED.md](GETTING_STARTED.md) and
+[examples/onboarding/](examples/onboarding/) for the smallest passing setup.
 
 ## Repository Map
 
 ```text
-contracts/   Canonical contract type definitions.
-templates/   Copyable contract templates.
-schema/      Machine-readable contract and tool-output schemas.
-docs/        Methodology details: proof matrix, maturity, rules, anti-patterns.
-playbooks/   Repeatable orchestration flows.
-examples/    Small reference examples.
-project-contracts/
-             COAD module contracts for this repository's real modules.
-tools/       Reference validator. Public command: `coad check .`.
+contracts/          Human-readable contract semantics.
+templates/          Copyable starter contracts.
+schema/             JSON schemas for contracts and reports.
+docs/               Methodology details and operating rules.
+playbooks/          Repeatable orchestration flows.
+examples/           Reference COAD project shapes.
+project-contracts/  COAD contracts for this repository itself.
+tools/              Reference validator. Public command: coad check .
 ```
+
+## Key Docs
+
+- [COAD_PROJECT_STANDARD.md](COAD_PROJECT_STANDARD.md) - project shape and adoption levels.
+- [AGENT_FLOW.md](AGENT_FLOW.md) - how agents enter, edit, prove, and hand off.
+- [docs/workcells.md](docs/workcells.md) - workcell tree, context budgets, write leases, and authority.
+- [docs/module-contract-checklist.md](docs/module-contract-checklist.md) - semantic quality checklist for module contracts.
+- [docs/landscape.md](docs/landscape.md) - comparison with adjacent agent-development projects.
+- [docs/validator.md](docs/validator.md) - validator behavior and report semantics.
+
+## Landscape
+
+COAD sits beside agent runtimes and spec-first workflow systems. It is lighter
+by design: a repository standard plus one public command.
+
+Adjacent projects worth knowing:
+
+- [GitHub Spec Kit](https://github.com/github/spec-kit)
+- [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD)
+- [Superpowers](https://github.com/obra/superpowers)
+- [GSD / Get Shit Done](https://github.com/gsd-build/get-shit-done)
+- [Agent OS](https://github.com/buildermethods/agent-os)
+- [Repomix](https://github.com/yamadashy/repomix)
+- [OpenHands](https://github.com/OpenHands/OpenHands)
+- [Cline](https://github.com/cline/cline)
+- [Roo Code](https://github.com/RooCodeInc/Roo-Code)
+- [Aider](https://github.com/Aider-AI/aider)
+
+Those projects mostly define agent workflows, agent runtimes, or context
+packaging. COAD defines how the repository itself exposes boundaries,
+ownership, proof, and safe write scope to any agent.
 
 ## Status
 
-Private draft. The goal is to turn the original Module Contract Pattern into a broader methodology for contract-driven orchestration of multi-agent software work.
+Private draft.
 
-## Recommended Reading Order
-
-1. `SPEC.md`
-2. `GETTING_STARTED.md`
-3. `COAD_PROJECT_STANDARD.md`
-4. `AGENT_FLOW.md`
-5. `PRINCIPLES.md`
-6. `contracts/goal-contract.md`
-7. `docs/contract-graph.md`
-8. `docs/proof-matrix.md`
-9. `docs/context-packs.md`
-10. `docs/validator.md`
-11. `docs/agent-integration.md`
-12. `docs/release-gates.md`
-13. `docs/execution-ledger.md`
-14. `docs/conformance-profile.md`
-15. `docs/policy-enforcement.md`
-16. `docs/attestation-bundle.md`
-17. `docs/artifact-export.md`
-18. `docs/tool-output-schemas.md`
-19. `docs/report-versioning.md`
-20. `examples/minimal/`
+Keywords: AI agents, agentic development, multi-agent software engineering,
+codebase standards, contracts, workcells, orchestration, validation.

@@ -9,4 +9,6 @@ Public API:
 
 Consumers: GETTING_STARTED.md, ADOPTION.md, and agents adopting COAD.
 
-Invariants: templates are examples with placeholders, not live repository contracts.
+Invariants: templates are examples with placeholders, not live repository
+contracts. Use `docs/module-contract-checklist.md` to review whether a filled
+`MODULE_CONTRACT.md` is semantically useful to an agent.

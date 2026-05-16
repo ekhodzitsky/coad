@@ -8,6 +8,25 @@ purpose: Replace with the module ownership boundary agents must preserve.
 status: pilot
 owners:
   - replace-with-owner
+workcell:
+  type: leaf
+  parent: replace-with-parent-or-empty
+  children: []
+  owns_paths:
+    - replace-with-module-path/
+  context_budget:
+    max_files: 12
+    max_source_lines: 1500
+    max_contract_lines: 180
+    max_readme_lines: 120
+    max_todo_lines: 80
+authority:
+  write_policy: single_active_write_lease
+  orchestrator: replace-with-owner-or-parent
+  read_agents: many_allowed
+  migration_lease_required:
+    - cross-workcell write
+    - public surface migration
 surface:
   - name: ReplaceWithSurface
     kind: service

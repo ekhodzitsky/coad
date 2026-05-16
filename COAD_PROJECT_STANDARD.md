@@ -28,8 +28,8 @@ project is not COAD-native yet.
 
 ## Repository Shape
 
-A COAD-native repository has a small global entry and strong local module
-contexts.
+A COAD-native repository has a small global entry and a tree of strong local
+workcell contexts.
 
 ```text
 AGENTS.md
@@ -54,11 +54,15 @@ Centralized module contracts are allowed when a repository cannot keep contracts
 beside code, but each contract must still point to a real module directory with
 local `README.md` and `TODO.md`.
 
-## Module As Agent Workspace
+## Workcell As Agent Workspace
 
-Every meaningful module is an agent workspace. An agent assigned to that module
-must be able to work from local context first, then inspect implementation
-details.
+Every meaningful module is a workcell: an agent workspace sized for fast
+orientation, local ownership, and proof-backed edits. A workcell may contain
+child workcells, but the normal write unit is a leaf workcell.
+
+A project should stay as flat as practical. Add hierarchy only when a workcell
+is too large, owns multiple independent surfaces, or needs an orchestrator to
+coordinate child work.
 
 Required local context:
 
@@ -70,6 +74,30 @@ Required local context:
 
 The module contract is the boundary. The module README is the working map. The
 module TODO is the local backlog. Tests and proof commands are the evidence.
+
+See `docs/workcells.md` for the full workcell tree, context budget, write-lease,
+and authority model.
+
+## Workcell Size Standard
+
+A workcell must fit into an agent's working context. Default advisory budgets:
+
+- source files in normal edit scope: 12;
+- source lines in normal edit scope: 1500;
+- `MODULE_CONTRACT.md`: 180 lines;
+- `README.md`: 120 lines;
+- `TODO.md`: 80 lines;
+- public or cross-workcell surfaces: 8;
+- invariants: 12;
+- active write agents: 1.
+
+The two-minute orientation rule is stronger than any numeric budget. If a fresh
+agent cannot understand the boundary, surfaces, risks, and proof quickly, split
+the workcell or improve its local context.
+
+Split a workcell when it starts acting like several independent workcells:
+unrelated surfaces, unrelated invariants, frequent concurrent edits, broad
+proof requirements, or README documentation that becomes an encyclopedia.
 
 ## Module Contract Standard
 
@@ -128,6 +156,15 @@ integration contracts.
 
 Parallelism is safe only when ownership is explicit.
 
+The default concurrency rule is:
+
+```text
+one leaf workcell -> one active write agent
+```
+
+Read-only agents may investigate, review, or verify the same workcell in
+parallel. Write authority is exclusive.
+
 Agents can work in parallel when:
 
 - their write scopes do not overlap;
@@ -138,6 +175,12 @@ Agents can work in parallel when:
 
 Agents should not work in parallel merely because files differ. The right unit
 of parallelism is module ownership plus proof, not filename coincidence.
+
+Composite workcells are orchestrated by read-only agents. A composite
+orchestrator decomposes work, assigns child write leases, accepts proof-backed
+handoffs, and escalates conflicts. It does not directly write child
+implementation files. Cross-workcell changes require an explicit migration
+lease approved by the nearest common orchestrator.
 
 ## Handoff Standard
 
@@ -159,9 +202,11 @@ the sender's chat history.
   module `README.md`/`TODO.md` pass `coad check .`.
 - **Level 1: Proven module invariants.** Critical surfaces and invariants have
   concrete proof commands.
-- **Level 2: Task handoff discipline.** Coordinated work uses task, proof,
+- **Level 2: Workcell authority discipline.** Work uses explicit read scopes,
+  write leases, and parent-orchestrator escalation for cross-workcell changes.
+- **Level 3: Task handoff discipline.** Coordinated work uses task, proof,
   handoff, review, and integration contracts.
-- **Level 3: Ledger-audited orchestration.** Completed agent work is recorded in
+- **Level 4: Ledger-audited orchestration.** Completed agent work is recorded in
   execution ledgers with proof evidence.
 
 Move up only when the workflow needs it. COAD should reduce rework, not create
@@ -170,6 +215,7 @@ ceremony.
 ## Anti-Patterns
 
 - A giant root README that replaces local module context.
+- A workcell so large that agents need repository archaeology for local edits.
 - Module contracts that describe aspirations instead of real ownership.
 - Consumers listed as "unknown".
 - Proof commands that no agent can run.
@@ -179,3 +225,6 @@ ceremony.
   contract.
 - `coad check .` treated as the source of speed instead of the validator of the
   project shape.
+- Parent orchestrators editing child implementation directly instead of
+  assigning child write leases.
+- Multiple write agents working inside the same leaf workcell at the same time.

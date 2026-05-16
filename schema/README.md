@@ -1,6 +1,7 @@
 # schema
 
-Purpose: define executable JSON schemas for COAD contracts, reports, and manifests.
+Purpose: define executable JSON schemas for COAD contracts, workcell authority
+fields, reports, and manifests.
 
 Public API:
 

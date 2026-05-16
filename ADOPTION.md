@@ -35,8 +35,9 @@ issue it reports before claiming the work is complete.
    coad check .
    ```
 
-   Keep at least one `MODULE_CONTRACT.md` for the module being changed, and
-   keep that module's `README.md` and `TODO.md` current for future agents.
+   Keep at least one `MODULE_CONTRACT.md` for the module being changed. Treat
+   that module as a workcell: one bounded agent workspace with one active write
+   agent. Keep its `README.md` and `TODO.md` current for future agents.
    ````
 
 2. Add one `MODULE_CONTRACT.md`.
@@ -71,6 +72,10 @@ Good candidates:
 
 Create module contracts for those boundaries only.
 
+Each boundary should be small enough for a fresh agent to orient in two
+minutes. If one boundary needs many unrelated surfaces, many invariants, or a
+long README, split it into smaller workcells before adding orchestration.
+
 For each contracted module, keep a real module directory with:
 
 - `README.md` for agent-facing ownership, API, dependencies, and invariants;
@@ -103,6 +108,10 @@ The task contract should define:
 - acceptance criteria;
 - required proof;
 - handoff requirements.
+
+For parallel work, also name the workcell write lease. One leaf workcell should
+have at most one active write agent. Composite workcell agents should decompose
+and delegate child implementation work instead of editing child code directly.
 
 ## Phase 4: Add Review And Integration Contracts
 

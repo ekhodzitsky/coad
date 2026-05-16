@@ -6,6 +6,9 @@ The flow optimizes for fast orientation, bounded edits, proof-backed handoff,
 and safe parallel work. `coad check .` validates the methodology; it is not the
 orchestrator.
 
+The normal write unit is a leaf workcell. Composite workcell agents orchestrate
+child work read-only; they do not directly write child implementation files.
+
 ## Entry Protocol
 
 1. Read root `AGENTS.md`.
@@ -13,8 +16,10 @@ orchestrator.
 3. Read the module `README.md`.
 4. Read the module `TODO.md`.
 5. Identify surfaces, consumers, invariants, and proof commands.
-6. Define read scope and write scope before editing.
-7. Inspect implementation only after the boundary is clear.
+6. Identify whether the workcell is leaf or composite.
+7. Define read scope and write scope before editing.
+8. Acquire or declare the write lease if implementation changes are needed.
+9. Inspect implementation only after the boundary is clear.
 
 The agent should enter through contracts and local context, not through a broad
 repository search.
@@ -24,12 +29,14 @@ repository search.
 Before editing, the agent should be able to answer:
 
 - Which module owns this behavior?
+- Is the owning workcell leaf or composite?
 - Which files am I allowed to change?
 - Which files may I read for context?
 - Which surface am I changing or preserving?
 - Which consumers could be affected?
 - Which invariants must remain true?
 - Which proof commands will establish correctness?
+- Do I have the only active write lease for this workcell?
 - Does this require updating a contract, README, TODO, schema, or docs?
 
 If these answers are unclear, the agent should clarify the module context before
@@ -37,7 +44,7 @@ changing code.
 
 ## Work Protocol
 
-1. Lock the intended write scope.
+1. Lock the intended write scope and write lease.
 2. Read the focused implementation files.
 3. Add or identify proof before changing shared behavior.
 4. Make the smallest change that satisfies the task.
@@ -57,7 +64,7 @@ A lead agent or orchestrator should assign parallel work by module ownership:
 1. Decompose the goal into module-owned tasks.
 2. Give each agent the relevant module contract, README, TODO, and proof
    expectations.
-3. Ensure write scopes do not overlap.
+3. Ensure each leaf workcell has at most one active write agent.
 4. Serialize tasks that touch the same invariant, public surface, schema, or
    shared dependency.
 5. Require proof-backed handoff from each agent.
@@ -65,6 +72,24 @@ A lead agent or orchestrator should assign parallel work by module ownership:
 
 Parallel work is safe when agents operate inside clear boundaries. It is unsafe
 when they merely edit different files without knowing shared invariants.
+
+## Workcell Authority Protocol
+
+Use the smallest authority level that can safely decide the work:
+
+- **Leaf write agent:** decides implementation details inside one leaf workcell
+  and one write lease.
+- **Composite orchestrator:** reads child context, decomposes tasks, assigns
+  write leases, and accepts proof-backed handoffs.
+- **Parent orchestrator:** resolves cross-workcell conflicts and approves
+  migration leases.
+- **Read agent:** investigates, reviews, or verifies without write authority.
+
+If a composite agent discovers a required child implementation change, it
+creates or assigns child work. It should not edit the child directly.
+
+Cross-workcell changes require a migration lease that names affected workcells,
+temporary write scope, proof, paused child work, and integration owner.
 
 ## Change Classification
 
@@ -88,7 +113,9 @@ Use this shape when handing work to another agent, reviewer, or integrator:
 
 ```markdown
 Module:
+Workcell:
 Write scope:
+Write lease:
 Changed files:
 Contracts/context updated:
 Surfaces changed:
@@ -119,6 +146,8 @@ acceptance.
 
 - Starting with a whole-repo scan when a module contract exists.
 - Editing across module boundaries without updating ownership context.
+- Editing a leaf workcell that already has an active write agent.
+- Letting a parent orchestrator directly change child implementation files.
 - Changing public surfaces without naming affected consumers.
 - Reporting completion without proof output.
 - Leaving local TODO or README stale after changing module behavior.

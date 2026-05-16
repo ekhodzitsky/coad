@@ -1,8 +1,13 @@
 # Module Contract
 
-A Module Contract describes one ownership boundary.
+A Module Contract describes one workcell ownership boundary.
 
-It is the base unit of COAD. Agents use it to understand what a module owns, what promises must be preserved, what evidence protects those promises, and when edits require escalation.
+It is the base unit of COAD. Agents use it to understand what a workcell owns,
+what promises must be preserved, what evidence protects those promises, and
+when edits require escalation.
+
+`MODULE_CONTRACT.md` is the compatibility filename. Conceptually, this is the
+workcell contract.
 
 ## Required Fields
 
@@ -16,6 +21,25 @@ purpose: Calculate invoice totals and expose billing decisions to callers.
 status: pilot
 owners:
   - platform
+workcell:
+  type: leaf
+  parent: commerce
+  children: []
+  owns_paths:
+    - billing/
+  context_budget:
+    max_files: 12
+    max_source_lines: 1500
+    max_contract_lines: 180
+    max_readme_lines: 120
+    max_todo_lines: 80
+authority:
+  write_policy: single_active_write_lease
+  orchestrator: commerce
+  read_agents: many_allowed
+  migration_lease_required:
+    - cross-workcell write
+    - public surface migration
 surface:
   - name: InvoiceCalculator
     kind: service
@@ -76,6 +100,19 @@ agent_policy:
 - `invariants` are rules that must remain true across changes.
 - `proof` points to artifacts, not prose.
 - `agent_policy` tells agents what they may do without guessing.
+- `workcell` describes whether the contract is for a project, composite, or
+  leaf workcell, plus parent/child relationships and context budgets.
+- `authority` describes who may write, who may read, and when a migration lease
+  is required.
+
+## Workcell Authority
+
+A leaf workcell has at most one active write agent. A composite workcell is
+owned by a read-only orchestrator that delegates implementation writes to child
+workcells.
+
+Cross-workcell implementation changes require a migration lease approved by the
+nearest common orchestrator.
 
 ## Agent Context Files
 
@@ -105,5 +142,8 @@ An agent changing this module should:
 - Listing consumers as "various".
 - Describing proof in prose without a target and command.
 - Creating contracts for tiny implementation details.
+- Creating a workcell so large that agents need broad repository searches for
+  local changes.
 - Treating the contract as documentation only.
+- Letting multiple write agents edit the same leaf workcell at once.
 - Introducing interfaces only because contracts exist.
