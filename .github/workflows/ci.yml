@@ -65,6 +65,10 @@ jobs:
         working-directory: tools/coad-validator
         run: uv run --locked coad-attest ../.. --schema-dir ../../schema
 
+      - name: Export evidence artifacts
+        working-directory: tools/coad-validator
+        run: uv run --locked coad-export ../.. --schema-dir ../../schema --output-dir /tmp/coad-export
+
       - name: Check repository drift
         working-directory: tools/coad-validator
         run: uv run --locked coad-drift ../..

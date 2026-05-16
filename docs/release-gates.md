@@ -23,6 +23,11 @@ Each release gate includes:
 `schema/release-manifest.schema.json` validates the manifest shape. The current
 policy is that every listed gate is required.
 
+The gate set includes contract validation, readiness reporting, proof matrix
+generation, graph export, schedule construction, ledger audit, conformance
+profile reporting, policy enforcement, attestation, evidence artifact export,
+drift detection, context pack generation, and JSON schema syntax validation.
+
 ## Drift Contract
 
 `coad-drift` fails when a required release gate is missing from CI. This gives an

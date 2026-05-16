@@ -20,6 +20,7 @@ REPORT_SCHEMAS = {
     "coad-profile": ["profile-report.schema.json"],
     "coad-policy": ["policy-report.schema.json"],
     "coad-attest": ["attestation-report.schema.json"],
+    "coad-export": ["export-report.schema.json"],
     "coad-pack": ["context-pack.schema.json", "pack-error.schema.json"],
 }
 

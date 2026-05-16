@@ -79,6 +79,13 @@
       "required": true
     },
     {
+      "id": "evidence-artifact-export",
+      "name": "Export evidence artifacts",
+      "command": "uv run --locked coad-export ../.. --schema-dir ../../schema --output-dir /tmp/coad-export",
+      "working_directory": "tools/coad-validator",
+      "required": true
+    },
+    {
       "id": "repository-drift",
       "name": "Check repository drift",
       "command": "uv run --locked coad-drift ../..",

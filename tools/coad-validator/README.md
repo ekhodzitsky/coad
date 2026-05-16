@@ -16,6 +16,7 @@ uv run coad-ledger ../.. --schema-dir ../../schema
 uv run coad-profile ../.. --schema-dir ../../schema
 uv run coad-policy ../.. --schema-dir ../../schema
 uv run coad-attest ../.. --schema-dir ../../schema
+uv run coad-export ../.. --schema-dir ../../schema --output-dir /tmp/coad-export
 uv run coad-drift ../..
 uv run coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
 ```
@@ -34,6 +35,8 @@ tool evidence supporting it.
 permission and required contract update handoff fields.
 `coad-attest` builds a hashable bundle that binds the required reports together
 for acceptance and audit.
+`coad-export` writes those reports plus the attestation into a deterministic
+artifact directory with a machine-readable manifest.
 
 JSON outputs are covered by report schemas in `../../schema/reports/`.
 

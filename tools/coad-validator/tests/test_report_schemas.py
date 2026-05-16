@@ -161,6 +161,23 @@ def test_attestation_json_output_matches_report_schema() -> None:
     _assert_matches_report_schema("attestation-report.schema.json", payload)
 
 
+def test_export_json_output_matches_report_schema(tmp_path: Path) -> None:
+    payload = _run_json(
+        [
+            sys.executable,
+            "-m",
+            "coad_validator.export_cli",
+            str(ROOT),
+            "--schema-dir",
+            str(SCHEMA_DIR),
+            "--output-dir",
+            str(tmp_path / "coad-export"),
+        ]
+    )
+
+    _assert_matches_report_schema("export-report.schema.json", payload)
+
+
 def test_pack_error_json_output_matches_report_schema() -> None:
     payload = _run_json(
         [

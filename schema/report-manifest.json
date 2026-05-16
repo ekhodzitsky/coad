@@ -65,6 +65,13 @@
       "stability": "stable"
     },
     {
+      "name": "export-report",
+      "producer": "coad-export",
+      "schema": "reports/export-report.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
       "name": "drift-report",
       "producer": "coad-drift",
       "schema": "reports/drift-report.schema.json",

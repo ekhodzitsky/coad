@@ -20,6 +20,7 @@ coad-ledger = "coad_validator.ledger_cli:main"
 coad-profile = "coad_validator.profile_cli:main"
 coad-policy = "coad_validator.policy_cli:main"
 coad-attest = "coad_validator.attest_cli:main"
+coad-export = "coad_validator.export_cli:main"
 coad-drift = "coad_validator.drift_cli:main"
 
 [dependency-groups]

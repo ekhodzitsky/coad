@@ -7,6 +7,9 @@ The bundle does not replace the individual reports. It binds them together with
 SHA-256 digests so an orchestrator, reviewer, or CI system can refer to one
 stable acceptance artifact.
 
+Use `coad-export` when the same evidence must be written to disk as PR or
+release artifacts. See `docs/artifact-export.md`.
+
 ## Included Reports
 
 The current bundle includes:

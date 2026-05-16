@@ -130,6 +130,7 @@ uv run --locked coad-ledger ../.. --schema-dir ../../schema
 uv run --locked coad-profile ../.. --schema-dir ../../schema
 uv run --locked coad-policy ../.. --schema-dir ../../schema
 uv run --locked coad-attest ../.. --schema-dir ../../schema
+uv run --locked coad-export ../.. --schema-dir ../../schema --output-dir /tmp/coad-export
 uv run --locked coad-drift ../..
 uv run --locked coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
 jq empty ../../schema/*.json ../../schema/reports/*.json
@@ -139,3 +140,4 @@ External GitHub Actions in `.github/workflows/ci.yml` are pinned by commit SHA.
 Update those pins deliberately when refreshing the CI supply chain.
 
 See `docs/release-gates.md` for the release gate manifest contract.
+See `docs/artifact-export.md` for the evidence artifact export contract.

@@ -63,7 +63,7 @@ schema/      Machine-readable contract and tool-output schemas.
 docs/        Methodology details: proof matrix, maturity, rules, anti-patterns.
 playbooks/   Repeatable orchestration flows.
 examples/    Small reference examples.
-tools/       Reference validator and context pack generator.
+tools/       Reference validator and orchestration control-plane tools.
 ```
 
 ## Status
@@ -84,6 +84,7 @@ Private draft. The goal is to turn the original Module Contract Pattern into a b
 10. `docs/conformance-profile.md`
 11. `docs/policy-enforcement.md`
 12. `docs/attestation-bundle.md`
-13. `docs/tool-output-schemas.md`
-14. `docs/report-versioning.md`
-15. `examples/minimal/`
+13. `docs/artifact-export.md`
+14. `docs/tool-output-schemas.md`
+15. `docs/report-versioning.md`
+16. `examples/minimal/`

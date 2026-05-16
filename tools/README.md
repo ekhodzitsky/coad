@@ -14,6 +14,7 @@ Current tools:
 - `coad-profile` - reports declared COAD conformance profile status.
 - `coad-policy` - enforces goal policy constraints across task contracts.
 - `coad-attest` - builds a hashable evidence bundle from required reports.
+- `coad-export` - writes attestation and report artifacts for PR or release evidence.
 - `coad-drift` - checks whether tool docs, schemas, and CI are aligned.
 
 Planned tools:
