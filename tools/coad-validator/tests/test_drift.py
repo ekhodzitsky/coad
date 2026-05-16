@@ -72,6 +72,54 @@ def test_drift_report_detects_unlisted_report_schema(tmp_path: Path) -> None:
     } in payload["issues"]
 
 
+def test_drift_report_detects_missing_release_gate_ci_step(tmp_path: Path) -> None:
+    target = _copy_repo_subset(tmp_path)
+    workflow = target / ".github" / "workflows" / "ci.yml"
+    workflow.write_text(
+        workflow.read_text(encoding="utf-8").replace(
+            "      - name: Export contract graph\n"
+            "        working-directory: tools/coad-validator\n"
+            "        run: uv run --locked coad-graph ../.. --schema-dir ../../schema\n\n",
+            "",
+        ),
+        encoding="utf-8",
+    )
+
+    payload = build_drift_report(target)
+
+    assert payload["ok"] is False
+    assert {
+        "severity": "error",
+        "path": ".github/workflows/ci.yml",
+        "message": "release gate missing from CI: contract-graph-export",
+    } in payload["issues"]
+
+
+def test_drift_report_detects_release_gate_working_directory_drift(tmp_path: Path) -> None:
+    target = _copy_repo_subset(tmp_path)
+    workflow = target / ".github" / "workflows" / "ci.yml"
+    workflow.write_text(
+        workflow.read_text(encoding="utf-8").replace(
+            "      - name: Export contract graph\n"
+            "        working-directory: tools/coad-validator\n"
+            "        run: uv run --locked coad-graph ../.. --schema-dir ../../schema\n",
+            "      - name: Export contract graph\n"
+            "        working-directory: .\n"
+            "        run: uv run --locked coad-graph ../.. --schema-dir ../../schema\n",
+        ),
+        encoding="utf-8",
+    )
+
+    payload = build_drift_report(target)
+
+    assert payload["ok"] is False
+    assert {
+        "severity": "error",
+        "path": ".github/workflows/ci.yml",
+        "message": "release gate missing from CI: contract-graph-export",
+    } in payload["issues"]
+
+
 def test_drift_cli_reports_structured_issues(tmp_path: Path) -> None:
     target = _copy_repo_subset(tmp_path)
     workflow = target / ".github" / "workflows" / "ci.yml"

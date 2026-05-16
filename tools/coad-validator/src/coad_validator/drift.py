@@ -6,6 +6,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+import yaml
+
 from .report import versioned_report
 
 REPORT_SCHEMAS = {
@@ -42,6 +44,8 @@ def build_drift_report(root: Path) -> dict[str, Any]:
     tool_schema_docs = _read_text(resolved_root / "docs" / "tool-output-schemas.md", issues)
     workflow = _read_text(resolved_root / ".github" / "workflows" / "ci.yml", issues)
     manifest_reports = _report_manifest(resolved_root, issues)
+    release_gates = _release_manifest(resolved_root, issues)
+    workflow_steps = _workflow_steps(resolved_root / ".github" / "workflows" / "ci.yml", workflow, issues)
     manifest_schemas = {
         report["schema"]
         for report in manifest_reports
@@ -88,6 +92,27 @@ def build_drift_report(root: Path) -> dict[str, Any]:
             issues.append(DriftIssue(resolved_root / "schema" / "report-manifest.json", f"manifest references missing report schema: {schema}"))
         if isinstance(producer, str) and producer not in scripts:
             issues.append(DriftIssue(resolved_root / "schema" / "report-manifest.json", f"manifest references missing producer command: {producer}"))
+
+    for gate in release_gates:
+        gate_id = gate.get("id")
+        name = gate.get("name")
+        command = gate.get("command")
+        working_directory = gate.get("working_directory")
+        required = gate.get("required")
+        has_gate_identity = all(
+            isinstance(value, str) and value
+            for value in (gate_id, name, command, working_directory)
+        )
+        if not has_gate_identity or not isinstance(required, bool):
+            issues.append(
+                DriftIssue(
+                    resolved_root / "schema" / "release-manifest.json",
+                    "release gate must include id, name, command, working_directory, and required",
+                )
+            )
+            continue
+        if required and not _workflow_has_gate(workflow_steps, name, command, working_directory):
+            issues.append(DriftIssue(resolved_root / ".github" / "workflows" / "ci.yml", f"release gate missing from CI: {gate_id}"))
 
     return versioned_report(
         {
@@ -137,6 +162,70 @@ def _report_manifest(root: Path, issues: list[DriftIssue]) -> list[dict[str, Any
             continue
         valid_reports.append(report)
     return valid_reports
+
+
+def _release_manifest(root: Path, issues: list[DriftIssue]) -> list[dict[str, Any]]:
+    manifest_path = root / "schema" / "release-manifest.json"
+    try:
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        issues.append(DriftIssue(manifest_path, "missing release manifest"))
+        return []
+    except json.JSONDecodeError as exc:
+        issues.append(DriftIssue(manifest_path, f"invalid release manifest JSON: {exc.msg}"))
+        return []
+
+    if payload.get("schema_version") != 1:
+        issues.append(DriftIssue(manifest_path, "release manifest schema_version must be 1"))
+    gates = payload.get("release_gates")
+    if not isinstance(gates, list):
+        issues.append(DriftIssue(manifest_path, "release manifest must contain release_gates list"))
+        return []
+
+    valid_gates: list[dict[str, Any]] = []
+    for gate in gates:
+        if not isinstance(gate, dict):
+            issues.append(DriftIssue(manifest_path, "release manifest contains non-object gate entry"))
+            continue
+        valid_gates.append(gate)
+    return valid_gates
+
+
+def _workflow_steps(path: Path, workflow: str, issues: list[DriftIssue]) -> list[dict[str, Any]]:
+    if not workflow:
+        return []
+    try:
+        payload = yaml.safe_load(workflow)
+    except yaml.YAMLError as exc:
+        issues.append(DriftIssue(path, f"invalid CI workflow YAML: {exc.__class__.__name__}"))
+        return []
+    if not isinstance(payload, dict):
+        issues.append(DriftIssue(path, "CI workflow must be a YAML mapping"))
+        return []
+    jobs = payload.get("jobs")
+    if not isinstance(jobs, dict):
+        issues.append(DriftIssue(path, "CI workflow must contain jobs mapping"))
+        return []
+
+    steps: list[dict[str, Any]] = []
+    for job in jobs.values():
+        if not isinstance(job, dict):
+            continue
+        job_steps = job.get("steps")
+        if not isinstance(job_steps, list):
+            continue
+        steps.extend(step for step in job_steps if isinstance(step, dict))
+    return steps
+
+
+def _workflow_has_gate(steps: list[dict[str, Any]], name: str, command: str, working_directory: str) -> bool:
+    for step in steps:
+        if step.get("name") != name or step.get("run") != command:
+            continue
+        step_working_directory = step.get("working-directory", ".")
+        if step_working_directory == working_directory:
+            return True
+    return False
 
 
 def _read_text(path: Path, issues: list[DriftIssue]) -> str:

@@ -114,6 +114,17 @@ def test_report_manifest_matches_manifest_schema() -> None:
         assert (SCHEMA_DIR / report["schema"]).is_file()
 
 
+def test_release_manifest_matches_manifest_schema() -> None:
+    manifest_path = SCHEMA_DIR / "release-manifest.json"
+    manifest_schema_path = SCHEMA_DIR / "release-manifest.schema.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest_schema = json.loads(manifest_schema_path.read_text(encoding="utf-8"))
+
+    Draft202012Validator.check_schema(manifest_schema)
+    Draft202012Validator(manifest_schema).validate(manifest)
+    assert all(gate["required"] is True for gate in manifest["release_gates"])
+
+
 def _run_json(args: list[str]) -> dict[str, Any]:
     result = subprocess.run(args, check=False, capture_output=True, text=True)
     return json.loads(result.stdout)

@@ -1,0 +1,68 @@
+{
+  "schema_version": 1,
+  "release_gates": [
+    {
+      "id": "validator-tests",
+      "name": "Run validator tests",
+      "command": "uv run --locked pytest",
+      "working_directory": "tools/coad-validator",
+      "required": true
+    },
+    {
+      "id": "contract-validation",
+      "name": "Validate repository contracts",
+      "command": "uv run --locked coad-validate ../.. --schema-dir ../../schema",
+      "working_directory": "tools/coad-validator",
+      "required": true
+    },
+    {
+      "id": "contract-validation-json",
+      "name": "Validate repository contracts as JSON",
+      "command": "uv run --locked coad-validate ../.. --schema-dir ../../schema --format json",
+      "working_directory": "tools/coad-validator",
+      "required": true
+    },
+    {
+      "id": "readiness-report",
+      "name": "Report repository readiness",
+      "command": "uv run --locked coad-status ../.. --schema-dir ../../schema",
+      "working_directory": "tools/coad-validator",
+      "required": true
+    },
+    {
+      "id": "proof-matrix",
+      "name": "Build proof matrix",
+      "command": "uv run --locked coad-proof-matrix ../.. --schema-dir ../../schema",
+      "working_directory": "tools/coad-validator",
+      "required": true
+    },
+    {
+      "id": "contract-graph-export",
+      "name": "Export contract graph",
+      "command": "uv run --locked coad-graph ../.. --schema-dir ../../schema",
+      "working_directory": "tools/coad-validator",
+      "required": true
+    },
+    {
+      "id": "repository-drift",
+      "name": "Check repository drift",
+      "command": "uv run --locked coad-drift ../..",
+      "working_directory": "tools/coad-validator",
+      "required": true
+    },
+    {
+      "id": "context-pack",
+      "name": "Build minimal context pack",
+      "command": "uv run --locked coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema > /tmp/coad-pack.json",
+      "working_directory": "tools/coad-validator",
+      "required": true
+    },
+    {
+      "id": "json-schema-syntax",
+      "name": "Validate JSON schemas",
+      "command": "jq empty schema/*.json schema/reports/*.json",
+      "working_directory": ".",
+      "required": true
+    }
+  ]
+}

@@ -113,7 +113,9 @@ contract graphs.
 
 ## CI Contract
 
-The repository CI runs the same checks expected from a local orchestrator:
+The repository CI runs the same checks expected from a local orchestrator. The
+machine-readable gate list lives in `schema/release-manifest.json`; `coad-drift`
+checks that the manifest and `.github/workflows/ci.yml` stay aligned.
 
 ```bash
 cd tools/coad-validator
@@ -130,3 +132,5 @@ jq empty ../../schema/*.json ../../schema/reports/*.json
 
 External GitHub Actions in `.github/workflows/ci.yml` are pinned by commit SHA.
 Update those pins deliberately when refreshing the CI supply chain.
+
+See `docs/release-gates.md` for the release gate manifest contract.
