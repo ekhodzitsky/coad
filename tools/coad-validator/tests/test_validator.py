@@ -11,6 +11,15 @@ from coad_validator.validate import validate_path
 ROOT = Path(__file__).resolve().parents[3]
 SCHEMA_DIR = ROOT / "schema"
 FIXTURES = Path(__file__).parent / "fixtures"
+PROJECT_SELF_MODULES = {
+    "contracts",
+    "docs",
+    "examples",
+    "playbooks",
+    "schema",
+    "templates",
+    "tools/coad-validator",
+}
 
 
 def test_minimal_example_validates() -> None:
@@ -31,7 +40,18 @@ def test_repository_validation_skips_templates_and_test_fixtures() -> None:
     report = validate_path(ROOT, schema_dir=SCHEMA_DIR)
 
     assert report.ok, [issue.format(report.root) for issue in report.issues]
-    assert len(report.documents) == 8
+    assert len(report.documents) == 15
+
+
+def test_repository_declares_real_project_module_contracts() -> None:
+    report = validate_path(ROOT, schema_dir=SCHEMA_DIR)
+
+    modules = {
+        document.data["module"]
+        for document in report.documents
+        if document.kind == "module_contract"
+    }
+    assert PROJECT_SELF_MODULES.issubset(modules)
 
 
 def test_invalid_conformance_fixture_reports_missing_proof() -> None:

@@ -11,3 +11,8 @@ Minimum onboarding for any repository adopting COAD:
 
 Agents changing this repository must keep the public utility surface focused on
 `coad check .` and update the methodology docs when the check semantics change.
+
+This repository dogfoods COAD through `project-contracts/`. When changing a
+real project module such as `contracts/`, `schema/`, `docs/`, `templates/`,
+`examples/`, `playbooks/`, or `tools/coad-validator/`, keep that module's
+contract plus local `README.md` and `TODO.md` current.

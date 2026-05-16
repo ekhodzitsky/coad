@@ -117,6 +117,8 @@ schema/      Machine-readable contract and tool-output schemas.
 docs/        Methodology details: proof matrix, maturity, rules, anti-patterns.
 playbooks/   Repeatable orchestration flows.
 examples/    Small reference examples.
+project-contracts/
+             COAD module contracts for this repository's real modules.
 tools/       Reference validator. Public command: `coad check .`.
 ```
 

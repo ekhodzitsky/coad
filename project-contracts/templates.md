@@ -1,0 +1,60 @@
+---
+schema_version: 1
+kind: module_contract
+module: templates
+level: root
+layer: methodology
+purpose: Provide copyable contract and onboarding templates.
+status: pilot
+owners:
+  - methodology-maintainers
+surface:
+  - name: ContractTemplates
+    kind: template-set
+    visibility: public
+    contract: Gives agents starting points without being treated as live contracts.
+    proof:
+      kind: static-check
+      target: templates
+      command: coad check .
+dependencies:
+  internal:
+    - module: contracts
+      scope: template semantics
+      reason: Templates must match canonical contract specs.
+    - module: schema
+      scope: frontmatter shape
+      reason: Templates should remain close to executable schemas.
+  external: []
+consumers:
+  - path: GETTING_STARTED.md
+    uses:
+      - ContractTemplates
+  - path: ADOPTION.md
+    uses:
+      - ContractTemplates
+invariants:
+  - id: templates-are-not-live-contracts
+    rule: Repository validation skips templates so placeholders do not become contract errors.
+    proof:
+      kind: static-check
+      target: tools/coad-validator/src/coad_validator/frontmatter.py
+      command: uv run --locked pytest tests/test_validator.py
+verification:
+  pre_change:
+    - uv run --locked pytest tests/test_validator.py
+  full:
+    - uv run --locked pytest
+    - coad check .
+agent_policy:
+  allowed_mutations:
+    - Improve starter templates while keeping the onboarding flow copy-pasteable.
+  forbidden_mutations:
+    - Add required placeholders that prevent the template from being understandable.
+  escalation:
+    - Template change that requires validator schema changes
+---
+
+# templates
+
+The templates module owns copyable COAD starting points.
