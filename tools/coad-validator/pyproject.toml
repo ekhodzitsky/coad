@@ -13,6 +13,7 @@ dependencies = [
 coad-validate = "coad_validator.cli:main"
 coad-pack = "coad_validator.pack_cli:main"
 coad-status = "coad_validator.status_cli:main"
+coad-proof-matrix = "coad_validator.proof_matrix_cli:main"
 
 [dependency-groups]
 dev = [

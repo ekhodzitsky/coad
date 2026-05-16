@@ -7,11 +7,11 @@ Current tools:
 - `coad-validator` - validates contract schemas and graph references.
 - `coad-pack` - emits bounded task context packs for orchestrators and agents.
 - `coad-status` - reports whether a contract graph is ready or blocked.
+- `coad-proof-matrix` - reports required proof commands and handoff evidence.
 
 Planned tools:
 
 - drift checker
-- proof matrix checker
 - contract graph renderer
 
 The methodology should remain useful without tools, but tools should make contract use repeatable and hard to fake.

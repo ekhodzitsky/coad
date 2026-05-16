@@ -19,6 +19,22 @@ The proof matrix maps change classes to required evidence.
 
 A task cannot be accepted until all required proof for its change class passes or is explicitly accepted as missing proof debt by policy.
 
+## Machine Report
+
+Use `coad-proof-matrix` to inspect proof readiness independently from overall
+goal or task readiness:
+
+```bash
+cd tools/coad-validator
+uv run coad-proof-matrix ../.. --schema-dir ../../schema
+```
+
+The command emits JSON with every required task proof command, the referenced
+proof contract, matching handoff evidence, and a per-proof status. This lets an
+orchestrator distinguish "proof is satisfied" from "the task is declared ready".
+
+The output is covered by `schema/reports/proof-matrix.schema.json`.
+
 ## Missing Proof
 
 `kind: missing` is allowed during migration, but it is never silent success. It must include:
