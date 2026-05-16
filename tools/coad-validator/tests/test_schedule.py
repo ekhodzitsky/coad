@@ -27,6 +27,7 @@ def test_schedule_report_groups_tasks_into_dependency_waves(tmp_path: Path) -> N
     _write_task(
         target / "TASK_DOC.md",
         task_id="checkout-doc-update",
+        read_scope=["docs/**"],
         write_scope=["docs/checkout.md"],
         dependencies=[],
     )
@@ -84,6 +85,38 @@ def test_schedule_report_serializes_write_scope_conflicts(tmp_path: Path) -> Non
     } in goal["conflicts"]
 
 
+def test_schedule_report_serializes_read_write_conflicts(tmp_path: Path) -> None:
+    target = _copy_minimal_graph(tmp_path)
+    _replace_text(target / "GOAL_CONTRACT.md", "max_parallel_agents: 1", "max_parallel_agents: 2")
+    _add_goal_task(target / "GOAL_CONTRACT.md", "checkout-reader")
+    _add_integration_task(target / "INTEGRATION.md", "checkout-reader")
+    _write_task(
+        target / "TASK_READER.md",
+        task_id="checkout-reader",
+        read_scope=["checkout/**"],
+        write_scope=["docs/checkout.md"],
+        dependencies=[],
+    )
+
+    payload = build_schedule_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is True
+    goal = payload["goals"][0]
+    assert [
+        [task["task_id"] for task in wave["tasks"]]
+        for wave in goal["waves"]
+    ] == [
+        ["checkout-negative-total-guard"],
+        ["checkout-reader"],
+    ]
+    assert {
+        "task_a": "checkout-negative-total-guard",
+        "task_b": "checkout-reader",
+        "type": "read_write_overlap",
+        "scopes": ["checkout/**", "checkout/**"],
+    } in goal["conflicts"]
+
+
 def test_schedule_cli_output_matches_schema() -> None:
     result = subprocess.run(
         [
@@ -114,9 +147,11 @@ def _write_task(
     path: Path,
     *,
     task_id: str,
+    read_scope: list[str] | None = None,
     write_scope: list[str],
     dependencies: list[str],
 ) -> None:
+    read_scope_yaml = "\n".join(f"  - {scope}" for scope in (read_scope or ["checkout/**"]))
     write_scope_yaml = "\n".join(f"  - {scope}" for scope in write_scope)
     dependencies_yaml = (
         "dependencies:\n" + "\n".join(f"  - {dependency}" for dependency in dependencies)
@@ -136,7 +171,7 @@ change_class: documentation
 modules:
   - checkout
 read_scope:
-  - checkout/**
+{read_scope_yaml}
 write_scope:
 {write_scope_yaml}
 {dependencies_yaml}

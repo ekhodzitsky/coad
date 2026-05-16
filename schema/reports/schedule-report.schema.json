@@ -177,7 +177,7 @@
           "minLength": 1
         },
         "type": {
-          "const": "write_scope_overlap"
+          "enum": ["write_scope_overlap", "read_write_overlap"]
         },
         "scopes": {
           "type": "array",

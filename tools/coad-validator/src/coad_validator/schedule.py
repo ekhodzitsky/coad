@@ -106,22 +106,44 @@ def _write_scope_conflicts(tasks: list[ContractDocument]) -> list[dict[str, Any]
     conflicts: list[dict[str, Any]] = []
     for left_index, left in enumerate(tasks):
         for right in tasks[left_index + 1:]:
-            overlap = _first_scope_overlap(_write_scope(left), _write_scope(right))
-            if overlap is None:
+            conflict = _first_conflict(left, right)
+            if conflict is None:
                 continue
-            conflicts.append(
-                {
-                    "task_a": left.identifier,
-                    "task_b": right.identifier,
-                    "type": "write_scope_overlap",
-                    "scopes": [overlap[0], overlap[1]],
-                }
-            )
+            conflicts.append(conflict)
     return conflicts
 
 
 def _conflicts_with_any(task: ContractDocument, wave_tasks: list[ContractDocument]) -> bool:
-    return any(_first_scope_overlap(_write_scope(task), _write_scope(other)) for other in wave_tasks)
+    return any(_first_conflict(task, other) for other in wave_tasks)
+
+
+def _first_conflict(left: ContractDocument, right: ContractDocument) -> dict[str, Any] | None:
+    write_overlap = _first_scope_overlap(_write_scope(left), _write_scope(right))
+    if write_overlap is not None:
+        return _conflict(left, right, "write_scope_overlap", write_overlap)
+
+    left_writes_right_reads = _first_scope_overlap(_write_scope(left), _read_scope(right))
+    if left_writes_right_reads is not None:
+        return _conflict(left, right, "read_write_overlap", left_writes_right_reads)
+
+    right_writes_left_reads = _first_scope_overlap(_write_scope(right), _read_scope(left))
+    if right_writes_left_reads is not None:
+        return _conflict(left, right, "read_write_overlap", right_writes_left_reads)
+    return None
+
+
+def _conflict(
+    left: ContractDocument,
+    right: ContractDocument,
+    conflict_type: str,
+    scopes: tuple[str, str],
+) -> dict[str, Any]:
+    return {
+        "task_a": left.identifier,
+        "task_b": right.identifier,
+        "type": conflict_type,
+        "scopes": [scopes[0], scopes[1]],
+    }
 
 
 def _first_scope_overlap(left: list[str], right: list[str]) -> tuple[str, str] | None:
@@ -175,6 +197,10 @@ def _blocked_task(task: ContractDocument, root: Path, reason: str) -> dict[str, 
 
 def _write_scope(task: ContractDocument) -> list[str]:
     return string_list(task.data.get("write_scope"))
+
+
+def _read_scope(task: ContractDocument) -> list[str]:
+    return string_list(task.data.get("read_scope"))
 
 
 def _task_status(task: ContractDocument) -> str:
