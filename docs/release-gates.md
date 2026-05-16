@@ -23,10 +23,8 @@ Each release gate includes:
 `schema/release-manifest.schema.json` validates the manifest shape. The current
 policy is that every listed gate is required.
 
-The gate set includes contract validation, readiness reporting, proof matrix
-generation, graph export, schedule construction, ledger audit, conformance
-profile reporting, policy enforcement, attestation, evidence artifact export,
-drift detection, context pack generation, and JSON schema syntax validation.
+The gate set includes the public `coad check` command plus the detailed
+diagnostic reports that keep this repository's own toolchain honest.
 
 ## Drift Contract
 

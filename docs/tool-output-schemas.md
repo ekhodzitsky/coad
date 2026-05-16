@@ -5,6 +5,7 @@ the methodology contract, not incidental CLI formatting.
 
 Report schemas live under `schema/reports/`:
 
+- `check-report.schema.json` covers `coad check --format json`.
 - `validation-report.schema.json` covers `coad-validate --format json`.
 - `status-report.schema.json` covers `coad-status`.
 - `proof-matrix.schema.json` covers `coad-proof-matrix`.

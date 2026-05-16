@@ -42,4 +42,7 @@ def find_schema_dir(start: Path) -> Path:
         schema_dir = candidate / "schema"
         if schema_dir.is_dir():
             return schema_dir
+    bundled_schema_dir = Path(__file__).resolve().parent / "schema"
+    if bundled_schema_dir.is_dir():
+        return bundled_schema_dir
     raise FileNotFoundError(f"could not find schema directory from {start}")

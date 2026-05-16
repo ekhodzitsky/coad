@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/coad/integration-contract.schema.json",
+  "title": "COAD Integration Contract",
+  "type": "object",
+  "required": ["schema_version", "kind", "integration_id", "baseline", "policy", "tasks", "merge_order", "required_before_integration", "final_verification", "terminal_statuses"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "integration_contract" },
+    "integration_id": { "type": "string", "minLength": 1 },
+    "baseline": { "type": "string", "minLength": 1 },
+    "policy": { "enum": ["local", "draft-pr", "auto-pr", "manual", "gated"] },
+    "tasks": { "type": "array", "items": { "type": "string" } },
+    "merge_order": { "type": "array", "items": { "type": "string" } },
+    "required_before_integration": { "type": "array", "items": { "type": "string" } },
+    "final_verification": { "type": "array" },
+    "release_evidence": { "type": "object", "additionalProperties": true },
+    "terminal_statuses": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

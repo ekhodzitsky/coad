@@ -11,6 +11,7 @@ import yaml
 from .report import versioned_report
 
 REPORT_SCHEMAS = {
+    "coad": ["check-report.schema.json"],
     "coad-validate": ["validation-report.schema.json"],
     "coad-status": ["status-report.schema.json"],
     "coad-proof-matrix": ["proof-matrix.schema.json"],
@@ -140,7 +141,11 @@ def _tool_scripts(root: Path, issues: list[DriftIssue]) -> list[str]:
     if not isinstance(scripts, dict):
         issues.append(DriftIssue(pyproject, "missing [project.scripts] table"))
         return []
-    return sorted(script for script in scripts if isinstance(script, str) and script.startswith("coad-"))
+    return sorted(
+        script
+        for script in scripts
+        if isinstance(script, str) and (script == "coad" or script.startswith("coad-"))
+    )
 
 
 def _report_manifest(root: Path, issues: list[DriftIssue]) -> list[dict[str, Any]]:

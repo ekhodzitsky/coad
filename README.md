@@ -20,6 +20,46 @@ Goal
 
 Agents do not own completion claims. Contracts and proof do.
 
+## One Command
+
+The public integration surface is intentionally small:
+
+```bash
+coad check .
+```
+
+From a local clone:
+
+```bash
+cd tools/coad-validator
+uv run coad check ../..
+```
+
+For another repository, install the tool once and run the same check in that
+repository:
+
+```bash
+uv tool install /path/to/coad/tools/coad-validator
+coad check .
+```
+
+The command prints one line and exits non-zero on failure:
+
+```text
+coad check: pass
+```
+
+Agents that need structured output can use:
+
+```bash
+coad check . --format json
+```
+
+Everything else in `tools/` is supporting machinery for tests, CI, debugging,
+and deeper reports. A normal dev flow should start with `coad check .`.
+The validator bundles the COAD schemas, so integrated repositories do not need
+to carry a local `schema/` directory just to run the check.
+
 ## Why This Exists
 
 Agentic coding breaks down when agents:
@@ -79,12 +119,13 @@ Private draft. The goal is to turn the original Module Contract Pattern into a b
 5. `docs/proof-matrix.md`
 6. `docs/context-packs.md`
 7. `docs/validator.md`
-8. `docs/release-gates.md`
-9. `docs/execution-ledger.md`
-10. `docs/conformance-profile.md`
-11. `docs/policy-enforcement.md`
-12. `docs/attestation-bundle.md`
-13. `docs/artifact-export.md`
-14. `docs/tool-output-schemas.md`
-15. `docs/report-versioning.md`
-16. `examples/minimal/`
+8. `docs/agent-integration.md`
+9. `docs/release-gates.md`
+10. `docs/execution-ledger.md`
+11. `docs/conformance-profile.md`
+12. `docs/policy-enforcement.md`
+13. `docs/attestation-bundle.md`
+14. `docs/artifact-export.md`
+15. `docs/tool-output-schemas.md`
+16. `docs/report-versioning.md`
+17. `examples/minimal/`

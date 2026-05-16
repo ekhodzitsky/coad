@@ -3,6 +3,25 @@
 COAD adoption should be incremental. The goal is safer orchestration, not a
 documentation migration project.
 
+## Agent Quickstart
+
+Give an agent this repository link and one rule:
+
+```bash
+coad check .
+```
+
+The command is the default integration point. It should be run before a handoff,
+review, or PR claim. It prints a single result line for humans and supports
+`--format json` for orchestration.
+
+The installed tool bundles the COAD schemas, so a repository can adopt the
+methodology with contract files and `coad check .` without copying this repo's
+`schema/` directory.
+
+If `coad check .` fails, fix the contracts, proof, handoff, ledger, or policy
+issue it reports before claiming the work is complete.
+
 ## Phase 1: Identify Boundaries
 
 Pick one or two important ownership boundaries.

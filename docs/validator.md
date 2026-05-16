@@ -24,9 +24,24 @@ fixtures do not fail CI.
 
 ```bash
 cd tools/coad-validator
+uv run coad check ../../examples/minimal --schema-dir ../../schema
 uv run coad-validate ../../examples/minimal --schema-dir ../../schema
 uv run coad-validate ../.. --schema-dir ../../schema
 ```
+
+`coad check` is the public default for agents and development flows. It prints
+one result line in text mode:
+
+```text
+coad check: pass
+```
+
+Use `--format json` when an orchestrator needs structured issues and check
+statuses.
+
+The validator bundles the COAD schemas. `--schema-dir` remains useful for this
+repository's own tests and schema development, but integrated repositories can
+normally run `coad check .` without it.
 
 ## JSON Output
 
@@ -122,6 +137,7 @@ cd tools/coad-validator
 uv run --locked pytest
 uv run --locked coad-validate ../.. --schema-dir ../../schema
 uv run --locked coad-validate ../.. --schema-dir ../../schema --format json
+uv run --locked coad check ../.. --schema-dir ../../schema
 uv run --locked coad-status ../.. --schema-dir ../../schema
 uv run --locked coad-proof-matrix ../.. --schema-dir ../../schema
 uv run --locked coad-graph ../.. --schema-dir ../../schema

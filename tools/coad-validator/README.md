@@ -5,6 +5,8 @@ Reference validator for COAD contract files.
 ## Usage
 
 ```bash
+uv run coad check ../../examples/minimal --schema-dir ../../schema
+uv run coad check ../../examples/minimal --schema-dir ../../schema --format json
 uv run coad-validate ../../examples/minimal --schema-dir ../../schema
 uv run coad-validate ../.. --schema-dir ../../schema --format json
 uv run coad-status ../.. --schema-dir ../../schema
@@ -37,6 +39,12 @@ permission and required contract update handoff fields.
 for acceptance and audit.
 `coad-export` writes those reports plus the attestation into a deterministic
 artifact directory with a machine-readable manifest.
+
+`coad check` is the public default. It prints one line in text mode and returns a
+non-zero exit code when methodology compliance fails. The other commands are
+diagnostic surfaces behind that default.
+The package bundles the COAD schemas, so installed usage does not require
+`--schema-dir`.
 
 JSON outputs are covered by report schemas in `../../schema/reports/`.
 

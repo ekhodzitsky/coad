@@ -33,6 +33,10 @@ jobs:
         working-directory: tools/coad-validator
         run: uv run --locked coad-validate ../.. --schema-dir ../../schema --format json
 
+      - name: Check COAD methodology compliance
+        working-directory: tools/coad-validator
+        run: uv run --locked coad check ../.. --schema-dir ../../schema
+
       - name: Report repository readiness
         working-directory: tools/coad-validator
         run: uv run --locked coad-status ../.. --schema-dir ../../schema

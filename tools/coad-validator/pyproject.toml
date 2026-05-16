@@ -10,6 +10,7 @@ dependencies = [
 ]
 
 [project.scripts]
+coad = "coad_validator.coad_cli:main"
 coad-validate = "coad_validator.cli:main"
 coad-pack = "coad_validator.pack_cli:main"
 coad-status = "coad_validator.status_cli:main"

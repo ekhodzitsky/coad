@@ -44,6 +44,24 @@ def test_validate_json_output_matches_report_schema() -> None:
     _assert_matches_report_schema("validation-report.schema.json", invalid)
 
 
+def test_check_json_output_matches_report_schema() -> None:
+    payload = _run_json(
+        [
+            sys.executable,
+            "-m",
+            "coad_validator.coad_cli",
+            "check",
+            str(ROOT / "examples" / "minimal"),
+            "--schema-dir",
+            str(SCHEMA_DIR),
+            "--format",
+            "json",
+        ]
+    )
+
+    _assert_matches_report_schema("check-report.schema.json", payload)
+
+
 def test_status_json_output_matches_report_schema() -> None:
     valid = _run_json(
         [
@@ -235,6 +253,18 @@ def test_conformance_profile_matches_profile_schema() -> None:
 
     Draft202012Validator.check_schema(profile_schema)
     Draft202012Validator(profile_schema).validate(profile)
+
+
+def test_bundled_schemas_match_repository_schemas() -> None:
+    bundled_schema_dir = ROOT / "tools" / "coad-validator" / "src" / "coad_validator" / "schema"
+    root_schema_paths = sorted(SCHEMA_DIR.rglob("*.json"))
+
+    assert root_schema_paths
+    for root_schema_path in root_schema_paths:
+        relative_path = root_schema_path.relative_to(SCHEMA_DIR)
+        bundled_schema_path = bundled_schema_dir / relative_path
+        assert bundled_schema_path.is_file()
+        assert bundled_schema_path.read_text(encoding="utf-8") == root_schema_path.read_text(encoding="utf-8")
 
 
 def _run_json(args: list[str]) -> dict[str, Any]:

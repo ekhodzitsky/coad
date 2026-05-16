@@ -4,6 +4,7 @@ This directory is reserved for reference tooling.
 
 Current tools:
 
+- `coad check` - single-command methodology compliance check for normal dev flow.
 - `coad-validate` - validates contract schemas and graph references.
 - `coad-pack` - emits bounded task context packs for orchestrators and agents.
 - `coad-status` - reports whether a contract graph is ready or blocked.
