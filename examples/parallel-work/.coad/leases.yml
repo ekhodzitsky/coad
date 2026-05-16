@@ -1,0 +1,23 @@
+version: 1
+leases:
+  - workcell: parallel-work
+    owner: lead-agent
+    mode: orchestrate
+    started_at: "2026-05-16T18:45:00Z"
+    complete_when: child proofs are collected and coad check passes
+  - workcell: parallel-work/api
+    owner: api-agent
+    mode: write
+    started_at: "2026-05-16T18:45:00Z"
+    task: add-health-endpoint
+    proof: coad check examples/parallel-work
+    scope:
+      - api/
+  - workcell: parallel-work/docs
+    owner: docs-agent
+    mode: write
+    started_at: "2026-05-16T18:45:00Z"
+    task: refresh-agent-guide
+    proof: coad check examples/parallel-work
+    scope:
+      - docs/

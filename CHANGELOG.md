@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.1 - 2026-05-16
+
+### Added
+
+- `examples/parallel-work` showing an active `.coad/leases.yml` manifest with
+  one composite orchestrator and two independent leaf write agents.
+
+### Fixed
+
+- Nested module contracts with `workcell.context_path: .` now resolve local
+  context and ownership paths instead of accidentally using repository-root
+  files when the repository is checked from above the example.
+
 ## 0.5.0 - 2026-05-16
 
 ### Added

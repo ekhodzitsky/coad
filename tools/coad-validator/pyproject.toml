@@ -1,6 +1,6 @@
 [project]
 name = "coad-validator"
-version = "0.5.0"
+version = "0.5.1"
 description = "Reference validator for Contract-Orchestrated Agent Development contracts"
 readme = "README.md"
 requires-python = ">=3.11"

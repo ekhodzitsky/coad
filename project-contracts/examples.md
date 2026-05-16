@@ -14,6 +14,7 @@ workcell:
   children:
     - examples/onboarding-reference
     - examples/minimal-reference
+    - examples/parallel-work-reference
   owns_paths:
     - examples/README.md
     - examples/TODO.md
@@ -49,6 +50,14 @@ surface:
       kind: smoke
       target: examples/minimal
       command: coad check examples/minimal
+  - name: ParallelWorkLeaseExample
+    kind: example
+    visibility: public
+    contract: Shows a composite orchestrator with active leaf write leases.
+    proof:
+      kind: smoke
+      target: examples/parallel-work
+      command: coad check examples/parallel-work
 dependencies:
   internal:
     - module: contracts
@@ -68,13 +77,14 @@ consumers:
   - path: README.md
     uses:
       - MinimalOrchestrationExample
+      - ParallelWorkLeaseExample
 invariants:
   - id: examples-stay-runnable
     rule: Every committed example must pass `coad check` from the repository root.
     proof:
       kind: smoke
       target: examples
-      command: coad check examples/onboarding && coad check examples/minimal
+      command: coad check examples/onboarding && coad check examples/minimal && coad check examples/parallel-work
 verification:
   pre_change:
     - coad check examples/onboarding

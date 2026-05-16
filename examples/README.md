@@ -6,6 +6,7 @@ Public API:
 
 - `onboarding/` demonstrates the two-minute adoption path.
 - `minimal/` demonstrates a complete orchestration graph.
+- `parallel-work/` demonstrates active leases for coordinated parallel work.
 
 Consumers: README, GETTING_STARTED.md, validator tests, and agents learning COAD.
 

@@ -7,6 +7,8 @@ import sys
 import textwrap
 from pathlib import Path
 
+import yaml
+
 from coad_validator.validate import validate_path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -31,6 +33,26 @@ def test_minimal_example_validates() -> None:
     assert len(report.documents) == 7
 
 
+def test_parallel_work_example_validates_and_declares_active_leases() -> None:
+    example_dir = ROOT / "examples" / "parallel-work"
+    lease_path = example_dir / ".coad" / "leases.yml"
+
+    assert example_dir.is_dir()
+    assert lease_path.is_file()
+
+    report = validate_path(example_dir, schema_dir=SCHEMA_DIR)
+    lease_manifest = yaml.safe_load(lease_path.read_text(encoding="utf-8"))
+    lease_modes = {
+        (lease["workcell"], lease["mode"])
+        for lease in lease_manifest["leases"]
+    }
+
+    assert report.ok, [issue.format(report.root) for issue in report.issues]
+    assert ("parallel-work", "orchestrate") in lease_modes
+    assert ("parallel-work/api", "write") in lease_modes
+    assert ("parallel-work/docs", "write") in lease_modes
+
+
 def test_valid_conformance_fixture_validates() -> None:
     report = validate_path(FIXTURES / "valid" / "minimal-graph", schema_dir=SCHEMA_DIR)
 
@@ -42,7 +64,7 @@ def test_repository_validation_skips_templates_and_test_fixtures() -> None:
     report = validate_path(ROOT, schema_dir=SCHEMA_DIR)
 
     assert report.ok, [issue.format(report.root) for issue in report.issues]
-    assert len(report.documents) == 38
+    assert len(report.documents) == 42
 
 
 def test_repository_declares_real_project_module_contracts() -> None:
@@ -352,6 +374,66 @@ verification:
     - test all
 ---
 # commerce/checkout
+""",
+        encoding="utf-8",
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert report.ok, [issue.format(report.root) for issue in report.issues]
+
+
+def test_nested_module_contract_context_path_dot_resolves_locally(tmp_path: Path) -> None:
+    nested_dir = tmp_path / "examples" / "parallel-work"
+    nested_dir.mkdir(parents=True)
+    (tmp_path / "README.md").write_text("root readme\n" * 130, encoding="utf-8")
+    (tmp_path / "TODO.md").write_text("root todo\n", encoding="utf-8")
+    (nested_dir / "README.md").write_text("# nested\n", encoding="utf-8")
+    (nested_dir / "TODO.md").write_text("# nested TODO\n", encoding="utf-8")
+    (nested_dir / "MODULE_CONTRACT.md").write_text(
+        """---
+schema_version: 1
+kind: module_contract
+module: nested-example
+level: subsystem
+purpose: Nested example that uses local context.
+status: pilot
+workcell:
+  type: composite
+  context_path: .
+  children: []
+  owns_paths:
+    - README.md
+    - TODO.md
+  context_budget:
+    max_files: 2
+    max_source_lines: 1
+    max_contract_lines: 80
+    max_readme_lines: 5
+    max_todo_lines: 5
+    max_surfaces: 1
+    max_invariants: 0
+surface:
+  - name: NestedExample
+    kind: module
+    visibility: internal
+    contract: Uses local nested context rather than repository root context.
+    proof:
+      kind: static-check
+      target: examples/parallel-work
+      command: test nested
+dependencies:
+  internal: []
+  external: []
+consumers: []
+invariants: []
+verification:
+  pre_change:
+    - test nested
+  full:
+    - test all
+---
+# nested-example
 """,
         encoding="utf-8",
     )

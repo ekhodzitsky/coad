@@ -4,7 +4,11 @@ from pathlib import Path
 from typing import Any
 
 from .model import ContractDocument, ValidationIssue
-from .module_context import module_context_path, module_directory
+from .module_context import (
+    module_context_path,
+    module_directory,
+    resolve_contract_relative_path,
+)
 
 _AGENT_CONTEXT_FILES = {"AGENTS.md", "MODULE_CONTRACT.md", "README.md", "TODO.md"}
 _SKIP_DIRS = {
@@ -84,8 +88,7 @@ def _owned_files(root: Path, document: ContractDocument, workcell: dict[str, Any
         if owned_path.is_absolute() or ".." in owned_path.parts:
             continue
 
-        candidates = [root / owned_path, document.path.parent / owned_path]
-        target = next((candidate for candidate in candidates if candidate.exists()), candidates[0])
+        target = resolve_contract_relative_path(root, document, owned_path)
         if target.is_file() and _is_counted_file(target):
             files.append(target)
         elif target.is_dir():

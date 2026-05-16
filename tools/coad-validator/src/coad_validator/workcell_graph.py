@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from .model import ContractDocument, ValidationIssue
+from .module_context import resolve_contract_relative_path
 
 
 def validate_workcell_graph(documents: list[ContractDocument], root: Path) -> list[ValidationIssue]:
@@ -174,8 +175,7 @@ def _owned_paths(root: Path, document: ContractDocument) -> list[Path]:
         owned_path = Path(raw_path)
         if owned_path.is_absolute() or ".." in owned_path.parts:
             continue
-        candidates = [root / owned_path, document.path.parent / owned_path]
-        target = next((candidate for candidate in candidates if candidate.exists()), candidates[0])
+        target = resolve_contract_relative_path(root, document, owned_path)
         paths.append(target.resolve())
     return paths
 

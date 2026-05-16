@@ -2,3 +2,4 @@
 
 - Keep `onboarding/` minimal.
 - Use `minimal/` for full goal/task/proof/handoff/review/integration examples.
+- Keep `parallel-work/` focused on active lease mechanics.

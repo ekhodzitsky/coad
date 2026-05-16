@@ -36,15 +36,7 @@ def validate_module_context(documents: list[ContractDocument], root: Path) -> li
 
 
 def module_directory(root: Path, document: ContractDocument, module_path: Path) -> Path:
-    root_candidate = root / module_path
-    if root_candidate.exists():
-        return root_candidate
-
-    local_candidate = document.path.parent / module_path
-    if local_candidate.exists():
-        return local_candidate
-
-    return root_candidate
+    return resolve_contract_relative_path(root, document, module_path)
 
 
 def module_context_path(document: ContractDocument, module: str) -> Path:
@@ -54,3 +46,29 @@ def module_context_path(document: ContractDocument, module: str) -> Path:
         if isinstance(context_path, str) and context_path:
             return Path(context_path)
     return Path(module)
+
+
+def resolve_contract_relative_path(root: Path, document: ContractDocument, path: Path) -> Path:
+    root_candidate = root / path
+    local_candidate = document.path.parent / path
+    if _should_prefer_local_candidate(root, document, root_candidate, local_candidate):
+        return local_candidate
+    if root_candidate.exists():
+        return root_candidate
+    if local_candidate.exists():
+        return local_candidate
+    return root_candidate
+
+
+def _should_prefer_local_candidate(
+    root: Path,
+    document: ContractDocument,
+    root_candidate: Path,
+    local_candidate: Path,
+) -> bool:
+    if document.path.parent == root or root_candidate == local_candidate or not local_candidate.exists():
+        return False
+    workcell = document.data.get("workcell")
+    if isinstance(workcell, dict) and workcell.get("type") == "project":
+        return False
+    return True
