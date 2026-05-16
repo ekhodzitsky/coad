@@ -35,13 +35,24 @@ class ContractDocument:
 class ValidationIssue:
     path: Path
     message: str
+    severity: str = "error"
 
     def format(self, root: Path) -> str:
-        try:
-            display = self.path.relative_to(root)
-        except ValueError:
-            display = self.path
+        display = self.relative_path(root)
         return f"{display}: {self.message}"
+
+    def relative_path(self, root: Path) -> str:
+        try:
+            return str(self.path.relative_to(root))
+        except ValueError:
+            return str(self.path)
+
+    def to_json(self, root: Path) -> dict[str, str]:
+        return {
+            "severity": self.severity,
+            "path": self.relative_path(root),
+            "message": self.message,
+        }
 
 
 class ValidationFailure(Exception):

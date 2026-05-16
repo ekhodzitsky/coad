@@ -35,8 +35,9 @@ def read_contract(path: Path) -> tuple[ContractDocument | None, ValidationIssue 
 def discover_contracts(root: Path) -> tuple[list[ContractDocument], list[ValidationIssue]]:
     documents: list[ContractDocument] = []
     issues: list[ValidationIssue] = []
+    skip_test_fixtures = not _inside_test_fixtures(root)
     for path in sorted(root.rglob("*.md")):
-        if any(part in {".git", ".venv", "templates"} for part in path.parts):
+        if _should_skip(path, skip_test_fixtures=skip_test_fixtures):
             continue
         document, issue = read_contract(path)
         if issue is not None:
@@ -44,6 +45,18 @@ def discover_contracts(root: Path) -> tuple[list[ContractDocument], list[Validat
         if document is not None and document.kind.endswith("_contract"):
             documents.append(document)
     return documents, issues
+
+
+def _should_skip(path: Path, skip_test_fixtures: bool) -> bool:
+    parts = path.parts
+    if any(part in {".git", ".venv", "templates", "__pycache__"} for part in parts):
+        return True
+    return skip_test_fixtures and _inside_test_fixtures(path)
+
+
+def _inside_test_fixtures(path: Path) -> bool:
+    parts = path.parts
+    return any(first == "tests" and second == "fixtures" for first, second in zip(parts, parts[1:]))
 
 
 def _normalize_mapping(value: dict[Any, Any]) -> dict[str, Any]:
