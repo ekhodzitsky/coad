@@ -9,6 +9,7 @@ from .module_context import validate_module_context
 from .release_metadata import validate_release_metadata
 from .schema import validate_schemas
 from .workcell_budget import validate_workcell_budgets
+from .workcell_graph import validate_workcell_graph
 
 
 class ValidationReport:
@@ -34,6 +35,7 @@ def validate_path(root: Path, schema_dir: Path | None = None, check_graph: bool 
     issues.extend(validate_schemas(documents, resolved_schema_dir))
     issues.extend(validate_module_context(documents, resolved_root))
     issues.extend(validate_workcell_budgets(documents, resolved_root))
+    issues.extend(validate_workcell_graph(documents, resolved_root))
     issues.extend(validate_release_metadata(resolved_root))
     if check_graph:
         issues.extend(validate_graph(documents))

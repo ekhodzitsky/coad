@@ -11,6 +11,10 @@ executable before heavier orchestration tooling exists.
 - JSON Schema conformance for each contract type.
 - Module contracts point to real module directories with `README.md` and
   `TODO.md` agent context files.
+- Workcell tree integrity: parents exist, declared children exist and point
+  back to the parent, parent cycles are rejected, leaf workcells cannot declare
+  children, and composite workcells cannot directly own child implementation
+  paths.
 - Workcell context budgets declared in `workcell.context_budget`: file count,
   source lines, contract length, README length, TODO length, surface count, and
   invariant count.

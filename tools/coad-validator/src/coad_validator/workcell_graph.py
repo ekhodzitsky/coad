@@ -1,0 +1,150 @@
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+from .model import ContractDocument, ValidationIssue
+
+
+def validate_workcell_graph(documents: list[ContractDocument], root: Path) -> list[ValidationIssue]:
+    module_documents = {
+        document.identifier: document
+        for document in documents
+        if document.kind == "module_contract" and document.identifier
+    }
+    issues: list[ValidationIssue] = []
+
+    for module, document in module_documents.items():
+        workcell = _workcell(document)
+        if workcell is None:
+            continue
+
+        parent = _parent(workcell)
+        if parent is not None and parent not in module_documents:
+            issues.append(ValidationIssue(document.path, f"workcell parent does not exist: {parent}"))
+
+        children = _children(workcell)
+        if _workcell_type(workcell) == "leaf" and children:
+            issues.append(ValidationIssue(document.path, "leaf workcell must not declare children"))
+
+        for child in children:
+            child_document = module_documents.get(child)
+            if child_document is None:
+                issues.append(ValidationIssue(document.path, f"workcell child does not exist: {child}"))
+                continue
+            child_workcell = _workcell(child_document)
+            child_parent = _parent(child_workcell) if child_workcell is not None else None
+            if child_parent != module:
+                issues.append(
+                    ValidationIssue(
+                        document.path,
+                        f"workcell child does not point back to parent: {child} parent={child_parent or '<none>'}",
+                    )
+                )
+
+        if _workcell_type(workcell) == "composite":
+            issues.extend(_validate_composite_owned_paths(root, document, module_documents, module, children))
+
+    issues.extend(_validate_parent_cycles(module_documents))
+    return issues
+
+
+def _validate_parent_cycles(module_documents: dict[str, ContractDocument]) -> list[ValidationIssue]:
+    issues: list[ValidationIssue] = []
+    reported: set[str] = set()
+    for module, document in module_documents.items():
+        seen: list[str] = []
+        current: str | None = module
+        while current is not None:
+            if current in seen:
+                cycle = seen[seen.index(current) :] + [current]
+                key = " -> ".join(cycle)
+                if key not in reported:
+                    issues.append(ValidationIssue(document.path, f"workcell parent cycle detected: {key}"))
+                    reported.add(key)
+                break
+            seen.append(current)
+            current_document = module_documents.get(current)
+            if current_document is None:
+                break
+            workcell = _workcell(current_document)
+            current = _parent(workcell) if workcell is not None else None
+    return issues
+
+
+def _validate_composite_owned_paths(
+    root: Path,
+    document: ContractDocument,
+    module_documents: dict[str, ContractDocument],
+    module: str,
+    children: list[str],
+) -> list[ValidationIssue]:
+    issues: list[ValidationIssue] = []
+    parent_paths = _owned_paths(root, document)
+    if not parent_paths:
+        return issues
+
+    for child in children:
+        child_document = module_documents.get(child)
+        if child_document is None:
+            continue
+        for parent_path in parent_paths:
+            for child_path in _owned_paths(root, child_document):
+                if _contains_path(parent_path, child_path):
+                    issues.append(
+                        ValidationIssue(
+                            document.path,
+                            "composite workcell owns child implementation path: "
+                            f"{module} owns {parent_path.relative_to(root)} used by {child}",
+                        )
+                    )
+                    return issues
+    return issues
+
+
+def _owned_paths(root: Path, document: ContractDocument) -> list[Path]:
+    workcell = _workcell(document)
+    if workcell is None:
+        return []
+    owns_paths = workcell.get("owns_paths")
+    if not isinstance(owns_paths, list):
+        return []
+    paths: list[Path] = []
+    for raw_path in owns_paths:
+        if not isinstance(raw_path, str) or not raw_path:
+            continue
+        owned_path = Path(raw_path)
+        if owned_path.is_absolute() or ".." in owned_path.parts:
+            continue
+        candidates = [root / owned_path, document.path.parent / owned_path]
+        target = next((candidate for candidate in candidates if candidate.exists()), candidates[0])
+        paths.append(target.resolve())
+    return paths
+
+
+def _contains_path(parent_path: Path, child_path: Path) -> bool:
+    return child_path == parent_path or child_path.is_relative_to(parent_path)
+
+
+def _workcell(document: ContractDocument) -> dict[str, Any] | None:
+    value = document.data.get("workcell")
+    return value if isinstance(value, dict) else None
+
+
+def _workcell_type(workcell: dict[str, Any]) -> str:
+    value = workcell.get("type")
+    return value if isinstance(value, str) else ""
+
+
+def _parent(workcell: dict[str, Any] | None) -> str | None:
+    if workcell is None:
+        return None
+    value = workcell.get("parent")
+    return value if isinstance(value, str) and value else None
+
+
+def _children(workcell: dict[str, Any]) -> list[str]:
+    value = workcell.get("children")
+    if not isinstance(value, list):
+        return []
+    return [child for child in value if isinstance(child, str) and child]

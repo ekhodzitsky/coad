@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 - 2026-05-16
+
+### Added
+
+- Workcell tree validation for parent existence, child backlinks, parent
+  cycles, leaf child declarations, and composite ownership of child paths.
+- Root `project` workcell contract for COAD's own repository tree.
+
 ## 0.2.0 - 2026-05-16
 
 ### Added

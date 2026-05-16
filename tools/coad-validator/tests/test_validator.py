@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[3]
 SCHEMA_DIR = ROOT / "schema"
 FIXTURES = Path(__file__).parent / "fixtures"
 PROJECT_SELF_MODULES = {
+    "project",
     "contracts",
     "docs",
     "examples",
@@ -41,7 +42,7 @@ def test_repository_validation_skips_templates_and_test_fixtures() -> None:
     report = validate_path(ROOT, schema_dir=SCHEMA_DIR)
 
     assert report.ok, [issue.format(report.root) for issue in report.issues]
-    assert len(report.documents) == 37
+    assert len(report.documents) == 38
 
 
 def test_repository_declares_real_project_module_contracts() -> None:
@@ -355,6 +356,67 @@ verification:
     assert report.ok, [issue.format(report.root) for issue in report.issues]
 
 
+def test_workcell_graph_reports_missing_parent(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "checkout", parent="commerce")
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any("workcell parent does not exist: commerce" in issue.message for issue in report.issues)
+
+
+def test_workcell_graph_reports_missing_child_and_missing_backlink(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "commerce", workcell_type="composite", children=["checkout", "missing"])
+    _write_workcell_contract(tmp_path, "checkout", parent="wrong-parent")
+    _write_workcell_contract(tmp_path, "wrong-parent", workcell_type="composite", children=["checkout"])
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    messages = [issue.message for issue in report.issues]
+    assert not report.ok
+    assert any("workcell child does not exist: missing" in message for message in messages)
+    assert any("workcell child does not point back to parent: checkout parent=wrong-parent" in message for message in messages)
+
+
+def test_workcell_graph_reports_parent_cycles(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "commerce", workcell_type="composite", parent="checkout", children=["checkout"])
+    _write_workcell_contract(tmp_path, "checkout", workcell_type="composite", parent="commerce", children=["commerce"])
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any("workcell parent cycle detected" in issue.message for issue in report.issues)
+
+
+def test_workcell_graph_reports_leaf_with_children(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "commerce", children=["checkout"])
+    _write_workcell_contract(tmp_path, "checkout", parent="commerce")
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any("leaf workcell must not declare children" in issue.message for issue in report.issues)
+
+
+def test_workcell_graph_reports_composite_owning_child_implementation(tmp_path: Path) -> None:
+    child_impl = tmp_path / "checkout" / "logic.py"
+    child_impl.parent.mkdir(parents=True)
+    child_impl.write_text("total = 1\n", encoding="utf-8")
+    _write_workcell_contract(
+        tmp_path,
+        "commerce",
+        workcell_type="composite",
+        children=["checkout"],
+        owns_paths=["checkout/"],
+    )
+    _write_workcell_contract(tmp_path, "checkout", parent="commerce", owns_paths=["checkout/logic.py"])
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any("composite workcell owns child implementation path" in issue.message for issue in report.issues)
+
+
 def test_release_metadata_requires_version_and_changelog_for_validator_repo(tmp_path: Path) -> None:
     validator_dir = tmp_path / "tools" / "coad-validator"
     validator_dir.mkdir(parents=True)
@@ -442,3 +504,70 @@ def test_release_metadata_requires_package_version_to_match_version_file(tmp_pat
 
     assert not report.ok
     assert any("package __version__ 0.0.9 does not match VERSION 0.1.0" in issue.message for issue in report.issues)
+
+
+def _write_workcell_contract(
+    root: Path,
+    module: str,
+    *,
+    workcell_type: str = "leaf",
+    parent: str | None = None,
+    children: list[str] | None = None,
+    owns_paths: list[str] | None = None,
+) -> None:
+    context_dir = root / module
+    context_dir.mkdir(parents=True, exist_ok=True)
+    (context_dir / "README.md").write_text(f"# {module}\n", encoding="utf-8")
+    (context_dir / "TODO.md").write_text(f"# {module} TODO\n", encoding="utf-8")
+    children = children or []
+    owns_paths = owns_paths or [f"{module}/README.md", f"{module}/TODO.md"]
+    parent_block = f"  parent: {parent}\n" if parent is not None else ""
+    children_block = "\n".join(f"    - {child}" for child in children) if children else "    []"
+    owns_block = "\n".join(f"    - {owned_path}" for owned_path in owns_paths)
+    safe_name = module.replace("/", "-")
+    (root / f"{safe_name}.md").write_text(
+        f"""---
+schema_version: 1
+kind: module_contract
+module: {module}
+level: subsystem
+purpose: Test workcell {module}.
+status: pilot
+workcell:
+  type: {workcell_type}
+{parent_block}  children:
+{children_block}
+  owns_paths:
+{owns_block}
+  context_budget:
+    max_files: 12
+    max_source_lines: 1500
+    max_contract_lines: 120
+    max_readme_lines: 20
+    max_todo_lines: 20
+    max_surfaces: 1
+    max_invariants: 0
+surface:
+  - name: {safe_name}
+    kind: module
+    visibility: internal
+    contract: Test surface.
+    proof:
+      kind: static-check
+      target: {module}
+      command: test {safe_name}
+dependencies:
+  internal: []
+  external: []
+consumers: []
+invariants: []
+verification:
+  pre_change:
+    - test {safe_name}
+  full:
+    - test all
+---
+# {module}
+""",
+        encoding="utf-8",
+    )

@@ -10,6 +10,11 @@ comprehension and ownership, not by implementation naming alone.
 `MODULE_CONTRACT.md` remains the compatibility filename for a workcell contract.
 Conceptually, a module contract is a workcell contract.
 
+`coad check .` validates the declared workcell tree: parents and children must
+exist, child contracts must point back to declared parents, parent cycles are
+invalid, leaf workcells cannot declare children, and composite workcells cannot
+directly own child implementation paths.
+
 ## Workcell Types
 
 ### Project Workcell

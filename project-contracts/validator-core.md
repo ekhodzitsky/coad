@@ -22,6 +22,7 @@ workcell:
     - tools/coad-validator/src/coad_validator/schema.py
     - tools/coad-validator/src/coad_validator/validate.py
     - tools/coad-validator/src/coad_validator/workcell_budget.py
+    - tools/coad-validator/src/coad_validator/workcell_graph.py
   context_budget:
     max_files: 12
     max_source_lines: 1500

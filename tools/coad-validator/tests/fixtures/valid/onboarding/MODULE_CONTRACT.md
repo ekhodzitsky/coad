@@ -10,7 +10,6 @@ owners:
   - product-platform
 workcell:
   type: leaf
-  parent: project
   children: []
   owns_paths:
     - checkout/
