@@ -4,6 +4,7 @@ import json
 import shutil
 import subprocess
 import sys
+import tomllib
 from pathlib import Path
 from typing import Any
 
@@ -16,6 +17,7 @@ SCHEMA_DIR = ROOT / "schema"
 REPORT_SCHEMA_DIR = SCHEMA_DIR / "reports"
 FIXTURES = Path(__file__).parent / "fixtures"
 MINIMAL_EXAMPLE = ROOT / "examples" / "minimal"
+ONBOARDING_FIXTURE = FIXTURES / "valid" / "onboarding"
 
 
 def test_check_report_passes_for_valid_methodology_graph() -> None:
@@ -24,6 +26,7 @@ def test_check_report_passes_for_valid_methodology_graph() -> None:
     assert payload["ok"] is True
     assert payload["status"] == "pass"
     assert {check["name"] for check in payload["checks"]} == {
+        "agent-guidance",
         "validation-report",
         "status-report",
         "proof-matrix",
@@ -34,6 +37,44 @@ def test_check_report_passes_for_valid_methodology_graph() -> None:
     }
     assert payload["issues"] == []
     _assert_matches_report_schema("check-report.schema.json", payload)
+
+
+def test_check_report_passes_for_two_minute_onboarding_shape() -> None:
+    payload = build_check_report(ONBOARDING_FIXTURE, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is True
+    assert payload["status"] == "pass"
+    check_names = {check["name"] for check in payload["checks"]}
+    assert {"agent-guidance", "validation-report"}.issubset(check_names)
+    assert "ledger-report" not in check_names
+    assert payload["issues"] == []
+    _assert_matches_report_schema("check-report.schema.json", payload)
+
+
+def test_check_report_requires_root_agents_onboarding_guidance(tmp_path: Path) -> None:
+    target = tmp_path / "onboarding"
+    shutil.copytree(ONBOARDING_FIXTURE, target)
+    (target / "AGENTS.md").unlink()
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert payload["status"] == "fail"
+    assert {
+        "severity": "error",
+        "path": "AGENTS.md",
+        "message": "agent-guidance: missing AGENTS.md with COAD onboarding guidance",
+    } in payload["issues"]
+    _assert_matches_report_schema("check-report.schema.json", payload)
+
+
+def test_validator_package_exposes_only_coad_public_command() -> None:
+    pyproject = ROOT / "tools" / "coad-validator" / "pyproject.toml"
+    data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
+
+    assert data["project"]["scripts"] == {
+        "coad": "coad_validator.coad_cli:main",
+    }
 
 
 def test_check_report_fails_for_invalid_methodology_graph() -> None:

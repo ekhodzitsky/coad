@@ -21,17 +21,11 @@ A task cannot be accepted until all required proof for its change class passes o
 
 ## Machine Report
 
-Use `coad-proof-matrix` to inspect proof readiness independently from overall
-goal or task readiness:
-
-```bash
-cd tools/coad-validator
-uv run coad-proof-matrix ../.. --schema-dir ../../schema
-```
-
-The command emits JSON with every required task proof command, the referenced
-proof contract, matching handoff evidence, and a per-proof status. This lets an
-orchestrator distinguish "proof is satisfied" from "the task is declared ready".
+When execution contracts are present, `coad check . --format json` includes a
+proof matrix check. The internal report payload contains every required task
+proof command, the referenced proof contract, matching handoff evidence, and a
+per-proof status. This lets an orchestrator distinguish "proof is satisfied"
+from "the task is declared ready".
 
 The output is covered by `schema/reports/proof-matrix.schema.json`.
 

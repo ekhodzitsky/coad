@@ -34,6 +34,6 @@ Consumers SHOULD reject reports with unsupported `schema_version` values.
 Producers MUST update the matching file in `schema/reports/` and the test suite
 in the same change that modifies a report payload.
 
-The `coad-drift` command exists to catch local repository drift around tool
-commands, report schemas, docs, and CI. It does not replace schema compatibility
-review.
+The internal drift report exists to catch local repository drift around the
+public command, report schemas, docs, and CI. It does not replace schema
+compatibility review.

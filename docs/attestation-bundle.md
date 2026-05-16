@@ -1,14 +1,14 @@
 # Attestation Bundle
 
-`coad-attest` builds a hashable evidence bundle from the required COAD control
-plane reports.
+The internal attestation report builds a hashable evidence bundle from the
+required COAD control-plane reports.
 
 The bundle does not replace the individual reports. It binds them together with
 SHA-256 digests so an orchestrator, reviewer, or CI system can refer to one
 stable acceptance artifact.
 
-Use `coad-export` when the same evidence must be written to disk as PR or
-release artifacts. See `docs/artifact-export.md`.
+Use the internal artifact export report when the same evidence must be written
+to disk as PR or release artifacts. See `docs/artifact-export.md`.
 
 ## Included Reports
 
@@ -35,9 +35,4 @@ digest is the SHA-256 hash of the ordered report name/digest/ok/required set.
 This makes the bundle deterministic for the same inputs and sensitive to report
 content changes.
 
-## Local Verification
-
-```bash
-cd tools/coad-validator
-uv run --locked coad-attest ../.. --schema-dir ../../schema
-```
+The public verification path remains `coad check .`.

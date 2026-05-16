@@ -4,17 +4,31 @@ from pathlib import Path
 from typing import Any
 
 from .report import versioned_report
-from .report_sources import CORE_METHODOLOGY_SOURCES, ReportSource
-from .validate import find_schema_dir
+from .report_sources import (
+    CORE_METHODOLOGY_SOURCES,
+    ONBOARDING_METHODOLOGY_SOURCES,
+    ReportSource,
+)
+from .validate import find_schema_dir, validate_path
+
+EXECUTION_CONTRACT_KINDS = {
+    "goal_contract",
+    "task_contract",
+    "proof_contract",
+    "handoff_contract",
+    "integration_contract",
+    "review_contract",
+}
 
 
 def build_check_report(root: Path, schema_dir: Path | None = None) -> dict[str, Any]:
     resolved_root = root.resolve()
     resolved_schema_dir = (schema_dir or find_schema_dir(resolved_root)).resolve()
+    sources = _applicable_sources(resolved_root, resolved_schema_dir)
     issues: list[dict[str, str]] = []
     checks = [
         _check_source(source, resolved_root, resolved_schema_dir, issues)
-        for source in CORE_METHODOLOGY_SOURCES
+        for source in sources
     ]
     ok = not issues
     return versioned_report(
@@ -25,6 +39,13 @@ def build_check_report(root: Path, schema_dir: Path | None = None) -> dict[str, 
             "issues": issues,
         }
     )
+
+
+def _applicable_sources(root: Path, schema_dir: Path) -> list[ReportSource]:
+    report = validate_path(root, schema_dir=schema_dir, check_graph=False)
+    if any(document.kind in EXECUTION_CONTRACT_KINDS for document in report.documents):
+        return CORE_METHODOLOGY_SOURCES
+    return ONBOARDING_METHODOLOGY_SOURCES
 
 
 def _check_source(

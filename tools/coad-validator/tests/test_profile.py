@@ -50,7 +50,7 @@ def test_profile_report_fails_when_required_ledger_check_fails(tmp_path: Path) -
         "id": "execution-ledger-verified",
         "status": "fail",
         "required": True,
-        "evidence": "coad-ledger status=ledger_issues",
+        "evidence": "coad check ledger-report status=ledger_issues",
     } in payload["checks"]
     _assert_matches_report_schema("profile-report.schema.json", payload)
 

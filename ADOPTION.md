@@ -22,6 +22,31 @@ methodology with contract files and `coad check .` without copying this repo's
 If `coad check .` fails, fix the contracts, proof, handoff, ledger, or policy
 issue it reports before claiming the work is complete.
 
+## 2-Minute Onboarding
+
+1. Paste this into the repository `AGENTS.md`:
+
+   ````markdown
+   Use COAD for agent development coordination.
+
+   Before claiming completion:
+
+   ```bash
+   coad check .
+   ```
+
+   Keep at least one `MODULE_CONTRACT.md` for the module being changed, and
+   keep that module's `README.md` and `TODO.md` current for future agents.
+   ````
+
+2. Add one `MODULE_CONTRACT.md`.
+3. Add or update the module `README.md` and `TODO.md`.
+4. Run `coad check .`.
+
+That is enough to start. Add goal, task, proof, handoff, review, integration,
+and ledger contracts only when the workflow needs orchestration beyond module
+ownership.
+
 ## Phase 1: Identify Boundaries
 
 Pick one or two important ownership boundaries.

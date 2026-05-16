@@ -22,7 +22,7 @@ files, optional handoff path, and proof command results.
 ## Completion Rule
 
 A ledger entry with `status: completed` must include a passing proof result for
-every proof command required by the referenced task contract. `coad-ledger`
+every proof command required by the referenced task contract. `coad check .`
 fails when a completion entry omits required proof.
 
 This prevents a control plane from accepting "done" as a chat claim. Completion
@@ -31,6 +31,5 @@ must be backed by durable proof evidence.
 ## Local Verification
 
 ```bash
-cd tools/coad-validator
-uv run --locked coad-ledger ../.. --schema-dir ../../schema
+coad check .
 ```

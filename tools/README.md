@@ -2,24 +2,12 @@
 
 This directory is reserved for reference tooling.
 
-Current tools:
+Public command:
 
-- `coad check` - single-command methodology compliance check for normal dev flow.
-- `coad-validate` - validates contract schemas and graph references.
-- `coad-pack` - emits bounded task context packs for orchestrators and agents.
-- `coad-status` - reports whether a contract graph is ready or blocked.
-- `coad-proof-matrix` - reports required proof commands and handoff evidence.
-- `coad-graph` - exports contract nodes and typed graph edges.
-- `coad-schedule` - builds dependency/write-scope execution waves for tasks.
-- `coad-ledger` - audits durable execution ledgers against task proof contracts.
-- `coad-profile` - reports declared COAD conformance profile status.
-- `coad-policy` - enforces goal policy constraints across task contracts.
-- `coad-attest` - builds a hashable evidence bundle from required reports.
-- `coad-export` - writes attestation and report artifacts for PR or release evidence.
-- `coad-drift` - checks whether tool docs, schemas, and CI are aligned.
+- `coad check .` - single-command methodology compliance check for normal dev flow.
 
-Planned tools:
-
-- visual graph renderer
+The validator still has internal report builders for tests and repository
+self-checks, but they are not exposed as user-facing CLI commands. The intended
+integration surface for another repository or agent is only `coad check .`.
 
 The methodology should remain useful without tools, but tools should make contract use repeatable and hard to fake.

@@ -23,6 +23,7 @@ def test_attestation_report_binds_required_reports() -> None:
     assert payload["status"] == "attested"
     assert len(payload["bundle_digest"]) == 64
     assert {report["name"] for report in payload["reports"]} == {
+        "agent-guidance",
         "validation-report",
         "status-report",
         "proof-matrix",

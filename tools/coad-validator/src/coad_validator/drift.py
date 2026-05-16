@@ -10,8 +10,12 @@ import yaml
 
 from .report import versioned_report
 
-REPORT_SCHEMAS = {
+PUBLIC_REPORT_SCHEMAS = {
     "coad": ["check-report.schema.json"],
+}
+
+REPORT_SCHEMAS = {
+    **PUBLIC_REPORT_SCHEMAS,
     "coad-validate": ["validation-report.schema.json"],
     "coad-status": ["status-report.schema.json"],
     "coad-proof-matrix": ["proof-matrix.schema.json"],
@@ -22,6 +26,7 @@ REPORT_SCHEMAS = {
     "coad-policy": ["policy-report.schema.json"],
     "coad-attest": ["attestation-report.schema.json"],
     "coad-export": ["export-report.schema.json"],
+    "coad-drift": ["drift-report.schema.json"],
     "coad-pack": ["context-pack.schema.json", "pack-error.schema.json"],
 }
 
@@ -65,11 +70,12 @@ def build_drift_report(root: Path) -> dict[str, Any]:
     }
 
     for script in scripts:
-        _require_text(script, resolved_root / "tools" / "README.md", tools_readme, issues, f"missing documented tool: {script}")
-        _require_text(script, resolved_root / "tools" / "coad-validator" / "README.md", validator_readme, issues, f"validator README does not mention tool: {script}")
-        _require_text(script, resolved_root / "docs" / "validator.md", validator_docs, issues, f"validator docs do not mention tool: {script}")
-        _require_text(script, resolved_root / ".github" / "workflows" / "ci.yml", workflow, issues, f"CI does not run tool: {script}")
-        for schema_name in REPORT_SCHEMAS.get(script, []):
+        command_needle = _public_command_needle(script)
+        _require_text(command_needle, resolved_root / "tools" / "README.md", tools_readme, issues, f"missing documented tool: {script}")
+        _require_text(command_needle, resolved_root / "tools" / "coad-validator" / "README.md", validator_readme, issues, f"validator README does not mention tool: {script}")
+        _require_text(command_needle, resolved_root / "docs" / "validator.md", validator_docs, issues, f"validator docs do not mention tool: {script}")
+        _require_text(command_needle, resolved_root / ".github" / "workflows" / "ci.yml", workflow, issues, f"CI does not run tool: {script}")
+        for schema_name in PUBLIC_REPORT_SCHEMAS.get(script, []):
             schema_path = resolved_root / "schema" / "reports" / schema_name
             if not schema_path.is_file():
                 issues.append(DriftIssue(schema_path, f"missing report schema for {script}: {schema_name}"))
@@ -97,8 +103,8 @@ def build_drift_report(root: Path) -> dict[str, Any]:
         producer = report.get("producer")
         if isinstance(schema, str) and not (resolved_root / "schema" / schema).is_file():
             issues.append(DriftIssue(resolved_root / "schema" / "report-manifest.json", f"manifest references missing report schema: {schema}"))
-        if isinstance(producer, str) and producer not in scripts:
-            issues.append(DriftIssue(resolved_root / "schema" / "report-manifest.json", f"manifest references missing producer command: {producer}"))
+        if isinstance(producer, str) and producer not in REPORT_SCHEMAS:
+            issues.append(DriftIssue(resolved_root / "schema" / "report-manifest.json", f"manifest references unknown report producer: {producer}"))
 
     for gate in release_gates:
         gate_id = gate.get("id")
@@ -146,6 +152,12 @@ def _tool_scripts(root: Path, issues: list[DriftIssue]) -> list[str]:
         for script in scripts
         if isinstance(script, str) and (script == "coad" or script.startswith("coad-"))
     )
+
+
+def _public_command_needle(script: str) -> str:
+    if script == "coad":
+        return "coad check"
+    return script
 
 
 def _report_manifest(root: Path, issues: list[DriftIssue]) -> list[dict[str, Any]]:

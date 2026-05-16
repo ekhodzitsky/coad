@@ -33,8 +33,9 @@ An orchestrator may schedule tasks in parallel when:
 - no task writes an invariant another task relies on without ordering;
 - required exclusive resources are not already claimed.
 
-`coad-schedule` exports these decisions as machine-readable execution waves.
-Tasks in the same wave have satisfied dependencies, fit the goal's
+When execution contracts are present, `coad check .` builds these decisions as
+machine-readable execution waves. Tasks in the same wave have satisfied
+dependencies, fit the goal's
 `max_parallel_agents` policy, and do not overlap write scopes. Write-scope
 conflicts are reported explicitly so the control plane can serialize rather
 than guess.

@@ -1,30 +1,23 @@
 # Artifact Export
 
-`coad-export` writes the COAD evidence surface to a deterministic directory that
-can be uploaded from CI, attached to a PR, or archived with a release.
+The internal artifact export report writes the COAD evidence surface to a
+deterministic directory that can be uploaded from CI, attached to a PR, or
+archived with a release.
 
-It is the file artifact layer above `coad-attest`:
+It is the file artifact layer above the internal attestation report:
 
-- `coad-attest` binds report digests into one attestation report.
-- `coad-export` writes the attestation, every required report, and a manifest to
-  disk.
-
-## Usage
-
-```bash
-cd tools/coad-validator
-uv run --locked coad-export ../.. --schema-dir ../../schema --output-dir /tmp/coad-export
-```
+- the attestation report binds report digests into one report;
+- the export report writes the attestation, every required report, and a
+  manifest to disk.
 
 The output directory contains:
 
 - `manifest.json` - the export report and artifact index;
-- `attestation.json` - the `coad-attest` report;
+- `attestation.json` - the attestation report;
 - one JSON file for each required report, such as `validation-report.json`,
   `ledger-report.json`, and `drift-report.json`.
 
-The CLI also prints the same manifest payload to stdout. The payload is covered
-by `schema/reports/export-report.schema.json`.
+The payload is covered by `schema/reports/export-report.schema.json`.
 
 ## Contract
 
@@ -45,7 +38,5 @@ of losing the diagnostic artifact.
 
 ## Release Gate
 
-`schema/release-manifest.json` declares `coad-export` as a required release gate,
-and `.github/workflows/ci.yml` runs it before drift checking. `coad-drift`
-verifies that the CLI, schema, docs, report manifest, release manifest, and CI
-gate stay aligned.
+Artifact export is an internal evidence surface. It is not part of the public
+CLI; the public repository check remains `coad check .`.

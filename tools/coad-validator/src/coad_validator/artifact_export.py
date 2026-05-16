@@ -7,7 +7,7 @@ from typing import Any
 
 from .attest import build_attestation_report
 from .report import versioned_report
-from .report_sources import ATTESTATION_SOURCES, ReportSource
+from .report_sources import ATTESTATION_SOURCES, COAD_CHECK_PRODUCER, ReportSource
 
 
 def export_artifacts(
@@ -28,7 +28,7 @@ def export_artifacts(
         _write_artifact(
             resolved_output_dir,
             "attestation-report",
-            "coad-attest",
+            COAD_CHECK_PRODUCER,
             "attestation.json",
             True,
             attestation,

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable
 
+from .agent_guidance import build_agent_guidance_report
 from .drift import build_drift_report
 from .graph_report import build_graph_report
 from .ledger import build_ledger_report
@@ -14,6 +15,8 @@ from .report import versioned_report
 from .schedule import build_schedule_report
 from .status import build_status_report
 from .validate import validate_path
+
+COAD_CHECK_PRODUCER = "coad check"
 
 
 @dataclass(frozen=True)
@@ -26,60 +29,68 @@ class ReportSource:
 
 CORE_METHODOLOGY_SOURCES = [
     ReportSource(
+        "agent-guidance",
+        COAD_CHECK_PRODUCER,
+        True,
+        lambda root, schema_dir: build_agent_guidance_report(root, schema_dir),
+    ),
+    ReportSource(
         "validation-report",
-        "coad-validate",
+        COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_validation_report(root, schema_dir),
     ),
     ReportSource(
         "status-report",
-        "coad-status",
+        COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_status_report(root, schema_dir=schema_dir),
     ),
     ReportSource(
         "proof-matrix",
-        "coad-proof-matrix",
+        COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_proof_matrix(root, schema_dir=schema_dir),
     ),
     ReportSource(
         "graph-report",
-        "coad-graph",
+        COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_graph_report(root, schema_dir=schema_dir),
     ),
     ReportSource(
         "schedule-report",
-        "coad-schedule",
+        COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_schedule_report(root, schema_dir=schema_dir),
     ),
     ReportSource(
         "ledger-report",
-        "coad-ledger",
+        COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_ledger_report(root, schema_dir=schema_dir),
     ),
     ReportSource(
         "policy-report",
-        "coad-policy",
+        COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_policy_report(root, schema_dir=schema_dir),
     ),
 ]
 
+ONBOARDING_METHODOLOGY_SOURCES = CORE_METHODOLOGY_SOURCES[:2]
+
 ATTESTATION_SOURCES = [
     *CORE_METHODOLOGY_SOURCES,
     ReportSource(
         "profile-report",
-        "coad-profile",
+        COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_profile_report(root, schema_dir=schema_dir),
     ),
     ReportSource(
         "drift-report",
-        "coad-drift",
+        COAD_CHECK_PRODUCER,
         True,
         lambda root, _schema_dir: build_drift_report(root),
     ),

@@ -10,91 +10,91 @@
     },
     {
       "name": "validation-report",
-      "producer": "coad-validate",
+      "producer": "coad",
       "schema": "reports/validation-report.schema.json",
       "report_schema_version": 1,
       "stability": "stable"
     },
     {
       "name": "status-report",
-      "producer": "coad-status",
+      "producer": "coad",
       "schema": "reports/status-report.schema.json",
       "report_schema_version": 1,
       "stability": "stable"
     },
     {
       "name": "proof-matrix",
-      "producer": "coad-proof-matrix",
+      "producer": "coad",
       "schema": "reports/proof-matrix.schema.json",
       "report_schema_version": 1,
       "stability": "stable"
     },
     {
       "name": "graph-report",
-      "producer": "coad-graph",
+      "producer": "coad",
       "schema": "reports/graph-report.schema.json",
       "report_schema_version": 1,
       "stability": "stable"
     },
     {
       "name": "schedule-report",
-      "producer": "coad-schedule",
+      "producer": "coad",
       "schema": "reports/schedule-report.schema.json",
       "report_schema_version": 1,
       "stability": "stable"
     },
     {
       "name": "ledger-report",
-      "producer": "coad-ledger",
+      "producer": "coad",
       "schema": "reports/ledger-report.schema.json",
       "report_schema_version": 1,
       "stability": "stable"
     },
     {
       "name": "profile-report",
-      "producer": "coad-profile",
+      "producer": "coad",
       "schema": "reports/profile-report.schema.json",
       "report_schema_version": 1,
       "stability": "stable"
     },
     {
       "name": "policy-report",
-      "producer": "coad-policy",
+      "producer": "coad",
       "schema": "reports/policy-report.schema.json",
       "report_schema_version": 1,
       "stability": "stable"
     },
     {
       "name": "attestation-report",
-      "producer": "coad-attest",
+      "producer": "coad",
       "schema": "reports/attestation-report.schema.json",
       "report_schema_version": 1,
       "stability": "stable"
     },
     {
       "name": "export-report",
-      "producer": "coad-export",
+      "producer": "coad",
       "schema": "reports/export-report.schema.json",
       "report_schema_version": 1,
       "stability": "stable"
     },
     {
       "name": "drift-report",
-      "producer": "coad-drift",
+      "producer": "coad",
       "schema": "reports/drift-report.schema.json",
       "report_schema_version": 1,
       "stability": "stable"
     },
     {
       "name": "context-pack",
-      "producer": "coad-pack",
+      "producer": "coad",
       "schema": "reports/context-pack.schema.json",
       "report_schema_version": 1,
       "stability": "stable"
     },
     {
       "name": "pack-error",
-      "producer": "coad-pack",
+      "producer": "coad",
       "schema": "reports/pack-error.schema.json",
       "report_schema_version": 1,
       "stability": "stable"

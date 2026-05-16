@@ -25,17 +25,12 @@ A COAD context pack SHOULD include:
 A context pack SHOULD NOT include unrelated modules, unrelated tasks, stale chat
 history, or broad repository dumps.
 
-## Reference Command
+## Reference Builder
 
-The reference validator package includes a context pack command:
-
-```bash
-cd tools/coad-validator
-uv run coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
-```
-
-The command validates the contract graph before producing output. If the graph is
-invalid, packing fails instead of handing an agent incomplete context.
+The reference validator package keeps an internal context pack builder for tests
+and future orchestrators. It validates the contract graph before producing
+output. If the graph is invalid, packing fails instead of handing an agent
+incomplete context.
 
 ## Current Output
 

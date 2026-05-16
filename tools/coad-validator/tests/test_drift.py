@@ -32,10 +32,7 @@ def test_drift_report_detects_missing_tool_docs(tmp_path: Path) -> None:
     target = _copy_repo_subset(tmp_path)
     tools_readme = target / "tools" / "README.md"
     tools_readme.write_text(
-        tools_readme.read_text(encoding="utf-8").replace(
-            "- `coad-graph` - exports contract nodes and typed graph edges.\n",
-            "",
-        ),
+        tools_readme.read_text(encoding="utf-8").replace("coad check", "coad verify"),
         encoding="utf-8",
     )
 
@@ -46,7 +43,7 @@ def test_drift_report_detects_missing_tool_docs(tmp_path: Path) -> None:
     assert {
         "severity": "error",
         "path": "tools/README.md",
-        "message": "missing documented tool: coad-graph",
+        "message": "missing documented tool: coad",
     } in payload["issues"]
     _assert_matches_report_schema("drift-report.schema.json", payload)
 
@@ -77,9 +74,9 @@ def test_drift_report_detects_missing_release_gate_ci_step(tmp_path: Path) -> No
     workflow = target / ".github" / "workflows" / "ci.yml"
     workflow.write_text(
         workflow.read_text(encoding="utf-8").replace(
-            "      - name: Export contract graph\n"
+            "      - name: Check COAD methodology compliance\n"
             "        working-directory: tools/coad-validator\n"
-            "        run: uv run --locked coad-graph ../.. --schema-dir ../../schema\n\n",
+            "        run: uv run --locked coad check ../.. --schema-dir ../../schema\n\n",
             "",
         ),
         encoding="utf-8",
@@ -91,7 +88,7 @@ def test_drift_report_detects_missing_release_gate_ci_step(tmp_path: Path) -> No
     assert {
         "severity": "error",
         "path": ".github/workflows/ci.yml",
-        "message": "release gate missing from CI: contract-graph-export",
+            "message": "release gate missing from CI: coad-check",
     } in payload["issues"]
 
 
@@ -100,12 +97,12 @@ def test_drift_report_detects_release_gate_working_directory_drift(tmp_path: Pat
     workflow = target / ".github" / "workflows" / "ci.yml"
     workflow.write_text(
         workflow.read_text(encoding="utf-8").replace(
-            "      - name: Export contract graph\n"
+            "      - name: Check COAD methodology compliance\n"
             "        working-directory: tools/coad-validator\n"
-            "        run: uv run --locked coad-graph ../.. --schema-dir ../../schema\n",
-            "      - name: Export contract graph\n"
+            "        run: uv run --locked coad check ../.. --schema-dir ../../schema\n",
+            "      - name: Check COAD methodology compliance\n"
             "        working-directory: .\n"
-            "        run: uv run --locked coad-graph ../.. --schema-dir ../../schema\n",
+            "        run: uv run --locked coad check ../.. --schema-dir ../../schema\n",
         ),
         encoding="utf-8",
     )
@@ -116,7 +113,7 @@ def test_drift_report_detects_release_gate_working_directory_drift(tmp_path: Pat
     assert {
         "severity": "error",
         "path": ".github/workflows/ci.yml",
-        "message": "release gate missing from CI: contract-graph-export",
+            "message": "release gate missing from CI: coad-check",
     } in payload["issues"]
 
 
@@ -125,9 +122,9 @@ def test_drift_cli_reports_structured_issues(tmp_path: Path) -> None:
     workflow = target / ".github" / "workflows" / "ci.yml"
     workflow.write_text(
         workflow.read_text(encoding="utf-8").replace(
-            "      - name: Export contract graph\n"
+            "      - name: Check COAD methodology compliance\n"
             "        working-directory: tools/coad-validator\n"
-            "        run: uv run --locked coad-graph ../.. --schema-dir ../../schema\n\n",
+            "        run: uv run --locked coad check ../.. --schema-dir ../../schema\n\n",
             "",
         ),
         encoding="utf-8",
@@ -145,7 +142,7 @@ def test_drift_cli_reports_structured_issues(tmp_path: Path) -> None:
     assert {
         "severity": "error",
         "path": ".github/workflows/ci.yml",
-        "message": "CI does not run tool: coad-graph",
+            "message": "CI does not run tool: coad",
     } in payload["issues"]
 
 

@@ -27,8 +27,6 @@ fixtures do not fail CI.
 ```bash
 cd tools/coad-validator
 uv run coad check ../../examples/minimal --schema-dir ../../schema
-uv run coad-validate ../../examples/minimal --schema-dir ../../schema
-uv run coad-validate ../.. --schema-dir ../../schema
 ```
 
 `coad check` is the public default for agents and development flows. It prints
@@ -45,22 +43,44 @@ The validator bundles the COAD schemas. `--schema-dir` remains useful for this
 repository's own tests and schema development, but integrated repositories can
 normally run `coad check .` without it.
 
+## 2-Minute Onboarding Check
+
+A repository can start with only:
+
+- `AGENTS.md` containing COAD guidance and `coad check .`;
+- one `MODULE_CONTRACT.md`;
+- that module's `README.md`;
+- that module's `TODO.md`.
+
+`coad check .` passes this shape without requiring goal, task, proof, handoff,
+review, integration, or ledger contracts. When those execution contracts appear,
+the command automatically expands to the deeper orchestration checks.
+
 ## JSON Output
 
 Use JSON output for CI or orchestration tools:
 
 ```bash
-uv run coad-validate ../.. --schema-dir ../../schema --format json
+uv run coad check ../.. --schema-dir ../../schema --format json
 ```
 
 Successful output:
 
 ```json
 {
-  "contracts": 7,
+  "checks": [
+    {
+      "name": "agent-guidance",
+      "ok": true,
+      "producer": "coad check",
+      "required": true,
+      "status": "pass"
+    }
+  ],
   "issues": [],
   "ok": true,
-  "schema_version": 1
+  "schema_version": 1,
+  "status": "pass"
 }
 ```
 
@@ -68,53 +88,26 @@ Failed output includes structured issues:
 
 ```json
 {
-  "contracts": 6,
+  "checks": [],
   "issues": [
     {
       "severity": "error",
-      "path": "GOAL_CONTRACT.md",
-      "message": "missing proof contract: missing-proof-contract"
+      "path": "AGENTS.md",
+      "message": "agent-guidance: missing AGENTS.md with COAD onboarding guidance"
     }
   ],
   "ok": false,
-  "schema_version": 1
+  "schema_version": 1,
+  "status": "fail"
 }
 ```
 
-## Readiness Status
-
-Use `coad-status` when an orchestrator needs to know whether the validated
-contract graph is ready or blocked:
-
-```bash
-cd tools/coad-validator
-uv run coad-status ../.. --schema-dir ../../schema
-```
-
-The status report is intentionally conservative. A goal is `ready` only when:
-
-- the goal contract declares `status: ready`;
-- every referenced task contract declares `status: complete`;
-- every task has a complete handoff;
-- every required task proof command appears as a passing handoff proof result.
-
-Valid but incomplete graphs return `ok: true` and `ready: false` with blockers.
-Invalid graphs return `ok: false`, `ready: false`, and validation issues.
-
-For hard readiness gates, add `--fail-on-not-ready`:
-
-```bash
-uv run coad-status ../.. --schema-dir ../../schema --fail-on-not-ready
-```
-
-This keeps status reporting and acceptance gating separate. A CI job can publish
-readiness without failing, while an orchestrator can fail a handoff or release
-gate on the same report.
-
 ## Tool Output Schemas
 
-The JSON outputs from COAD tools include `schema_version: 1` and are covered by
-schemas in `schema/reports/`.
+The JSON output from `coad check . --format json` includes
+`schema_version: 1` and is covered by `schema/reports/check-report.schema.json`.
+Internal report payload schemas also live in `schema/reports/` for this
+repository's tests and implementation.
 
 See `docs/tool-output-schemas.md` and `docs/report-versioning.md`.
 
@@ -131,26 +124,14 @@ contract graphs.
 ## CI Contract
 
 The repository CI runs the same checks expected from a local orchestrator. The
-machine-readable gate list lives in `schema/release-manifest.json`; `coad-drift`
-checks that the manifest and `.github/workflows/ci.yml` stay aligned.
+machine-readable gate list lives in `schema/release-manifest.json`; the drift
+report is an internal report builder that checks that the manifest and
+`.github/workflows/ci.yml` stay aligned.
 
 ```bash
 cd tools/coad-validator
 uv run --locked pytest
-uv run --locked coad-validate ../.. --schema-dir ../../schema
-uv run --locked coad-validate ../.. --schema-dir ../../schema --format json
 uv run --locked coad check ../.. --schema-dir ../../schema
-uv run --locked coad-status ../.. --schema-dir ../../schema
-uv run --locked coad-proof-matrix ../.. --schema-dir ../../schema
-uv run --locked coad-graph ../.. --schema-dir ../../schema
-uv run --locked coad-schedule ../.. --schema-dir ../../schema
-uv run --locked coad-ledger ../.. --schema-dir ../../schema
-uv run --locked coad-profile ../.. --schema-dir ../../schema
-uv run --locked coad-policy ../.. --schema-dir ../../schema
-uv run --locked coad-attest ../.. --schema-dir ../../schema
-uv run --locked coad-export ../.. --schema-dir ../../schema --output-dir /tmp/coad-export
-uv run --locked coad-drift ../..
-uv run --locked coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
 jq empty ../../schema/*.json ../../schema/reports/*.json
 ```
 
@@ -158,4 +139,3 @@ External GitHub Actions in `.github/workflows/ci.yml` are pinned by commit SHA.
 Update those pins deliberately when refreshing the CI supply chain.
 
 See `docs/release-gates.md` for the release gate manifest contract.
-See `docs/artifact-export.md` for the evidence artifact export contract.

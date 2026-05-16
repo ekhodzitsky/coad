@@ -11,18 +11,6 @@ dependencies = [
 
 [project.scripts]
 coad = "coad_validator.coad_cli:main"
-coad-validate = "coad_validator.cli:main"
-coad-pack = "coad_validator.pack_cli:main"
-coad-status = "coad_validator.status_cli:main"
-coad-proof-matrix = "coad_validator.proof_matrix_cli:main"
-coad-graph = "coad_validator.graph_report_cli:main"
-coad-schedule = "coad_validator.schedule_cli:main"
-coad-ledger = "coad_validator.ledger_cli:main"
-coad-profile = "coad_validator.profile_cli:main"
-coad-policy = "coad_validator.policy_cli:main"
-coad-attest = "coad_validator.attest_cli:main"
-coad-export = "coad_validator.export_cli:main"
-coad-drift = "coad_validator.drift_cli:main"
 
 [dependency-groups]
 dev = [

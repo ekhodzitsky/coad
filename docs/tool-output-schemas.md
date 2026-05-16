@@ -1,31 +1,23 @@
 # Tool Output Schemas
 
-COAD tools emit JSON for orchestration control planes. Those outputs are part of
-the methodology contract, not incidental CLI formatting.
+`coad check . --format json` emits JSON for orchestration control planes. That
+output is part of the methodology contract, not incidental CLI formatting.
 
 Report schemas live under `schema/reports/`:
 
-- `check-report.schema.json` covers `coad check --format json`.
-- `validation-report.schema.json` covers `coad-validate --format json`.
-- `status-report.schema.json` covers `coad-status`.
-- `proof-matrix.schema.json` covers `coad-proof-matrix`.
-- `graph-report.schema.json` covers `coad-graph`.
-- `schedule-report.schema.json` covers `coad-schedule`.
-- `ledger-report.schema.json` covers `coad-ledger`.
-- `profile-report.schema.json` covers `coad-profile`.
-- `policy-report.schema.json` covers `coad-policy`.
-- `attestation-report.schema.json` covers `coad-attest`.
-- `export-report.schema.json` covers `coad-export`.
-- `drift-report.schema.json` covers `coad-drift`.
-- `context-pack.schema.json` covers successful `coad-pack` output.
-- `pack-error.schema.json` covers failed `coad-pack` output.
+- `check-report.schema.json` covers the public `coad check --format json`
+  payload.
+- The remaining report schemas cover internal report payloads used by
+  `coad check`, tests, and repository self-checks: validation, status, proof
+  matrix, graph, schedule, ledger, profile, policy, attestation, export, drift,
+  context pack, and pack errors.
 
 The machine registry for these reports is `schema/report-manifest.json`.
 
 ## Contract
 
-Tool JSON output should be stable enough for an orchestrator to consume without
-screen scraping or natural-language parsing.
+Public JSON output should be stable enough for an orchestrator to consume
+without screen scraping or natural-language parsing.
 
 Every report payload MUST include `schema_version: 1`. Consumers should reject
 unknown major versions unless they explicitly support them.
@@ -46,6 +38,6 @@ cd tools/coad-validator
 uv run --locked pytest tests/test_report_schemas.py tests/test_report_versioning.py
 ```
 
-The tests execute the real CLIs, parse their JSON output, validate the payloads
-against `schema/reports/*.json`, and check that the schemas themselves are valid
-Draft 2020-12 JSON Schemas.
+The tests execute the public command and internal report modules, parse their
+JSON output, validate the payloads against `schema/reports/*.json`, and check
+that the schemas themselves are valid Draft 2020-12 JSON Schemas.

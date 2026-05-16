@@ -111,19 +111,24 @@ def _evaluate_check(check: dict[str, Any], root: Path, schema_dir: Path) -> dict
 def _check_status(check_id: str, root: Path, schema_dir: Path) -> tuple[str, str]:
     if check_id == "contracts-valid":
         report = validate_path(root, schema_dir=schema_dir)
-        return ("pass" if report.ok else "fail"), f"coad-validate ok={str(report.ok).lower()}"
+        evidence = f"coad check validation-report ok={str(report.ok).lower()}"
+        return ("pass" if report.ok else "fail"), evidence
     if check_id == "schedule-builds":
         report = build_schedule_report(root, schema_dir=schema_dir)
-        return ("pass" if report["ok"] else "fail"), f"coad-schedule status={report['status']}"
+        evidence = f"coad check schedule-report status={report['status']}"
+        return ("pass" if report["ok"] else "fail"), evidence
     if check_id == "execution-ledger-verified":
         report = build_ledger_report(root, schema_dir=schema_dir)
-        return ("pass" if report["ok"] else "fail"), f"coad-ledger status={report['status']}"
+        evidence = f"coad check ledger-report status={report['status']}"
+        return ("pass" if report["ok"] else "fail"), evidence
     if check_id == "policy-enforced":
         report = build_policy_report(root, schema_dir=schema_dir)
-        return ("pass" if report["ok"] else "fail"), f"coad-policy status={report['status']}"
+        evidence = f"coad check policy-report status={report['status']}"
+        return ("pass" if report["ok"] else "fail"), evidence
     if check_id == "release-gates-clean":
         report = build_drift_report(root)
-        return ("pass" if report["ok"] else "fail"), f"coad-drift status={report['status']}"
+        evidence = f"coad check drift-report status={report['status']}"
+        return ("pass" if report["ok"] else "fail"), evidence
     return "unknown", "unknown profile check"
 
 

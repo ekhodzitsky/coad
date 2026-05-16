@@ -27,6 +27,7 @@ def test_export_artifacts_writes_bundle_manifest_and_reports(tmp_path: Path) -> 
     assert payload["artifact_count"] == len(payload["artifacts"])
     assert {artifact["name"] for artifact in payload["artifacts"]} == {
         "attestation-report",
+        "agent-guidance",
         "validation-report",
         "status-report",
         "proof-matrix",

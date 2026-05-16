@@ -6,31 +6,31 @@
   "checks": [
     {
       "id": "contracts-valid",
-      "tool": "coad-validate",
+      "tool": "coad check .",
       "required": true,
       "description": "Contract files validate against schemas and graph references."
     },
     {
       "id": "schedule-builds",
-      "tool": "coad-schedule",
+      "tool": "coad check .",
       "required": true,
       "description": "Task contracts can be converted into execution waves."
     },
     {
       "id": "execution-ledger-verified",
-      "tool": "coad-ledger",
+      "tool": "coad check .",
       "required": true,
       "description": "Completed execution events include passing required proof commands."
     },
     {
       "id": "policy-enforced",
-      "tool": "coad-policy",
+      "tool": "coad check .",
       "required": true,
       "description": "Goal policy constraints are enforced across task contracts."
     },
     {
       "id": "release-gates-clean",
-      "tool": "coad-drift",
+      "tool": "coad check .",
       "required": true,
       "description": "Release gates, tool docs, report schemas, and CI remain aligned."
     }

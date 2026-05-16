@@ -60,6 +60,17 @@ and deeper reports. A normal dev flow should start with `coad check .`.
 The validator bundles the COAD schemas, so integrated repositories do not need
 to carry a local `schema/` directory just to run the check.
 
+## 2-Minute Onboarding
+
+1. Paste the COAD snippet into the repository `AGENTS.md`.
+2. Add one `MODULE_CONTRACT.md` for a real module.
+3. Give that module a `README.md` and `TODO.md`.
+4. Run `coad check .`.
+
+That is the first adoption bar. Repositories with only module contracts get a
+light structural check. When goal/task/proof/handoff contracts are added,
+`coad check .` automatically includes the orchestration evidence checks.
+
 ## Why This Exists
 
 Agentic coding breaks down when agents:
@@ -103,7 +114,7 @@ schema/      Machine-readable contract and tool-output schemas.
 docs/        Methodology details: proof matrix, maturity, rules, anti-patterns.
 playbooks/   Repeatable orchestration flows.
 examples/    Small reference examples.
-tools/       Reference validator and orchestration control-plane tools.
+tools/       Reference validator. Public command: `coad check .`.
 ```
 
 ## Status

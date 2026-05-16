@@ -25,61 +25,9 @@ jobs:
         working-directory: tools/coad-validator
         run: uv run --locked pytest
 
-      - name: Validate repository contracts
-        working-directory: tools/coad-validator
-        run: uv run --locked coad-validate ../.. --schema-dir ../../schema
-
-      - name: Validate repository contracts as JSON
-        working-directory: tools/coad-validator
-        run: uv run --locked coad-validate ../.. --schema-dir ../../schema --format json
-
       - name: Check COAD methodology compliance
         working-directory: tools/coad-validator
         run: uv run --locked coad check ../.. --schema-dir ../../schema
-
-      - name: Report repository readiness
-        working-directory: tools/coad-validator
-        run: uv run --locked coad-status ../.. --schema-dir ../../schema
-
-      - name: Build proof matrix
-        working-directory: tools/coad-validator
-        run: uv run --locked coad-proof-matrix ../.. --schema-dir ../../schema
-
-      - name: Export contract graph
-        working-directory: tools/coad-validator
-        run: uv run --locked coad-graph ../.. --schema-dir ../../schema
-
-      - name: Build execution schedule
-        working-directory: tools/coad-validator
-        run: uv run --locked coad-schedule ../.. --schema-dir ../../schema
-
-      - name: Audit execution ledgers
-        working-directory: tools/coad-validator
-        run: uv run --locked coad-ledger ../.. --schema-dir ../../schema
-
-      - name: Report conformance profile
-        working-directory: tools/coad-validator
-        run: uv run --locked coad-profile ../.. --schema-dir ../../schema
-
-      - name: Enforce orchestration policy
-        working-directory: tools/coad-validator
-        run: uv run --locked coad-policy ../.. --schema-dir ../../schema
-
-      - name: Build attestation bundle
-        working-directory: tools/coad-validator
-        run: uv run --locked coad-attest ../.. --schema-dir ../../schema
-
-      - name: Export evidence artifacts
-        working-directory: tools/coad-validator
-        run: uv run --locked coad-export ../.. --schema-dir ../../schema --output-dir /tmp/coad-export
-
-      - name: Check repository drift
-        working-directory: tools/coad-validator
-        run: uv run --locked coad-drift ../..
-
-      - name: Build minimal context pack
-        working-directory: tools/coad-validator
-        run: uv run --locked coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema > /tmp/coad-pack.json
 
       - name: Validate JSON schemas
         run: jq empty schema/*.json schema/reports/*.json

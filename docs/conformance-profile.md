@@ -1,7 +1,7 @@
 # Conformance Profile
 
 `COAD_PROFILE.json` declares the methodology level this repository claims to
-support. `coad-profile` verifies that claim with concrete tool evidence.
+support. `coad check .` verifies that claim through its internal report checks.
 
 ## Current Level
 
@@ -16,20 +16,19 @@ This means the repository has:
 
 ## Checks
 
-Each profile check has an `id`, tool, requirement flag, and description. Required
-checks must pass for the repository to be conformant.
+Each profile check has an `id`, tool, requirement flag, and description.
+Required checks must pass for the repository to be conformant.
 
 Current required checks:
 
-- `contracts-valid` via `coad-validate`;
-- `schedule-builds` via `coad-schedule`;
-- `execution-ledger-verified` via `coad-ledger`;
-- `policy-enforced` via `coad-policy`;
-- `release-gates-clean` via `coad-drift`.
+- `contracts-valid`;
+- `schedule-builds`;
+- `execution-ledger-verified`;
+- `policy-enforced`;
+- `release-gates-clean`.
 
 ## Local Verification
 
 ```bash
-cd tools/coad-validator
-uv run --locked coad-profile ../.. --schema-dir ../../schema
+coad check .
 ```

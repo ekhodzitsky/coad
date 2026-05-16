@@ -1,8 +1,8 @@
 # Policy Enforcement
 
-COAD goal contracts carry orchestration policy. `coad-policy` turns selected
+COAD goal contracts carry orchestration policy. `coad check .` turns selected
 policy fields into executable checks so agents cannot silently weaken the run
-contract.
+contract when execution contracts are present.
 
 ## Current Checks
 
@@ -32,6 +32,5 @@ policy enforcement.
 ## Local Verification
 
 ```bash
-cd tools/coad-validator
-uv run --locked coad-policy ../.. --schema-dir ../../schema
+coad check .
 ```
