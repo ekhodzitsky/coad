@@ -47,6 +47,17 @@ That is enough to start. Add goal, task, proof, handoff, review, integration,
 and ledger contracts only when the workflow needs orchestration beyond module
 ownership.
 
+## Adoption Levels
+
+- **Level 0: Agent-ready module context.** `AGENTS.md`, one
+  `MODULE_CONTRACT.md`, and module `README.md`/`TODO.md` pass `coad check .`.
+- **Level 1: Proven module invariants.** Module surfaces and invariants name
+  concrete proof commands.
+- **Level 2: Task handoff discipline.** Non-trivial work uses task, proof,
+  handoff, review, and integration contracts.
+- **Level 3: Ledger-audited orchestration.** Execution ledgers record agent
+  work, changed files, and passing proof evidence for completed tasks.
+
 ## Phase 1: Identify Boundaries
 
 Pick one or two important ownership boundaries.

@@ -31,7 +31,7 @@ def test_repository_validation_skips_templates_and_test_fixtures() -> None:
     report = validate_path(ROOT, schema_dir=SCHEMA_DIR)
 
     assert report.ok, [issue.format(report.root) for issue in report.issues]
-    assert len(report.documents) == 7
+    assert len(report.documents) == 8
 
 
 def test_invalid_conformance_fixture_reports_missing_proof() -> None:

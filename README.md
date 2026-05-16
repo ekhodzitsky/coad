@@ -71,6 +71,9 @@ That is the first adoption bar. Repositories with only module contracts get a
 light structural check. When goal/task/proof/handoff contracts are added,
 `coad check .` automatically includes the orchestration evidence checks.
 
+Use `GETTING_STARTED.md` for the copy-paste flow and `examples/onboarding/` for
+the smallest complete passing example.
+
 ## Why This Exists
 
 Agentic coding breaks down when agents:
@@ -124,11 +127,12 @@ Private draft. The goal is to turn the original Module Contract Pattern into a b
 ## Recommended Reading Order
 
 1. `SPEC.md`
-2. `PRINCIPLES.md`
-3. `contracts/goal-contract.md`
-4. `docs/contract-graph.md`
-5. `docs/proof-matrix.md`
-6. `docs/context-packs.md`
+2. `GETTING_STARTED.md`
+3. `PRINCIPLES.md`
+4. `contracts/goal-contract.md`
+5. `docs/contract-graph.md`
+6. `docs/proof-matrix.md`
+7. `docs/context-packs.md`
 7. `docs/validator.md`
 8. `docs/agent-integration.md`
 9. `docs/release-gates.md`

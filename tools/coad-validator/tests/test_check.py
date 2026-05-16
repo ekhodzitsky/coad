@@ -17,6 +17,7 @@ SCHEMA_DIR = ROOT / "schema"
 REPORT_SCHEMA_DIR = SCHEMA_DIR / "reports"
 FIXTURES = Path(__file__).parent / "fixtures"
 MINIMAL_EXAMPLE = ROOT / "examples" / "minimal"
+ONBOARDING_EXAMPLE = ROOT / "examples" / "onboarding"
 ONBOARDING_FIXTURE = FIXTURES / "valid" / "onboarding"
 
 
@@ -47,6 +48,19 @@ def test_check_report_passes_for_two_minute_onboarding_shape() -> None:
     check_names = {check["name"] for check in payload["checks"]}
     assert {"agent-guidance", "validation-report"}.issubset(check_names)
     assert "ledger-report" not in check_names
+    assert payload["issues"] == []
+    _assert_matches_report_schema("check-report.schema.json", payload)
+
+
+def test_check_report_passes_for_public_onboarding_example() -> None:
+    payload = build_check_report(ONBOARDING_EXAMPLE, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is True
+    assert payload["status"] == "pass"
+    assert {check["name"] for check in payload["checks"]} == {
+        "agent-guidance",
+        "validation-report",
+    }
     assert payload["issues"] == []
     _assert_matches_report_schema("check-report.schema.json", payload)
 

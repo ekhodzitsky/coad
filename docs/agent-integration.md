@@ -28,6 +28,10 @@ The installed validator bundles the COAD schemas. Adopting repositories need
 contract files and the command above; they do not need to vendor this repo's
 `schema/` directory.
 
+For a copy-paste start, use `GETTING_STARTED.md` and
+`templates/onboarding/`. For a complete minimal example, see
+`examples/onboarding/`.
+
 ## AGENTS.md Snippet
 
 ````markdown
