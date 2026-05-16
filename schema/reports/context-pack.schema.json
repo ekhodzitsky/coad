@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coad.dev/schema/reports/context-pack.schema.json",
+  "title": "COAD Context Pack",
+  "type": "object",
+  "required": [
+    "task_id",
+    "goal",
+    "task",
+    "modules",
+    "proofs",
+    "reviews",
+    "handoffs",
+    "integration",
+    "contracts"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "goal": {
+      "$ref": "#/$defs/contract"
+    },
+    "task": {
+      "$ref": "#/$defs/contract"
+    },
+    "modules": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/contract"
+      }
+    },
+    "proofs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/contract"
+      }
+    },
+    "reviews": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/contract"
+      }
+    },
+    "handoffs": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/contract"
+      }
+    },
+    "integration": {
+      "$ref": "#/$defs/contract"
+    },
+    "contracts": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  },
+  "$defs": {
+    "contract": {
+      "type": "object",
+      "required": ["id", "kind", "path", "data"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "data": {
+          "type": "object"
+        }
+      }
+    }
+  }
+}

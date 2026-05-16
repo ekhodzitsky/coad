@@ -92,6 +92,13 @@ This keeps status reporting and acceptance gating separate. A CI job can publish
 readiness without failing, while an orchestrator can fail a handoff or release
 gate on the same report.
 
+## Tool Output Schemas
+
+The JSON outputs from `coad-validate`, `coad-status`, and `coad-pack` are
+covered by schemas in `schema/reports/`.
+
+See `docs/tool-output-schemas.md`.
+
 ## Test Suite
 
 ```bash
@@ -113,7 +120,7 @@ uv run --locked coad-validate ../.. --schema-dir ../../schema
 uv run --locked coad-validate ../.. --schema-dir ../../schema --format json
 uv run --locked coad-status ../.. --schema-dir ../../schema
 uv run --locked coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
-jq empty ../../schema/*.json
+jq empty ../../schema/*.json ../../schema/reports/*.json
 ```
 
 External GitHub Actions in `.github/workflows/ci.yml` are pinned by commit SHA.

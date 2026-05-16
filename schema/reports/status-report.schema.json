@@ -1,0 +1,178 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coad.dev/schema/reports/status-report.schema.json",
+  "title": "COAD Readiness Status Report",
+  "oneOf": [
+    {
+      "type": "object",
+      "required": ["ok", "ready", "status", "contracts", "issues"],
+      "additionalProperties": false,
+      "properties": {
+        "ok": {
+          "const": false
+        },
+        "ready": {
+          "const": false
+        },
+        "status": {
+          "const": "invalid"
+        },
+        "contracts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "issues": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/issue"
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "required": ["ok", "ready", "status", "contracts", "goals"],
+      "additionalProperties": false,
+      "properties": {
+        "ok": {
+          "const": true
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": ["ready", "not_ready"]
+        },
+        "contracts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "goals": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/goal"
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "goal": {
+      "type": "object",
+      "required": [
+        "goal_id",
+        "path",
+        "declared_status",
+        "ready",
+        "status",
+        "blockers",
+        "tasks"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "goal_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "declared_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": ["ready", "not_ready"]
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/blocker"
+          }
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/task"
+          }
+        }
+      }
+    },
+    "task": {
+      "type": "object",
+      "required": ["task_id", "path", "declared_status", "ready", "status", "blockers"],
+      "additionalProperties": false,
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "declared_status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ready": {
+          "type": "boolean"
+        },
+        "status": {
+          "enum": ["ready", "not_ready"]
+        },
+        "blockers": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/blocker"
+          }
+        }
+      }
+    },
+    "blocker": {
+      "type": "object",
+      "required": ["kind", "id", "path", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "kind": {
+          "type": "string",
+          "minLength": 1
+        },
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "issue": {
+      "type": "object",
+      "required": ["severity", "path", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "severity": {
+          "enum": ["error", "warning", "info"]
+        },
+        "path": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

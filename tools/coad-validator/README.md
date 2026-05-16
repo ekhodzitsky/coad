@@ -17,6 +17,8 @@ that contract graph references point to existing contracts. `coad-status` adds a
 conservative readiness report for orchestrators: valid-but-incomplete graphs are
 reported as `ok: true` and `ready: false` with explicit blockers.
 
+JSON outputs are covered by report schemas in `../../schema/reports/`.
+
 ## Tests
 
 ```bash

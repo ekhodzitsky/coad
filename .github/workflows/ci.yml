@@ -42,4 +42,4 @@ jobs:
         run: uv run --locked coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema > /tmp/coad-pack.json
 
       - name: Validate JSON schemas
-        run: jq empty schema/*.json
+        run: jq empty schema/*.json schema/reports/*.json

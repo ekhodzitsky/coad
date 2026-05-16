@@ -59,7 +59,7 @@ COAD makes boundaries, permissions, proof, and readiness explicit enough for an 
 ```text
 contracts/   Canonical contract type definitions.
 templates/   Copyable contract templates.
-schema/      Machine-readable schema drafts.
+schema/      Machine-readable contract and tool-output schemas.
 docs/        Methodology details: proof matrix, maturity, rules, anti-patterns.
 playbooks/   Repeatable orchestration flows.
 examples/    Small reference examples.
@@ -79,4 +79,5 @@ Private draft. The goal is to turn the original Module Contract Pattern into a b
 5. `docs/proof-matrix.md`
 6. `docs/context-packs.md`
 7. `docs/validator.md`
-8. `examples/minimal/`
+8. `docs/tool-output-schemas.md`
+9. `examples/minimal/`
