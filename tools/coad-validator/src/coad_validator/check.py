@@ -82,8 +82,10 @@ def _extend_issues(
             path = issue.get("path")
             message = issue.get("message")
             severity = issue.get("severity")
+            code = issue.get("code")
             issues.append(
                 {
+                    "code": code if isinstance(code, str) else f"{source_name}.failed",
                     "severity": severity if isinstance(severity, str) else "error",
                     "path": path if isinstance(path, str) else _relative_path(root, root),
                     "message": (
@@ -96,6 +98,7 @@ def _extend_issues(
         return
     issues.append(
         {
+            "code": f"{source_name}.failed",
             "severity": "error",
             "path": _relative_path(root, root),
             "message": f"{source_name} failed",

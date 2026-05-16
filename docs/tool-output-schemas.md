@@ -22,6 +22,11 @@ without screen scraping or natural-language parsing.
 Every report payload MUST include `schema_version: 1`. Consumers should reject
 unknown major versions unless they explicitly support them.
 
+Structured issues SHOULD include a stable `code` field such as
+`workcell.parent_missing`, `workcell.owns_path_overlap`, or
+`graph.proof_missing`. Agents should use `code` for automated repair routing
+and treat `message` as human-facing context.
+
 Changing a report schema should be treated as a compatibility event:
 
 - update the schema and tests in the same change;

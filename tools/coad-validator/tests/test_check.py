@@ -75,6 +75,7 @@ def test_check_report_requires_root_agents_onboarding_guidance(tmp_path: Path) -
     assert payload["ok"] is False
     assert payload["status"] == "fail"
     assert {
+        "code": "agent-guidance.failed",
         "severity": "error",
         "path": "AGENTS.md",
         "message": "agent-guidance: missing AGENTS.md with COAD onboarding guidance",

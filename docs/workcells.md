@@ -13,7 +13,8 @@ Conceptually, a module contract is a workcell contract.
 `coad check .` validates the declared workcell tree: parents and children must
 exist, child contracts must point back to declared parents, parent cycles are
 invalid, leaf workcells cannot declare children, and composite workcells cannot
-directly own child implementation paths.
+directly own child implementation paths. It also rejects overlapping
+`owns_paths` between leaf workcells.
 
 ## Workcell Types
 
@@ -82,6 +83,9 @@ Rules:
   implementation directly.
 - Sibling workcells may be edited in parallel only when their contracts,
   invariants, surfaces, and dependency order do not conflict.
+- Leaf workcells may not have overlapping `owns_paths`. Shared files should
+  become their own workcell or be owned by the nearest composite as an
+  orchestration artifact, not as child implementation.
 
 Separate git worktrees do not remove the need for a write lease. They prevent
 file-level collisions, but they do not prevent two agents from making

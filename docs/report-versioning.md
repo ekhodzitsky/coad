@@ -15,6 +15,7 @@ Version 1 reports are allowed to evolve only through backward-compatible
 changes:
 
 - adding optional fields;
+- adding new stable issue `code` values;
 - adding new enum values only when consumers are documented to tolerate them;
 - adding new report types with their own schema files;
 - tightening producer behavior when existing valid payloads remain valid.

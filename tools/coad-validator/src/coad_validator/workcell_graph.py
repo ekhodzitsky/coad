@@ -21,16 +21,34 @@ def validate_workcell_graph(documents: list[ContractDocument], root: Path) -> li
 
         parent = _parent(workcell)
         if parent is not None and parent not in module_documents:
-            issues.append(ValidationIssue(document.path, f"workcell parent does not exist: {parent}"))
+            issues.append(
+                ValidationIssue(
+                    document.path,
+                    f"workcell parent does not exist: {parent}",
+                    code="workcell.parent_missing",
+                )
+            )
 
         children = _children(workcell)
         if _workcell_type(workcell) == "leaf" and children:
-            issues.append(ValidationIssue(document.path, "leaf workcell must not declare children"))
+            issues.append(
+                ValidationIssue(
+                    document.path,
+                    "leaf workcell must not declare children",
+                    code="workcell.leaf_has_children",
+                )
+            )
 
         for child in children:
             child_document = module_documents.get(child)
             if child_document is None:
-                issues.append(ValidationIssue(document.path, f"workcell child does not exist: {child}"))
+                issues.append(
+                    ValidationIssue(
+                        document.path,
+                        f"workcell child does not exist: {child}",
+                        code="workcell.child_missing",
+                    )
+                )
                 continue
             child_workcell = _workcell(child_document)
             child_parent = _parent(child_workcell) if child_workcell is not None else None
@@ -39,12 +57,14 @@ def validate_workcell_graph(documents: list[ContractDocument], root: Path) -> li
                     ValidationIssue(
                         document.path,
                         f"workcell child does not point back to parent: {child} parent={child_parent or '<none>'}",
+                        code="workcell.child_parent_mismatch",
                     )
                 )
 
         if _workcell_type(workcell) == "composite":
             issues.extend(_validate_composite_owned_paths(root, document, module_documents, module, children))
 
+    issues.extend(_validate_leaf_owned_path_overlaps(root, module_documents))
     issues.extend(_validate_parent_cycles(module_documents))
     return issues
 
@@ -60,7 +80,13 @@ def _validate_parent_cycles(module_documents: dict[str, ContractDocument]) -> li
                 cycle = seen[seen.index(current) :] + [current]
                 key = " -> ".join(cycle)
                 if key not in reported:
-                    issues.append(ValidationIssue(document.path, f"workcell parent cycle detected: {key}"))
+                    issues.append(
+                        ValidationIssue(
+                            document.path,
+                            f"workcell parent cycle detected: {key}",
+                            code="workcell.parent_cycle",
+                        )
+                    )
                     reported.add(key)
                 break
             seen.append(current)
@@ -96,9 +122,41 @@ def _validate_composite_owned_paths(
                             document.path,
                             "composite workcell owns child implementation path: "
                             f"{module} owns {parent_path.relative_to(root)} used by {child}",
+                            code="workcell.composite_owns_child_path",
                         )
                     )
                     return issues
+    return issues
+
+
+def _validate_leaf_owned_path_overlaps(
+    root: Path,
+    module_documents: dict[str, ContractDocument],
+) -> list[ValidationIssue]:
+    leaf_paths: list[tuple[str, ContractDocument, Path]] = []
+    for module, document in module_documents.items():
+        workcell = _workcell(document)
+        if workcell is None or _workcell_type(workcell) != "leaf":
+            continue
+        for owned_path in _owned_paths(root, document):
+            leaf_paths.append((module, document, owned_path))
+
+    issues: list[ValidationIssue] = []
+    for index, (left_module, left_document, left_path) in enumerate(leaf_paths):
+        for right_module, _right_document, right_path in leaf_paths[index + 1 :]:
+            if left_module == right_module:
+                continue
+            if _contains_path(left_path, right_path) or _contains_path(right_path, left_path):
+                issues.append(
+                    ValidationIssue(
+                        left_document.path,
+                        "workcell owns_path overlaps: "
+                        f"{left_module} {left_path.relative_to(root)} overlaps with "
+                        f"{right_module} {right_path.relative_to(root)}",
+                        code="workcell.owns_path_overlap",
+                    )
+                )
+                return issues
     return issues
 
 

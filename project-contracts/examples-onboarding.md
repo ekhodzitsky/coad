@@ -14,7 +14,10 @@ workcell:
   context_path: examples/onboarding
   children: []
   owns_paths:
-    - examples/onboarding/
+    - examples/onboarding/AGENTS.md
+    - examples/onboarding/MODULE_CONTRACT.md
+    - examples/onboarding/README.md
+    - examples/onboarding/TODO.md
   context_budget:
     max_files: 12
     max_source_lines: 1500

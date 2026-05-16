@@ -142,6 +142,7 @@ def test_cli_json_output_for_invalid_fixture_reports_structured_issue() -> None:
     assert payload["contracts"] == 6
     assert payload["issues"][0]["severity"] == "error"
     assert payload["issues"][0]["path"] == "GOAL_CONTRACT.md"
+    assert payload["issues"][0]["code"] == "graph.proof_missing"
     assert "missing proof contract: missing-proof-contract" in payload["issues"][0]["message"]
 
 
@@ -183,7 +184,11 @@ contracts:
     report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
 
     assert not report.ok
-    assert any("'objective' is a required property" in issue.message for issue in report.issues)
+    assert any(
+        issue.code == "schema.violation"
+        and "'objective' is a required property" in issue.message
+        for issue in report.issues
+    )
 
 
 def test_graph_validation_reports_missing_referenced_contract(tmp_path: Path) -> None:
@@ -362,7 +367,11 @@ def test_workcell_graph_reports_missing_parent(tmp_path: Path) -> None:
     report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
 
     assert not report.ok
-    assert any("workcell parent does not exist: commerce" in issue.message for issue in report.issues)
+    assert any(
+        issue.code == "workcell.parent_missing"
+        and "workcell parent does not exist: commerce" in issue.message
+        for issue in report.issues
+    )
 
 
 def test_workcell_graph_reports_missing_child_and_missing_backlink(tmp_path: Path) -> None:
@@ -373,7 +382,10 @@ def test_workcell_graph_reports_missing_child_and_missing_backlink(tmp_path: Pat
     report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
 
     messages = [issue.message for issue in report.issues]
+    codes = [issue.code for issue in report.issues]
     assert not report.ok
+    assert "workcell.child_missing" in codes
+    assert "workcell.child_parent_mismatch" in codes
     assert any("workcell child does not exist: missing" in message for message in messages)
     assert any("workcell child does not point back to parent: checkout parent=wrong-parent" in message for message in messages)
 
@@ -385,7 +397,11 @@ def test_workcell_graph_reports_parent_cycles(tmp_path: Path) -> None:
     report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
 
     assert not report.ok
-    assert any("workcell parent cycle detected" in issue.message for issue in report.issues)
+    assert any(
+        issue.code == "workcell.parent_cycle"
+        and "workcell parent cycle detected" in issue.message
+        for issue in report.issues
+    )
 
 
 def test_workcell_graph_reports_leaf_with_children(tmp_path: Path) -> None:
@@ -395,7 +411,11 @@ def test_workcell_graph_reports_leaf_with_children(tmp_path: Path) -> None:
     report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
 
     assert not report.ok
-    assert any("leaf workcell must not declare children" in issue.message for issue in report.issues)
+    assert any(
+        issue.code == "workcell.leaf_has_children"
+        and "leaf workcell must not declare children" in issue.message
+        for issue in report.issues
+    )
 
 
 def test_workcell_graph_reports_composite_owning_child_implementation(tmp_path: Path) -> None:
@@ -414,7 +434,56 @@ def test_workcell_graph_reports_composite_owning_child_implementation(tmp_path: 
     report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
 
     assert not report.ok
-    assert any("composite workcell owns child implementation path" in issue.message for issue in report.issues)
+    assert any(
+        issue.code == "workcell.composite_owns_child_path"
+        and "composite workcell owns child implementation path" in issue.message
+        for issue in report.issues
+    )
+
+
+def test_workcell_graph_reports_leaf_owned_path_overlap(tmp_path: Path) -> None:
+    shared_file = tmp_path / "src" / "shared.py"
+    shared_file.parent.mkdir(parents=True)
+    shared_file.write_text("VALUE = 1\n", encoding="utf-8")
+    _write_workcell_contract(tmp_path, "checkout", owns_paths=["src/shared.py"])
+    _write_workcell_contract(tmp_path, "billing", owns_paths=["src/"])
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "workcell.owns_path_overlap"
+        and "workcell owns_path overlaps" in issue.message
+        and "checkout" in issue.message
+        and "billing" in issue.message
+        for issue in report.issues
+    )
+
+
+def test_check_json_propagates_stable_issue_codes(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "checkout", parent="commerce")
+    (tmp_path / "AGENTS.md").write_text("Use COAD and run coad check .\n", encoding="utf-8")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "coad_validator.coad_cli",
+            "check",
+            str(tmp_path),
+            "--schema-dir",
+            str(SCHEMA_DIR),
+            "--format",
+            "json",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    payload = json.loads(result.stdout)
+    assert any(issue["code"] == "workcell.parent_missing" for issue in payload["issues"])
 
 
 def test_release_metadata_requires_version_and_changelog_for_validator_repo(tmp_path: Path) -> None:

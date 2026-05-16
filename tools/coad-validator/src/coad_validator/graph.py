@@ -155,8 +155,21 @@ def _missing_refs(
         return issues
     for value in values:
         if isinstance(value, str) and value not in index:
-            issues.append(document_issue(document, f"missing {label} contract: {value}"))
+            issues.append(
+                document_issue(
+                    document,
+                    f"missing {label} contract: {value}",
+                    code=_missing_ref_code(label),
+                )
+            )
     return issues
+
+
+def _missing_ref_code(label: str) -> str:
+    normalized = label.replace(" ", "_")
+    if "proof" in normalized:
+        return "graph.proof_missing"
+    return f"graph.{normalized}_missing"
 
 
 def _task_required_proofs(task: ContractDocument) -> list[str]:

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.0 - 2026-05-16
+
+### Added
+
+- Leaf `owns_paths` overlap detection for workcell ownership conflicts.
+- Stable issue `code` values in validation and `coad check --format json`
+  output.
+
 ## 0.3.0 - 2026-05-16
 
 ### Added

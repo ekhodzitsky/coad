@@ -36,6 +36,7 @@ def _check(args: argparse.Namespace) -> int:
                 "checks": [],
                 "issues": [
                     {
+                        "code": "schema.dir_not_found",
                         "severity": "error",
                         "path": str(root),
                         "message": str(exc),

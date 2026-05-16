@@ -36,6 +36,7 @@ class ValidationIssue:
     path: Path
     message: str
     severity: str = "error"
+    code: str = "validation.error"
 
     def format(self, root: Path) -> str:
         display = self.relative_path(root)
@@ -49,6 +50,7 @@ class ValidationIssue:
 
     def to_json(self, root: Path) -> dict[str, str]:
         return {
+            "code": self.code,
             "severity": self.severity,
             "path": self.relative_path(root),
             "message": self.message,

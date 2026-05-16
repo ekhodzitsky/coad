@@ -15,6 +15,7 @@ executable before heavier orchestration tooling exists.
   back to the parent, parent cycles are rejected, leaf workcells cannot declare
   children, and composite workcells cannot directly own child implementation
   paths.
+- Leaf workcell ownership: `owns_paths` cannot overlap between leaf workcells.
 - Workcell context budgets declared in `workcell.context_budget`: file count,
   source lines, contract length, README length, TODO length, surface count, and
   invariant count.
@@ -110,6 +111,7 @@ Failed output includes structured issues:
   "checks": [],
   "issues": [
     {
+      "code": "agent-guidance.failed",
       "severity": "error",
       "path": "AGENTS.md",
       "message": "agent-guidance: missing AGENTS.md with COAD onboarding guidance"
@@ -120,6 +122,9 @@ Failed output includes structured issues:
   "status": "fail"
 }
 ```
+
+Issue `code` values are stable machine keys. Agents should branch on `code`
+instead of parsing English messages.
 
 ## Tool Output Schemas
 

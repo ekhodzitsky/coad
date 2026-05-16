@@ -28,14 +28,26 @@ def validate_schemas(
     for document in documents:
         schema_name = _SCHEMA_BY_KIND.get(document.kind)
         if schema_name is None:
-            issues.append(document_issue(document, f"unknown contract kind: {document.kind}"))
+            issues.append(
+                document_issue(
+                    document,
+                    f"unknown contract kind: {document.kind}",
+                    code="schema.unknown_contract_kind",
+                )
+            )
             continue
 
         validator = validators.get(schema_name)
         if validator is None:
             schema_path = schema_dir / schema_name
             if not schema_path.exists():
-                issues.append(document_issue(document, f"schema not found: {schema_name}"))
+                issues.append(
+                    document_issue(
+                        document,
+                        f"schema not found: {schema_name}",
+                        code="schema.not_found",
+                    )
+                )
                 continue
             schema = _read_json(schema_path)
             validator = Draft202012Validator(schema)
@@ -44,13 +56,23 @@ def validate_schemas(
         for error in sorted(validator.iter_errors(document.data), key=str):
             location = ".".join(str(part) for part in error.absolute_path)
             prefix = f"schema violation at {location}: " if location else "schema violation: "
-            issues.append(document_issue(document, prefix + error.message))
+            issues.append(
+                document_issue(
+                    document,
+                    prefix + error.message,
+                    code="schema.violation",
+                )
+            )
 
     return issues
 
 
-def document_issue(document: ContractDocument, message: str) -> ValidationIssue:
-    return ValidationIssue(document.path, message)
+def document_issue(
+    document: ContractDocument,
+    message: str,
+    code: str = "validation.error",
+) -> ValidationIssue:
+    return ValidationIssue(document.path, message, code=code)
 
 
 def _read_json(path: Path) -> dict[str, Any]:
