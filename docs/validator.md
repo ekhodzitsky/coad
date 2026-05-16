@@ -71,3 +71,19 @@ uv run pytest
 
 The test suite includes conformance fixtures for valid and intentionally invalid
 contract graphs.
+
+## CI Contract
+
+The repository CI runs the same checks expected from a local orchestrator:
+
+```bash
+cd tools/coad-validator
+uv run --locked pytest
+uv run --locked coad-validate ../.. --schema-dir ../../schema
+uv run --locked coad-validate ../.. --schema-dir ../../schema --format json
+uv run --locked coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
+jq empty ../../schema/*.json
+```
+
+External GitHub Actions in `.github/workflows/ci.yml` are pinned by commit SHA.
+Update those pins deliberately when refreshing the CI supply chain.

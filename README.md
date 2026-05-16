@@ -63,7 +63,7 @@ schema/      Machine-readable schema drafts.
 docs/        Methodology details: proof matrix, maturity, rules, anti-patterns.
 playbooks/   Repeatable orchestration flows.
 examples/    Small reference examples.
-tools/       Placeholder for validators and context pack generators.
+tools/       Reference validator and context pack generator.
 ```
 
 ## Status

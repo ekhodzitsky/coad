@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  contracts:
+    name: Contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+
+      - name: Run validator tests
+        working-directory: tools/coad-validator
+        run: uv run --locked pytest
+
+      - name: Validate repository contracts
+        working-directory: tools/coad-validator
+        run: uv run --locked coad-validate ../.. --schema-dir ../../schema
+
+      - name: Validate repository contracts as JSON
+        working-directory: tools/coad-validator
+        run: uv run --locked coad-validate ../.. --schema-dir ../../schema --format json
+
+      - name: Build minimal context pack
+        working-directory: tools/coad-validator
+        run: uv run --locked coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema > /tmp/coad-pack.json
+
+      - name: Validate JSON schemas
+        run: jq empty schema/*.json

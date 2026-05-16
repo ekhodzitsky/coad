@@ -2,11 +2,14 @@
 
 This directory is reserved for reference tooling.
 
+Current tools:
+
+- `coad-validator` - validates contract schemas and graph references.
+- `coad-pack` - emits bounded task context packs for orchestrators and agents.
+
 Planned tools:
 
-- contract validator
 - drift checker
-- context pack generator
 - proof matrix checker
 - contract graph renderer
 
