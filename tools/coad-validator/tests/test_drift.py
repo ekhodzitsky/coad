@@ -20,6 +20,7 @@ def test_drift_report_accepts_current_repository() -> None:
     payload = build_drift_report(ROOT)
 
     assert payload == {
+        "schema_version": 1,
         "ok": True,
         "status": "clean",
         "issues": [],

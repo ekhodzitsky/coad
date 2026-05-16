@@ -3,9 +3,12 @@
   "$id": "https://coad.dev/schema/reports/drift-report.schema.json",
   "title": "COAD Drift Report",
   "type": "object",
-  "required": ["ok", "status", "issues"],
+  "required": ["schema_version", "ok", "status", "issues"],
   "additionalProperties": false,
   "properties": {
+    "schema_version": {
+      "const": 1
+    },
     "ok": {
       "type": "boolean"
     },

@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .graph_report import build_graph_report
+from .report import versioned_report
 
 
 def main() -> int:
@@ -20,18 +21,20 @@ def main() -> int:
     try:
         payload = build_graph_report(root, schema_dir=schema_dir)
     except FileNotFoundError as exc:
-        payload = {
-            "ok": False,
-            "status": "invalid",
-            "contracts": 0,
-            "issues": [
-                {
-                    "severity": "error",
-                    "path": str(root),
-                    "message": str(exc),
-                }
-            ],
-        }
+        payload = versioned_report(
+            {
+                "ok": False,
+                "status": "invalid",
+                "contracts": 0,
+                "issues": [
+                    {
+                        "severity": "error",
+                        "path": str(root),
+                        "message": str(exc),
+                    }
+                ],
+            }
+        )
 
     print(json.dumps(payload, indent=2, sort_keys=True))
     return 0 if payload["ok"] else 1

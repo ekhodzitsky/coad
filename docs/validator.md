@@ -42,7 +42,8 @@ Successful output:
 {
   "contracts": 7,
   "issues": [],
-  "ok": true
+  "ok": true,
+  "schema_version": 1
 }
 ```
 
@@ -58,7 +59,8 @@ Failed output includes structured issues:
       "message": "missing proof contract: missing-proof-contract"
     }
   ],
-  "ok": false
+  "ok": false,
+  "schema_version": 1
 }
 ```
 
@@ -94,10 +96,10 @@ gate on the same report.
 
 ## Tool Output Schemas
 
-The JSON outputs from `coad-validate`, `coad-status`, and `coad-pack` are
-covered by schemas in `schema/reports/`.
+The JSON outputs from COAD tools include `schema_version: 1` and are covered by
+schemas in `schema/reports/`.
 
-See `docs/tool-output-schemas.md`.
+See `docs/tool-output-schemas.md` and `docs/report-versioning.md`.
 
 ## Test Suite
 

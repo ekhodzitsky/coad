@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
+from .report import versioned_report
 from .validate import validate_path
 
 
@@ -24,7 +25,8 @@ def main() -> int:
         if args.format == "json":
             print(
                 json.dumps(
-                    {
+                    versioned_report(
+                        {
                         "ok": False,
                         "contracts": 0,
                         "issues": [
@@ -34,7 +36,8 @@ def main() -> int:
                                 "message": str(exc),
                             }
                         ],
-                    },
+                        }
+                    ),
                     indent=2,
                     sort_keys=True,
                 )
@@ -46,11 +49,13 @@ def main() -> int:
     if args.format == "json":
         print(
             json.dumps(
-                {
+                versioned_report(
+                    {
                     "ok": report.ok,
                     "contracts": len(report.documents),
                     "issues": [issue.to_json(report.root) for issue in report.issues],
-                },
+                    }
+                ),
                 indent=2,
                 sort_keys=True,
             )

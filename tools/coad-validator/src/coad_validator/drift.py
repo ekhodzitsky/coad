@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+from .report import versioned_report
+
 REPORT_SCHEMAS = {
     "coad-validate": ["validation-report.schema.json"],
     "coad-status": ["status-report.schema.json"],
@@ -50,12 +52,13 @@ def build_drift_report(root: Path) -> dict[str, Any]:
                 issues.append(DriftIssue(schema_path, f"missing report schema for {script}: {schema_name}"))
             _require_text(schema_name, resolved_root / "docs" / "tool-output-schemas.md", tool_schema_docs, issues, f"tool output schema docs do not mention schema: {schema_name}")
 
-    payload: dict[str, Any] = {
-        "ok": not issues,
-        "status": "clean" if not issues else "drift",
-        "issues": [issue.to_json(resolved_root) for issue in issues],
-    }
-    return payload
+    return versioned_report(
+        {
+            "ok": not issues,
+            "status": "clean" if not issues else "drift",
+            "issues": [issue.to_json(resolved_root) for issue in issues],
+        }
+    )
 
 
 def _tool_scripts(root: Path, issues: list[DriftIssue]) -> list[str]:

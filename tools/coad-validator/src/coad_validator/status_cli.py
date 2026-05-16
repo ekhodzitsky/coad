@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
+from .report import versioned_report
 from .status import build_status_report
 
 
@@ -25,19 +26,21 @@ def main() -> int:
     try:
         payload = build_status_report(root, schema_dir=schema_dir)
     except FileNotFoundError as exc:
-        payload = {
-            "ok": False,
-            "ready": False,
-            "status": "invalid",
-            "contracts": 0,
-            "issues": [
-                {
-                    "severity": "error",
-                    "path": str(root),
-                    "message": str(exc),
-                }
-            ],
-        }
+        payload = versioned_report(
+            {
+                "ok": False,
+                "ready": False,
+                "status": "invalid",
+                "contracts": 0,
+                "issues": [
+                    {
+                        "severity": "error",
+                        "path": str(root),
+                        "message": str(exc),
+                    }
+                ],
+            }
+        )
 
     print(json.dumps(payload, indent=2, sort_keys=True))
     if not payload["ok"]:

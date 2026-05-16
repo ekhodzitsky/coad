@@ -5,9 +5,12 @@
   "oneOf": [
     {
       "type": "object",
-      "required": ["ok", "ready", "status", "contracts", "issues"],
+      "required": ["schema_version", "ok", "ready", "status", "contracts", "issues"],
       "additionalProperties": false,
       "properties": {
+        "schema_version": {
+          "const": 1
+        },
         "ok": {
           "const": false
         },
@@ -32,9 +35,12 @@
     },
     {
       "type": "object",
-      "required": ["ok", "ready", "status", "contracts", "goals"],
+      "required": ["schema_version", "ok", "ready", "status", "contracts", "goals"],
       "additionalProperties": false,
       "properties": {
+        "schema_version": {
+          "const": 1
+        },
         "ok": {
           "const": true
         },

@@ -80,4 +80,5 @@ Private draft. The goal is to turn the original Module Contract Pattern into a b
 6. `docs/context-packs.md`
 7. `docs/validator.md`
 8. `docs/tool-output-schemas.md`
-9. `examples/minimal/`
+9. `docs/report-versioning.md`
+10. `examples/minimal/`

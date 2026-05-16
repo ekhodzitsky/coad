@@ -61,6 +61,7 @@ def test_cli_json_output_for_valid_fixture() -> None:
     assert result.returncode == 0
     payload = json.loads(result.stdout)
     assert payload == {
+        "schema_version": 1,
         "ok": True,
         "contracts": 7,
         "issues": [],

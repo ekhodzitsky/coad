@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from .pack import PackFailure, build_context_pack
+from .report import versioned_report
 
 
 def main() -> int:
@@ -19,7 +20,7 @@ def main() -> int:
     try:
         payload = build_context_pack(Path(args.path), args.task_id, schema_dir=schema_dir)
     except PackFailure as exc:
-        print(json.dumps({"ok": False, "error": str(exc)}, indent=2, sort_keys=True))
+        print(json.dumps(versioned_report({"ok": False, "error": str(exc)}), indent=2, sort_keys=True))
         return 1
 
     print(json.dumps(payload, indent=2, sort_keys=True))

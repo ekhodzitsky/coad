@@ -5,6 +5,7 @@ from typing import Any
 
 from .graph_index import ContractIndex
 from .model import ContractDocument
+from .report import versioned_report
 from .validate import validate_path
 
 
@@ -36,17 +37,19 @@ def build_context_pack(root: Path, task_id: str, schema_dir: Path | None = None)
         raise PackFailure(f"integration contract not found for task: {task_id}")
 
     ordered = [goal, task, *modules, *proofs, *reviews, *handoffs, integration]
-    return {
-        "task_id": task_id,
-        "goal": _contract_payload(goal, report.root),
-        "task": _contract_payload(task, report.root),
-        "modules": [_contract_payload(document, report.root) for document in modules],
-        "proofs": [_contract_payload(document, report.root) for document in proofs],
-        "reviews": [_contract_payload(document, report.root) for document in reviews],
-        "handoffs": [_contract_payload(document, report.root) for document in handoffs],
-        "integration": _contract_payload(integration, report.root),
-        "contracts": [_relative_path(document, report.root) for document in ordered],
-    }
+    return versioned_report(
+        {
+            "task_id": task_id,
+            "goal": _contract_payload(goal, report.root),
+            "task": _contract_payload(task, report.root),
+            "modules": [_contract_payload(document, report.root) for document in modules],
+            "proofs": [_contract_payload(document, report.root) for document in proofs],
+            "reviews": [_contract_payload(document, report.root) for document in reviews],
+            "handoffs": [_contract_payload(document, report.root) for document in handoffs],
+            "integration": _contract_payload(integration, report.root),
+            "contracts": [_relative_path(document, report.root) for document in ordered],
+        }
+    )
 
 
 def _contract_payload(document: ContractDocument, root: Path) -> dict[str, Any]:

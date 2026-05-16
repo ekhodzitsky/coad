@@ -4,6 +4,7 @@
   "title": "COAD Context Pack",
   "type": "object",
   "required": [
+    "schema_version",
     "task_id",
     "goal",
     "task",
@@ -16,6 +17,9 @@
   ],
   "additionalProperties": false,
   "properties": {
+    "schema_version": {
+      "const": 1
+    },
     "task_id": {
       "type": "string",
       "minLength": 1

@@ -18,6 +18,9 @@ Report schemas live under `schema/reports/`:
 Tool JSON output should be stable enough for an orchestrator to consume without
 screen scraping or natural-language parsing.
 
+Every report payload MUST include `schema_version: 1`. Consumers should reject
+unknown major versions unless they explicitly support them.
+
 Changing a report schema should be treated as a compatibility event:
 
 - update the schema and tests in the same change;
@@ -25,11 +28,13 @@ Changing a report schema should be treated as a compatibility event:
 - keep existing fields stable unless the versioned contract explicitly changes;
 - prefer adding fields over renaming or removing fields.
 
+See `docs/report-versioning.md` for compatibility rules.
+
 ## Local Verification
 
 ```bash
 cd tools/coad-validator
-uv run --locked pytest tests/test_report_schemas.py
+uv run --locked pytest tests/test_report_schemas.py tests/test_report_versioning.py
 ```
 
 The tests execute the real CLIs, parse their JSON output, validate the payloads

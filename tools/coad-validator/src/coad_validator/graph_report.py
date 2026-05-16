@@ -5,18 +5,21 @@ from typing import Any
 
 from .graph_index import ContractIndex, string_list, task_proof_ids
 from .model import ContractDocument
+from .report import versioned_report
 from .validate import validate_path
 
 
 def build_graph_report(root: Path, schema_dir: Path | None = None) -> dict[str, Any]:
     report = validate_path(root, schema_dir=schema_dir)
     if not report.ok:
-        return {
-            "ok": False,
-            "status": "invalid",
-            "contracts": len(report.documents),
-            "issues": [issue.to_json(report.root) for issue in report.issues],
-        }
+        return versioned_report(
+            {
+                "ok": False,
+                "status": "invalid",
+                "contracts": len(report.documents),
+                "issues": [issue.to_json(report.root) for issue in report.issues],
+            }
+        )
 
     index = ContractIndex.from_documents(report.documents)
     nodes = [_node(document, report.root) for document in sorted(report.documents, key=lambda item: item.identifier)]
@@ -29,13 +32,15 @@ def build_graph_report(root: Path, schema_dir: Path | None = None) -> dict[str, 
             *_integration_edges(index),
         ]
     )
-    return {
-        "ok": True,
-        "status": "valid",
-        "contracts": len(report.documents),
-        "nodes": nodes,
-        "edges": edges,
-    }
+    return versioned_report(
+        {
+            "ok": True,
+            "status": "valid",
+            "contracts": len(report.documents),
+            "nodes": nodes,
+            "edges": edges,
+        }
+    )
 
 
 def _goal_edges(index: ContractIndex) -> list[dict[str, str]]:

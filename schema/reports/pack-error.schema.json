@@ -3,9 +3,12 @@
   "$id": "https://coad.dev/schema/reports/pack-error.schema.json",
   "title": "COAD Context Pack Error",
   "type": "object",
-  "required": ["ok", "error"],
+  "required": ["schema_version", "ok", "error"],
   "additionalProperties": false,
   "properties": {
+    "schema_version": {
+      "const": 1
+    },
     "ok": {
       "const": false
     },

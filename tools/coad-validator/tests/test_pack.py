@@ -70,6 +70,7 @@ def test_cli_pack_reports_missing_task() -> None:
     assert result.returncode == 1
     payload = json.loads(result.stdout)
     assert payload == {
+        "schema_version": 1,
         "ok": False,
         "error": "task contract not found: missing-task",
     }

@@ -5,19 +5,22 @@ from typing import Any
 
 from .graph_index import ContractIndex
 from .model import ContractDocument
+from .report import versioned_report
 from .validate import validate_path
 
 
 def build_proof_matrix(root: Path, schema_dir: Path | None = None) -> dict[str, Any]:
     report = validate_path(root, schema_dir=schema_dir)
     if not report.ok:
-        return {
-            "ok": False,
-            "ready": False,
-            "status": "invalid",
-            "contracts": len(report.documents),
-            "issues": [issue.to_json(report.root) for issue in report.issues],
-        }
+        return versioned_report(
+            {
+                "ok": False,
+                "ready": False,
+                "status": "invalid",
+                "contracts": len(report.documents),
+                "issues": [issue.to_json(report.root) for issue in report.issues],
+            }
+        )
 
     index = ContractIndex.from_documents(report.documents)
     goals = [
@@ -25,13 +28,15 @@ def build_proof_matrix(root: Path, schema_dir: Path | None = None) -> dict[str, 
         for goal in index.goals()
     ]
     ready = bool(goals) and all(goal["ready"] for goal in goals)
-    return {
-        "ok": True,
-        "ready": ready,
-        "status": "ready" if ready else "not_ready",
-        "contracts": len(report.documents),
-        "goals": goals,
-    }
+    return versioned_report(
+        {
+            "ok": True,
+            "ready": ready,
+            "status": "ready" if ready else "not_ready",
+            "contracts": len(report.documents),
+            "goals": goals,
+        }
+    )
 
 
 def _goal_matrix(
