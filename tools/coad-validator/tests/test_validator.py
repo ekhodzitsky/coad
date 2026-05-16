@@ -328,8 +328,14 @@ def test_module_contract_allows_documented_workcell_budget_exception(tmp_path: P
 def test_module_contract_can_use_logical_module_with_context_path(tmp_path: Path) -> None:
     module_dir = tmp_path / "src" / "checkout"
     module_dir.mkdir(parents=True)
-    (module_dir / "README.md").write_text("# checkout\n", encoding="utf-8")
-    (module_dir / "TODO.md").write_text("# checkout TODO\n", encoding="utf-8")
+    (module_dir / "README.md").write_text(
+        "# checkout\n\nOwns the logical checkout workcell context.\n",
+        encoding="utf-8",
+    )
+    (module_dir / "TODO.md").write_text(
+        "# checkout TODO\n\n- Keep logical checkout context aligned with its contract.\n",
+        encoding="utf-8",
+    )
     contract_path = tmp_path / "MODULE_CONTRACT.md"
     contract_path.write_text(
         """---
@@ -388,8 +394,14 @@ def test_nested_module_contract_context_path_dot_resolves_locally(tmp_path: Path
     nested_dir.mkdir(parents=True)
     (tmp_path / "README.md").write_text("root readme\n" * 130, encoding="utf-8")
     (tmp_path / "TODO.md").write_text("root todo\n", encoding="utf-8")
-    (nested_dir / "README.md").write_text("# nested\n", encoding="utf-8")
-    (nested_dir / "TODO.md").write_text("# nested TODO\n", encoding="utf-8")
+    (nested_dir / "README.md").write_text(
+        "# nested\n\nOwns the nested module context for local resolution tests.\n",
+        encoding="utf-8",
+    )
+    (nested_dir / "TODO.md").write_text(
+        "# nested TODO\n\n- Keep nested context resolution covered by tests.\n",
+        encoding="utf-8",
+    )
     (nested_dir / "MODULE_CONTRACT.md").write_text(
         """---
 schema_version: 1
@@ -811,6 +823,58 @@ def test_release_metadata_requires_package_version_to_match_version_file(tmp_pat
     assert any("package __version__ 0.0.9 does not match VERSION 0.1.0" in issue.message for issue in report.issues)
 
 
+def test_semantic_quality_reports_contract_placeholders_and_generic_purpose(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "checkout")
+    contract_path = tmp_path / "checkout.md"
+    contract_path.write_text(
+        contract_path.read_text(encoding="utf-8").replace(
+            "purpose: Test workcell checkout.",
+            "purpose: TODO",
+        ),
+        encoding="utf-8",
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+    codes = {issue.code for issue in report.issues}
+
+    assert not report.ok
+    assert "semantic.placeholder" in codes
+    assert "semantic.purpose_too_generic" in codes
+
+
+def test_semantic_quality_reports_public_surface_without_consumer_and_placeholder_proof(
+    tmp_path: Path,
+) -> None:
+    _write_workcell_contract(tmp_path, "checkout")
+    contract_path = tmp_path / "checkout.md"
+    contract_path.write_text(
+        contract_path.read_text(encoding="utf-8")
+        .replace("visibility: internal", "visibility: public")
+        .replace("target: checkout", "target: <proof-target>")
+        .replace("command: test checkout", "command: TODO"),
+        encoding="utf-8",
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+    codes = {issue.code for issue in report.issues}
+
+    assert not report.ok
+    assert "semantic.public_surface_without_consumer" in codes
+    assert "semantic.proof_placeholder" in codes
+
+
+def test_semantic_quality_reports_empty_context_and_missing_owned_path(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "checkout", owns_paths=["checkout/missing.py"])
+    (tmp_path / "checkout" / "README.md").write_text("# checkout\n", encoding="utf-8")
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+    codes = {issue.code for issue in report.issues}
+
+    assert not report.ok
+    assert "semantic.context_file_empty" in codes
+    assert "semantic.owns_path_missing" in codes
+
+
 def _write_workcell_contract(
     root: Path,
     module: str,
@@ -822,8 +886,14 @@ def _write_workcell_contract(
 ) -> None:
     context_dir = root / module
     context_dir.mkdir(parents=True, exist_ok=True)
-    (context_dir / "README.md").write_text(f"# {module}\n", encoding="utf-8")
-    (context_dir / "TODO.md").write_text(f"# {module} TODO\n", encoding="utf-8")
+    (context_dir / "README.md").write_text(
+        f"# {module}\n\nOwns the {module} test workcell and its validation contract.\n",
+        encoding="utf-8",
+    )
+    (context_dir / "TODO.md").write_text(
+        f"# {module} TODO\n\n- Keep the {module} test fixture aligned with validator behavior.\n",
+        encoding="utf-8",
+    )
     children = children or []
     owns_paths = owns_paths or [f"{module}/README.md", f"{module}/TODO.md"]
     parent_block = f"  parent: {parent}\n" if parent is not None else ""

@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.0 - 2026-05-16
+
+### Added
+
+- Semantic module contract quality checks inside `coad check .` for obvious
+  placeholders, too-generic purposes, public surfaces without consumers,
+  placeholder proof commands, empty local context files, and missing
+  `owns_paths`.
+
 ## 0.5.1 - 2026-05-16
 
 ### Added

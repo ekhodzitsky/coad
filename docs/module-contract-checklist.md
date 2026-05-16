@@ -34,6 +34,11 @@ If the contract cannot answer those questions, it is present but not useful.
 
 ## Semantic Checks
 
+`coad check .` enforces the obvious failure cases: placeholder text, a generic
+purpose, public surfaces without consumers, placeholder proof commands, empty
+local README/TODO guidance, and `owns_paths` that do not exist. This checklist
+covers the higher-quality review bar after the machine gate passes.
+
 ### Workcell Shape
 
 - The contract makes clear whether the workcell is project, composite, or leaf.

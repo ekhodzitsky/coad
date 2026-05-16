@@ -24,8 +24,9 @@ unknown major versions unless they explicitly support them.
 
 Structured issues SHOULD include a stable `code` field such as
 `workcell.parent_missing`, `workcell.owns_path_overlap`,
-`lease.write_conflict`, or `graph.proof_missing`. Agents should use `code` for
-automated repair routing and treat `message` as human-facing context.
+`lease.write_conflict`, `semantic.owns_path_missing`, or
+`graph.proof_missing`. Agents should use `code` for automated repair routing
+and treat `message` as human-facing context.
 
 Changing a report schema should be treated as a compatibility event:
 

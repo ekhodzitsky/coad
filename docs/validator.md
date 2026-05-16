@@ -11,6 +11,9 @@ executable before heavier orchestration tooling exists.
 - JSON Schema conformance for each contract type.
 - Module contracts point to real module directories with `README.md` and
   `TODO.md` agent context files.
+- Module contract semantic quality: obvious placeholders, too-generic module
+  purpose, public surfaces without declared consumers, placeholder proof
+  targets or commands, empty local context files, and missing `owns_paths`.
 - Workcell tree integrity: parents exist, declared children exist and point
   back to the parent, parent cycles are rejected, leaf workcells cannot declare
   children, and composite workcells cannot directly own child implementation
@@ -132,6 +135,13 @@ instead of parsing English messages.
 Lease-related failures use codes such as `lease.workcell_unknown`,
 `lease.composite_write_forbidden`, `lease.scope_outside_ownership`, and
 `lease.write_conflict`.
+
+Semantic quality failures use codes such as `semantic.placeholder`,
+`semantic.purpose_too_generic`, `semantic.proof_placeholder`,
+`semantic.surface_missing`, `semantic.public_surface_without_consumer`,
+`semantic.context_file_empty`, and `semantic.owns_path_missing`. These checks
+are intentionally conservative: they catch contracts that are structurally
+valid but not useful enough for a fresh agent to edit safely.
 
 ## Tool Output Schemas
 
