@@ -16,3 +16,7 @@ This repository dogfoods COAD through `project-contracts/`. When changing a
 real project module such as `contracts/`, `schema/`, `docs/`, `templates/`,
 `examples/`, `playbooks/`, or `tools/coad-validator/`, keep that module's
 contract plus local `README.md` and `TODO.md` current.
+
+Use `COAD_PROJECT_STANDARD.md` as the source of truth for COAD-native project
+shape and `AGENT_FLOW.md` as the source of truth for how agents enter, change,
+prove, and hand off work.

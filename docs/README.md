@@ -4,6 +4,8 @@ Purpose: explain COAD adoption, orchestration, reports, and operating rules.
 
 Public API:
 
+- `COAD_PROJECT_STANDARD.md`
+- `AGENT_FLOW.md`
 - `agent-integration.md`
 - `validator.md`
 - `contract-graph.md`

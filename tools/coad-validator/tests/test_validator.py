@@ -54,6 +54,21 @@ def test_repository_declares_real_project_module_contracts() -> None:
     assert PROJECT_SELF_MODULES.issubset(modules)
 
 
+def test_methodology_entry_docs_are_discoverable() -> None:
+    expected_docs = [
+        ROOT / "COAD_PROJECT_STANDARD.md",
+        ROOT / "AGENT_FLOW.md",
+    ]
+    for path in expected_docs:
+        assert path.is_file()
+
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    docs_readme = (ROOT / "docs" / "README.md").read_text(encoding="utf-8")
+    for path in expected_docs:
+        assert path.name in readme
+        assert path.name in docs_readme
+
+
 def test_invalid_conformance_fixture_reports_missing_proof() -> None:
     report = validate_path(FIXTURES / "invalid" / "missing-proof", schema_dir=SCHEMA_DIR)
 

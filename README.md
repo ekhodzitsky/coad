@@ -6,6 +6,11 @@ It turns modules, tasks, proofs, handoffs, reviews, and integrations into machin
 
 ## Core Idea
 
+A COAD-native codebase is an agent-navigable codebase: every important module
+has enough local context for an agent to understand ownership, surfaces,
+consumers, invariants, proof, and safe write scope before reading the whole
+repository.
+
 A software system can be changed safely by agents when every unit of work is bounded by explicit contracts:
 
 ```text
@@ -74,6 +79,9 @@ light structural check. When goal/task/proof/handoff contracts are added,
 Use `GETTING_STARTED.md` for the copy-paste flow and `examples/onboarding/` for
 the smallest complete passing example.
 
+Use `COAD_PROJECT_STANDARD.md` for the project shape and `AGENT_FLOW.md` for the
+agent work protocol.
+
 ## Why This Exists
 
 Agentic coding breaks down when agents:
@@ -130,19 +138,21 @@ Private draft. The goal is to turn the original Module Contract Pattern into a b
 
 1. `SPEC.md`
 2. `GETTING_STARTED.md`
-3. `PRINCIPLES.md`
-4. `contracts/goal-contract.md`
-5. `docs/contract-graph.md`
-6. `docs/proof-matrix.md`
-7. `docs/context-packs.md`
-7. `docs/validator.md`
-8. `docs/agent-integration.md`
-9. `docs/release-gates.md`
-10. `docs/execution-ledger.md`
-11. `docs/conformance-profile.md`
-12. `docs/policy-enforcement.md`
-13. `docs/attestation-bundle.md`
-14. `docs/artifact-export.md`
-15. `docs/tool-output-schemas.md`
-16. `docs/report-versioning.md`
-17. `examples/minimal/`
+3. `COAD_PROJECT_STANDARD.md`
+4. `AGENT_FLOW.md`
+5. `PRINCIPLES.md`
+6. `contracts/goal-contract.md`
+7. `docs/contract-graph.md`
+8. `docs/proof-matrix.md`
+9. `docs/context-packs.md`
+10. `docs/validator.md`
+11. `docs/agent-integration.md`
+12. `docs/release-gates.md`
+13. `docs/execution-ledger.md`
+14. `docs/conformance-profile.md`
+15. `docs/policy-enforcement.md`
+16. `docs/attestation-bundle.md`
+17. `docs/artifact-export.md`
+18. `docs/tool-output-schemas.md`
+19. `docs/report-versioning.md`
+20. `examples/minimal/`
