@@ -79,3 +79,20 @@ The orchestrator MUST either:
 
 The graph reaches `ready` only when every required path from goal to integration
 has passing proof or explicitly accepted debt.
+
+## Machine Report
+
+Use `coad-graph` to export the validated contract topology as JSON:
+
+```bash
+cd tools/coad-validator
+uv run coad-graph ../.. --schema-dir ../../schema
+```
+
+The report includes contract nodes and typed edges such as `goal_has_task`,
+`task_requires_proof`, `handoff_for_task`, and `integration_orders_task`.
+Nodes carry a unique `key` in `<kind>:<id>` form so graph consumers can
+distinguish contracts that intentionally share the same domain id, such as a
+task contract and its handoff contract.
+
+The output is covered by `schema/reports/graph-report.schema.json`.

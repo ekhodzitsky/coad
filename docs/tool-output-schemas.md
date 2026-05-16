@@ -8,6 +8,7 @@ Report schemas live under `schema/reports/`:
 - `validation-report.schema.json` covers `coad-validate --format json`.
 - `status-report.schema.json` covers `coad-status`.
 - `proof-matrix.schema.json` covers `coad-proof-matrix`.
+- `graph-report.schema.json` covers `coad-graph`.
 - `context-pack.schema.json` covers successful `coad-pack` output.
 - `pack-error.schema.json` covers failed `coad-pack` output.
 

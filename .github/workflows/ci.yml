@@ -41,6 +41,10 @@ jobs:
         working-directory: tools/coad-validator
         run: uv run --locked coad-proof-matrix ../.. --schema-dir ../../schema
 
+      - name: Export contract graph
+        working-directory: tools/coad-validator
+        run: uv run --locked coad-graph ../.. --schema-dir ../../schema
+
       - name: Build minimal context pack
         working-directory: tools/coad-validator
         run: uv run --locked coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema > /tmp/coad-pack.json
