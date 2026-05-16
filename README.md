@@ -77,5 +77,6 @@ Private draft. The goal is to turn the original Module Contract Pattern into a b
 3. `contracts/goal-contract.md`
 4. `docs/contract-graph.md`
 5. `docs/proof-matrix.md`
-6. `docs/validator.md`
-7. `examples/minimal/`
+6. `docs/context-packs.md`
+7. `docs/validator.md`
+8. `examples/minimal/`
