@@ -58,6 +58,11 @@ The graph answers:
 
 ## Contract Types
 
+### Goal Contract
+
+Defines the root orchestration intent: objective, policy, budget, terminal
+states, readiness oracle, decomposition, and required contract graph members.
+
 ### Module Contract
 
 Defines an ownership boundary. It describes purpose, surface, dependencies, consumers, invariants, and verification.
@@ -84,10 +89,10 @@ Defines how accepted work is combined, verified, released, or blocked.
 
 ## Orchestration Lifecycle
 
-1. **Intake**: capture the goal, constraints, budget, risk, and terminal criteria.
+1. **Intake**: capture the goal, constraints, budget, risk, and terminal criteria in a goal contract.
 2. **Classification**: classify the change type: greenfield, refactor, rewrite, migration, bugfix, audit, performance, documentation, or mixed.
 3. **Contract discovery**: identify relevant module contracts and missing contract debt.
-4. **Decomposition**: create task contracts with dependencies and scopes.
+4. **Decomposition**: create task contracts with dependencies and scopes, then attach them to the goal contract.
 5. **Scheduling**: select tasks that can run without contract or write-scope conflicts.
 6. **Context packing**: build bounded context packs from contracts and source artifacts.
 7. **Execution**: dispatch agents under task contracts.
@@ -96,6 +101,21 @@ Defines how accepted work is combined, verified, released, or blocked.
 10. **Integration**: combine accepted tasks in dependency order and run final proof.
 11. **Contract update**: update changed contracts and record missing proof debt.
 12. **Terminal status**: report ready, not_ready, blocked, failed, cancelled, or needs_more_budget with evidence.
+
+## Normative Rules
+
+COAD uses the normative language defined in `docs/normative-language.md`.
+
+Core conformance rules:
+
+- A non-trivial orchestrated run MUST have a goal contract.
+- Agent work MUST be bound to task contracts before execution.
+- Tasks that touch module boundaries MUST reference module contracts.
+- Completion claims MUST be backed by proof contracts.
+- Handoffs MUST be durable artifacts, not chat-only summaries.
+- Blocking review findings SHOULD become task contracts.
+- Integration readiness MUST be decided by an integration contract.
+- Contract drift MUST block readiness unless explicitly accepted as visible debt.
 
 ## Agent Decision Loop
 

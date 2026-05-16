@@ -1,4 +1,4 @@
-# Contract-Orchestrated Agent Development
+# COAD: Contract-Orchestrated Agent Development
 
 Contract-Orchestrated Agent Development (COAD) is a methodology for orchestrated agentic software development.
 
@@ -35,6 +35,7 @@ COAD makes boundaries, permissions, proof, and readiness explicit enough for an 
 
 ## Contract Types
 
+- **Goal Contract**: why the work exists, how readiness is decided, and what policy constrains orchestration.
 - **Module Contract**: what a module owns, exposes, depends on, and promises.
 - **Task Contract**: what one agent or worker must change, prove, and avoid.
 - **Proof Contract**: what evidence is required before a claim can be accepted.
@@ -68,3 +69,12 @@ tools/       Placeholder for validators and context pack generators.
 ## Status
 
 Private draft. The goal is to turn the original Module Contract Pattern into a broader methodology for contract-driven orchestration of multi-agent software work.
+
+## Recommended Reading Order
+
+1. `SPEC.md`
+2. `PRINCIPLES.md`
+3. `contracts/goal-contract.md`
+4. `docs/contract-graph.md`
+5. `docs/proof-matrix.md`
+6. `examples/minimal/`

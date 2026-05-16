@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/coad/goal-contract.schema.json",
+  "title": "COAD Goal Contract",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "kind",
+    "goal_id",
+    "objective",
+    "status",
+    "risk",
+    "goal_class",
+    "terminal_states",
+    "policy",
+    "readiness_oracle",
+    "decomposition",
+    "contracts"
+  ],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "kind": { "const": "goal_contract" },
+    "goal_id": { "type": "string", "minLength": 1 },
+    "objective": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["proposed", "running", "ready", "not_ready", "blocked_on_human", "blocked_on_external", "failed", "cancelled"] },
+    "risk": { "enum": ["low", "medium", "high", "critical"] },
+    "goal_class": { "enum": ["greenfield", "refactor", "rewrite", "migration", "bugfix", "audit", "performance", "documentation", "mixed"] },
+    "terminal_states": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "minLength": 1 }
+    },
+    "policy": {
+      "type": "object",
+      "required": ["delivery", "max_parallel_agents", "allow_external_side_effects", "require_contract_updates"],
+      "properties": {
+        "delivery": { "enum": ["local", "draft-pr", "auto-pr", "manual"] },
+        "max_parallel_agents": { "type": "integer", "minimum": 1 },
+        "allow_external_side_effects": { "type": "boolean" },
+        "require_contract_updates": { "type": "boolean" }
+      },
+      "additionalProperties": true
+    },
+    "budget": { "type": "object", "additionalProperties": true },
+    "readiness_oracle": {
+      "type": "object",
+      "required": ["type", "claim", "required_proof"],
+      "properties": {
+        "type": { "enum": ["proof_contract", "manual_acceptance", "external_gate"] },
+        "claim": { "type": "string", "minLength": 1 },
+        "required_proof": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": true
+    },
+    "decomposition": {
+      "type": "object",
+      "required": ["strategy", "tasks"],
+      "properties": {
+        "strategy": { "enum": ["module_boundary", "risk_first", "dependency_order", "manual"] },
+        "tasks": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        }
+      },
+      "additionalProperties": true
+    },
+    "contracts": {
+      "type": "object",
+      "required": ["modules", "tasks", "proofs", "reviews", "integration"],
+      "properties": {
+        "modules": { "type": "array", "items": { "type": "string" } },
+        "tasks": { "type": "array", "items": { "type": "string" } },
+        "proofs": { "type": "array", "items": { "type": "string" } },
+        "reviews": { "type": "array", "items": { "type": "string" } },
+        "integration": { "type": "string", "minLength": 1 }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}
