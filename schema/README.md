@@ -7,7 +7,7 @@ Public API:
 
 - contract schemas at `schema/*.schema.json`
 - report schemas at `schema/reports/*.schema.json`
-- release and report manifests
+- release, report, and lease manifests
 
 Consumers: `tools/coad-validator`, documentation, examples, and CI.
 

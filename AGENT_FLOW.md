@@ -57,6 +57,22 @@ changing code.
 Small documentation-only changes may use lighter proof, but they still must not
 invalidate module context.
 
+When the repository tracks active leases, declare the work in `.coad/leases.yml`
+before editing:
+
+```yaml
+version: 1
+leases:
+  - workcell: checkout
+    owner: codex
+    mode: write
+    scope:
+      - src/checkout/
+```
+
+Use `mode: read` or `mode: orchestrate` for investigation and composite
+coordination. Only leaf workcells may hold `mode: write`.
+
 ## Parallel Agent Protocol
 
 A lead agent or orchestrator should assign parallel work by module ownership:

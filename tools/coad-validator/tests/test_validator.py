@@ -486,6 +486,160 @@ def test_check_json_propagates_stable_issue_codes(tmp_path: Path) -> None:
     assert any(issue["code"] == "workcell.parent_missing" for issue in payload["issues"])
 
 
+def test_lease_manifest_allows_single_leaf_write_lease(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "checkout")
+    _write_lease_manifest(
+        tmp_path,
+        """
+        version: 1
+        leases:
+          - workcell: checkout
+            owner: codex
+            mode: write
+            scope:
+              - checkout/README.md
+        """,
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert report.ok, [issue.format(report.root) for issue in report.issues]
+
+
+def test_lease_manifest_reports_unknown_workcell(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "checkout")
+    _write_lease_manifest(
+        tmp_path,
+        """
+        version: 1
+        leases:
+          - workcell: billing
+            owner: codex
+            mode: write
+        """,
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "lease.workcell_unknown"
+        and "lease references unknown workcell: billing" in issue.message
+        for issue in report.issues
+    )
+
+
+def test_lease_manifest_rejects_composite_write_lease(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "commerce", workcell_type="composite", children=["checkout"])
+    _write_workcell_contract(tmp_path, "checkout", parent="commerce")
+    _write_lease_manifest(
+        tmp_path,
+        """
+        version: 1
+        leases:
+          - workcell: commerce
+            owner: codex
+            mode: write
+        """,
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "lease.composite_write_forbidden"
+        and "composite workcell cannot hold a write lease: commerce" in issue.message
+        for issue in report.issues
+    )
+
+
+def test_lease_manifest_reports_scope_outside_ownership(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "checkout")
+    _write_lease_manifest(
+        tmp_path,
+        """
+        version: 1
+        leases:
+          - workcell: checkout
+            owner: codex
+            mode: write
+            scope:
+              - billing/README.md
+        """,
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "lease.scope_outside_ownership"
+        and "lease scope is outside workcell ownership: checkout owns billing/README.md" in issue.message
+        for issue in report.issues
+    )
+
+
+def test_lease_manifest_rejects_duplicate_write_workcell(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "checkout")
+    _write_lease_manifest(
+        tmp_path,
+        """
+        version: 1
+        leases:
+          - workcell: checkout
+            owner: codex-a
+            mode: write
+          - workcell: checkout
+            owner: codex-b
+            mode: write
+        """,
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "lease.write_conflict"
+        and "multiple write leases for workcell: checkout" in issue.message
+        for issue in report.issues
+    )
+
+
+def test_lease_manifest_rejects_overlapping_write_scope(tmp_path: Path) -> None:
+    shared_file = tmp_path / "src" / "shared.py"
+    shared_file.parent.mkdir(parents=True)
+    shared_file.write_text("VALUE = 1\n", encoding="utf-8")
+    _write_workcell_contract(tmp_path, "checkout", owns_paths=["src/shared.py"])
+    _write_workcell_contract(tmp_path, "billing", owns_paths=["src/"])
+    _write_lease_manifest(
+        tmp_path,
+        """
+        version: 1
+        leases:
+          - workcell: checkout
+            owner: codex-a
+            mode: write
+            scope:
+              - src/shared.py
+          - workcell: billing
+            owner: codex-b
+            mode: write
+            scope:
+              - src/
+        """,
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "lease.write_conflict"
+        and "write lease scopes overlap" in issue.message
+        and "checkout" in issue.message
+        and "billing" in issue.message
+        for issue in report.issues
+    )
+
+
 def test_release_metadata_requires_version_and_changelog_for_validator_repo(tmp_path: Path) -> None:
     validator_dir = tmp_path / "tools" / "coad-validator"
     validator_dir.mkdir(parents=True)
@@ -638,5 +792,14 @@ verification:
 ---
 # {module}
 """,
+        encoding="utf-8",
+    )
+
+
+def _write_lease_manifest(root: Path, content: str) -> None:
+    leases_dir = root / ".coad"
+    leases_dir.mkdir()
+    (leases_dir / "leases.yml").write_text(
+        textwrap.dedent(content).strip() + "\n",
         encoding="utf-8",
     )

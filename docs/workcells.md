@@ -76,8 +76,8 @@ A write lease is the temporary right to mutate a workcell.
 Rules:
 
 - A leaf workcell has at most one active write lease.
-- A write lease names the workcell, owner, write paths, task, proof, and expiry
-  or completion condition.
+- A write lease names at least the workcell, owner, mode, and write scope. It
+  may also name the task, proof, expiry, or completion condition.
 - Read-only agents may work in parallel without a write lease.
 - A parent orchestrator may not bypass a child lease to edit child
   implementation directly.
@@ -86,6 +86,25 @@ Rules:
 - Leaf workcells may not have overlapping `owns_paths`. Shared files should
   become their own workcell or be owned by the nearest composite as an
   orchestration artifact, not as child implementation.
+
+Active leases can be declared in `.coad/leases.yml`:
+
+```yaml
+version: 1
+leases:
+  - workcell: checkout
+    owner: codex
+    mode: write
+    scope:
+      - src/checkout/
+```
+
+`mode` is one of `read`, `orchestrate`, or `write`. A write lease without
+`scope` means the workcell's full declared `owns_paths`. Optional `task`,
+`proof`, `expires_at`, and `complete_when` fields carry handoff context without
+becoming a runtime dependency. `coad check .` rejects unknown workcells, write
+leases on composite workcells, duplicate write leases, overlapping write
+scopes, and write scope outside declared ownership.
 
 Separate git worktrees do not remove the need for a write lease. They prevent
 file-level collisions, but they do not prevent two agents from making

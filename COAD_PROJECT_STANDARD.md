@@ -35,6 +35,8 @@ workcell contexts.
 AGENTS.md
 COAD_PROJECT_STANDARD.md
 AGENT_FLOW.md
+.coad/
+  leases.yml        # optional active agent lease manifest
 src/
   checkout/
     MODULE_CONTRACT.md
@@ -185,6 +187,23 @@ orchestrator decomposes work, assigns child write leases, accepts proof-backed
 handoffs, and escalates conflicts. It does not directly write child
 implementation files. Cross-workcell changes require an explicit migration
 lease approved by the nearest common orchestrator.
+
+Repositories that coordinate concurrent agents should declare active leases in
+`.coad/leases.yml`:
+
+```yaml
+version: 1
+leases:
+  - workcell: checkout
+    owner: codex
+    mode: write
+    scope:
+      - src/checkout/
+```
+
+`coad check .` validates that write leases reference known workcells, do not
+target composite workcells, do not duplicate a leaf write lease, and stay inside
+the workcell's declared `owns_paths`.
 
 ## Handoff Standard
 

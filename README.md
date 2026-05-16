@@ -3,7 +3,7 @@
 [![CI](https://github.com/ekhodzitsky/coad/actions/workflows/ci.yml/badge.svg)](https://github.com/ekhodzitsky/coad/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-%3E%3D3.11-3776AB?logo=python&logoColor=white)
 ![CLI](https://img.shields.io/badge/CLI-coad%20check%20.-111827)
-![Version](https://img.shields.io/badge/version-0.4.0-2563EB)
+![Version](https://img.shields.io/badge/version-0.5.0-2563EB)
 ![Standard](https://img.shields.io/badge/standard-agent--navigable%20codebases-7C3AED)
 ![Status](https://img.shields.io/badge/status-early%20draft-F59E0B)
 
@@ -76,6 +76,9 @@ units: they decompose work, assign write leases, collect proof, and delegate
 implementation to child workcells.
 
 `MODULE_CONTRACT.md` is the compatibility filename for a workcell contract.
+Active write ownership can be declared in `.coad/leases.yml`; `coad check .`
+rejects unknown workcells, composite write leases, duplicate write leases, and
+write scope outside the workcell's declared ownership.
 
 ## What You Add
 

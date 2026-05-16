@@ -4,7 +4,7 @@ kind: module_contract
 module: schema/manifests
 level: subsystem
 layer: tooling-contract
-purpose: Maintain manifest schemas and committed release/profile manifests.
+purpose: Maintain manifest schemas and committed release/profile/lease manifests.
 status: pilot
 owners:
   - validator-maintainers
@@ -15,6 +15,7 @@ workcell:
   children: []
   owns_paths:
     - schema/conformance-profile.schema.json
+    - schema/lease-manifest.schema.json
     - schema/release-manifest.json
     - schema/release-manifest.schema.json
     - schema/report-manifest.json
@@ -35,7 +36,7 @@ surface:
   - name: ReleaseAndReportManifests
     kind: schema-set
     visibility: public
-    contract: Defines release gate and report manifest structure.
+    contract: Defines release gate, report, and lease manifest structure.
     proof:
       kind: schema
       target: schema/*manifest*

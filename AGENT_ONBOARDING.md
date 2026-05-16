@@ -97,6 +97,9 @@ One leaf workcell may have only one active write agent. Read-only agents may
 investigate, review, or verify in parallel. Composite workcell agents orchestrate
 child work but do not directly edit child implementation files.
 
+If the repository has `.coad/leases.yml`, declare your active write lease there
+before editing so `coad check .` can catch ownership conflicts.
+
 Keep at least one `MODULE_CONTRACT.md` for the module being changed. The module
 is a workcell: one bounded agent workspace with ownership, surfaces, consumers,
 invariants, verification, and write authority. The module directory must include

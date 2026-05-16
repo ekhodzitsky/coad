@@ -16,6 +16,9 @@ executable before heavier orchestration tooling exists.
   children, and composite workcells cannot directly own child implementation
   paths.
 - Leaf workcell ownership: `owns_paths` cannot overlap between leaf workcells.
+- Optional active lease manifest at `.coad/leases.yml`: write leases must point
+  to known leaf workcells, must be unique per workcell, and must stay inside
+  declared ownership.
 - Workcell context budgets declared in `workcell.context_budget`: file count,
   source lines, contract length, README length, TODO length, surface count, and
   invariant count.
@@ -125,6 +128,10 @@ Failed output includes structured issues:
 
 Issue `code` values are stable machine keys. Agents should branch on `code`
 instead of parsing English messages.
+
+Lease-related failures use codes such as `lease.workcell_unknown`,
+`lease.composite_write_forbidden`, `lease.scope_outside_ownership`, and
+`lease.write_conflict`.
 
 ## Tool Output Schemas
 

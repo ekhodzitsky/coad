@@ -4,7 +4,7 @@ kind: module_contract
 module: validator/core
 level: subsystem
 layer: tooling
-purpose: Own core contract discovery, schema validation, module context, budgets, and release metadata checks.
+purpose: Own core contract discovery, schema validation, module context, budgets, lease manifests, and release metadata checks.
 status: pilot
 owners:
   - validator-maintainers
@@ -16,6 +16,7 @@ workcell:
   owns_paths:
     - tools/coad-validator/src/coad_validator/__init__.py
     - tools/coad-validator/src/coad_validator/frontmatter.py
+    - tools/coad-validator/src/coad_validator/lease_manifest.py
     - tools/coad-validator/src/coad_validator/model.py
     - tools/coad-validator/src/coad_validator/module_context.py
     - tools/coad-validator/src/coad_validator/release_metadata.py

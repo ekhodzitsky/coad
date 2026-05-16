@@ -15,6 +15,7 @@ workcell:
   children: []
   owns_paths:
     - tools/coad-validator/src/coad_validator/schema/conformance-profile.schema.json
+    - tools/coad-validator/src/coad_validator/schema/lease-manifest.schema.json
     - tools/coad-validator/src/coad_validator/schema/release-manifest.json
     - tools/coad-validator/src/coad_validator/schema/release-manifest.schema.json
     - tools/coad-validator/src/coad_validator/schema/report-manifest.json
@@ -35,7 +36,7 @@ surface:
   - name: BundledManifestSchemas
     kind: schema-set
     visibility: internal
-    contract: Provides packaged release and report manifest schemas.
+    contract: Provides packaged release, report, and lease manifest schemas.
     proof:
       kind: schema
       target: tools/coad-validator/src/coad_validator/schema

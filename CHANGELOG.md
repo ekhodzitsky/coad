@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.5.0 - 2026-05-16
+
+### Added
+
+- Optional `.coad/leases.yml` write lease validation.
+- Lease manifest JSON Schema for active agent ownership declarations.
+- Stable lease issue codes for unknown workcells, composite write leases,
+  scope violations, and write conflicts.
+
 ## 0.4.0 - 2026-05-16
 
 ### Added
