@@ -44,6 +44,13 @@
       "required": true
     },
     {
+      "id": "execution-schedule",
+      "name": "Build execution schedule",
+      "command": "uv run --locked coad-schedule ../.. --schema-dir ../../schema",
+      "working_directory": "tools/coad-validator",
+      "required": true
+    },
+    {
       "id": "repository-drift",
       "name": "Check repository drift",
       "command": "uv run --locked coad-drift ../..",

@@ -30,6 +30,13 @@
       "stability": "stable"
     },
     {
+      "name": "schedule-report",
+      "producer": "coad-schedule",
+      "schema": "reports/schedule-report.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
       "name": "drift-report",
       "producer": "coad-drift",
       "schema": "reports/drift-report.schema.json",

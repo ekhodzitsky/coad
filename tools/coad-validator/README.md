@@ -11,6 +11,7 @@ uv run coad-status ../.. --schema-dir ../../schema
 uv run coad-status ../.. --schema-dir ../../schema --fail-on-not-ready
 uv run coad-proof-matrix ../.. --schema-dir ../../schema
 uv run coad-graph ../.. --schema-dir ../../schema
+uv run coad-schedule ../.. --schema-dir ../../schema
 uv run coad-drift ../..
 uv run coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
 ```
@@ -19,6 +20,8 @@ The validator checks Markdown YAML frontmatter against JSON schemas and verifies
 that contract graph references point to existing contracts. `coad-status` adds a
 conservative readiness report for orchestrators: valid-but-incomplete graphs are
 reported as `ok: true` and `ready: false` with explicit blockers.
+`coad-schedule` turns task dependencies and write scopes into execution waves
+that an orchestrator can dispatch without overlapping writes inside a wave.
 
 JSON outputs are covered by report schemas in `../../schema/reports/`.
 

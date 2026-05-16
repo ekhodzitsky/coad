@@ -86,6 +86,21 @@ def test_context_pack_json_output_matches_report_schema() -> None:
     _assert_matches_report_schema("context-pack.schema.json", payload)
 
 
+def test_schedule_json_output_matches_report_schema() -> None:
+    payload = _run_json(
+        [
+            sys.executable,
+            "-m",
+            "coad_validator.schedule_cli",
+            str(FIXTURES / "valid" / "minimal-graph"),
+            "--schema-dir",
+            str(SCHEMA_DIR),
+        ]
+    )
+
+    _assert_matches_report_schema("schedule-report.schema.json", payload)
+
+
 def test_pack_error_json_output_matches_report_schema() -> None:
     payload = _run_json(
         [

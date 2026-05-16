@@ -15,6 +15,7 @@ REPORT_SCHEMAS = {
     "coad-status": ["status-report.schema.json"],
     "coad-proof-matrix": ["proof-matrix.schema.json"],
     "coad-graph": ["graph-report.schema.json"],
+    "coad-schedule": ["schedule-report.schema.json"],
     "coad-pack": ["context-pack.schema.json", "pack-error.schema.json"],
 }
 
