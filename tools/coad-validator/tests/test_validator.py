@@ -151,3 +151,29 @@ def test_graph_validation_reports_missing_referenced_contract(tmp_path: Path) ->
 
     assert not report.ok
     assert any("missing proof contract: missing-proof-contract" in issue.message for issue in report.issues)
+
+
+def test_module_contract_requires_agent_context_files(tmp_path: Path) -> None:
+    source = ROOT / "examples" / "minimal"
+    target = tmp_path / "minimal"
+    shutil.copytree(source, target)
+    shutil.rmtree(target / "checkout")
+
+    report = validate_path(target, schema_dir=SCHEMA_DIR)
+
+    assert not report.ok
+    assert any("module directory does not exist: checkout" in issue.message for issue in report.issues)
+
+
+def test_module_contract_requires_readme_and_todo(tmp_path: Path) -> None:
+    source = ROOT / "examples" / "minimal"
+    target = tmp_path / "minimal"
+    shutil.copytree(source, target)
+    (target / "checkout" / "README.md").unlink()
+    (target / "checkout" / "TODO.md").unlink()
+
+    report = validate_path(target, schema_dir=SCHEMA_DIR)
+
+    assert not report.ok
+    assert any("module agent context is missing README.md" in issue.message for issue in report.issues)
+    assert any("module agent context is missing TODO.md" in issue.message for issue in report.issues)

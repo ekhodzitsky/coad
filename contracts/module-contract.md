@@ -66,12 +66,29 @@ agent_policy:
 
 ## Semantics
 
+- `module` is both the module identifier and, by default, the relative path to
+  the module directory.
+  Resolution tries the validation root first, then the directory containing the
+  module contract. Absolute paths and `..` escapes are invalid.
 - `surface` lists promises, not every private function.
 - `dependencies` must include reason and scope.
 - `consumers` should be specific enough to test or inspect.
 - `invariants` are rules that must remain true across changes.
 - `proof` points to artifacts, not prose.
 - `agent_policy` tells agents what they may do without guessing.
+
+## Agent Context Files
+
+Every module contract must resolve to a real module directory. The directory
+must contain:
+
+- `README.md` - what the module owns, exposes, depends on, and promises;
+- `TODO.md` - current gaps, planned work, and known follow-ups.
+
+`AGENTS.md` is optional and should be added only when the module has rules that
+differ from the repository default.
+
+`coad check .` enforces the directory, `README.md`, and `TODO.md` requirements.
 
 ## Agent Use
 

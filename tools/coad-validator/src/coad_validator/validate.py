@@ -5,6 +5,7 @@ from pathlib import Path
 from .frontmatter import discover_contracts
 from .graph import validate_graph
 from .model import ContractDocument, ValidationFailure, ValidationIssue
+from .module_context import validate_module_context
 from .schema import validate_schemas
 
 
@@ -29,6 +30,7 @@ def validate_path(root: Path, schema_dir: Path | None = None, check_graph: bool 
 
     documents, issues = discover_contracts(resolved_root)
     issues.extend(validate_schemas(documents, resolved_schema_dir))
+    issues.extend(validate_module_context(documents, resolved_root))
     if check_graph:
         issues.extend(validate_graph(documents))
 

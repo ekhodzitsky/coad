@@ -35,6 +35,14 @@ Good candidates:
 
 Create module contracts for those boundaries only.
 
+For each contracted module, keep a real module directory with:
+
+- `README.md` for agent-facing ownership, API, dependencies, and invariants;
+- `TODO.md` for current gaps and planned work.
+
+Add module-local `AGENTS.md` only when that module needs rules beyond the
+repository default.
+
 ## Phase 2: Add Proof
 
 For each contracted module:

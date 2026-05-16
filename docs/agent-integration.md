@@ -49,6 +49,8 @@ output is needed.
 `coad check` verifies the core methodology surface:
 
 - contract schemas and graph references;
+- module contracts resolve to real module directories with `README.md` and
+  `TODO.md` agent context files;
 - readiness status;
 - proof matrix evidence;
 - contract graph exportability;

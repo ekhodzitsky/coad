@@ -9,6 +9,8 @@ executable before heavier orchestration tooling exists.
 
 - Markdown files with YAML frontmatter and `kind: *_contract`.
 - JSON Schema conformance for each contract type.
+- Module contracts point to real module directories with `README.md` and
+  `TODO.md` agent context files.
 - Cross-contract graph references:
   - goal to modules, tasks, proofs, reviews, and integration;
   - task to modules and proof contracts;
