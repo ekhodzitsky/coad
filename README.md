@@ -11,6 +11,8 @@
 Make repositories legible to coding agents: small workcells, explicit write
 authority, proof-backed handoffs, and one validator.
 
+Give your agent this repository link; the agent should do the onboarding.
+
 ```bash
 coad check .
 ```
@@ -133,15 +135,25 @@ cd tools/coad-validator
 uv run coad check ../..
 ```
 
-## 2-Minute Onboarding
+## One-Link Onboarding
 
-1. Paste the COAD snippet into the repository `AGENTS.md`.
-2. Add one `MODULE_CONTRACT.md` for a real module/workcell.
-3. Add that module's `README.md` and `TODO.md`.
-4. Run `coad check .`.
+Give your coding agent this link:
 
-That is the first adoption bar. Add task, proof, handoff, review, integration,
-and ledger contracts only when the workflow needs more orchestration.
+```text
+https://github.com/ekhodzitsky/coad
+```
+
+Tell it to adopt COAD in your repository. The agent should read
+[AGENT_ONBOARDING.md](AGENT_ONBOARDING.md), choose one real workcell, add the
+minimal COAD files, run `coad check .`, and report the result.
+
+You should not need to paste snippets, copy templates, or create files by hand.
+If the agent cannot install/run the validator because of network, package, or
+repository-access limits, that is a tooling blocker for the agent to report.
+
+The first adoption bar is intentionally small. Add task, proof, handoff,
+review, integration, and ledger contracts only when the workflow needs more
+orchestration.
 
 See [GETTING_STARTED.md](GETTING_STARTED.md) and
 [examples/onboarding/](examples/onboarding/) for the smallest passing setup.
@@ -162,6 +174,7 @@ tools/              Reference validator. Public command: coad check .
 ## Key Docs
 
 - [COAD_PROJECT_STANDARD.md](COAD_PROJECT_STANDARD.md) - project shape and adoption levels.
+- [AGENT_ONBOARDING.md](AGENT_ONBOARDING.md) - what an agent should do after receiving the COAD link.
 - [AGENT_FLOW.md](AGENT_FLOW.md) - how agents enter, edit, prove, and hand off.
 - [docs/workcells.md](docs/workcells.md) - workcell tree, context budgets, write leases, and authority.
 - [docs/module-contract-checklist.md](docs/module-contract-checklist.md) - semantic quality checklist for module contracts.

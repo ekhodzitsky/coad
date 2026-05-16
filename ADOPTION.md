@@ -5,15 +5,26 @@ documentation migration project.
 
 ## Agent Quickstart
 
-Give an agent this repository link and one rule:
+Give an agent this repository link:
+
+```text
+https://github.com/ekhodzitsky/coad
+```
+
+Then ask it to adopt COAD in the target repository. The agent should follow
+`AGENT_ONBOARDING.md`, make the minimal repository changes, and prove the result
+with:
 
 ```bash
 coad check .
 ```
 
-The command is the default integration point. It should be run before a handoff,
-review, or PR claim. It prints a single result line for humans and supports
-`--format json` for orchestration.
+The user should not need to paste snippets, copy templates, or create files by
+hand.
+
+The command is the default integration point. It should be run before a
+handoff, review, or PR claim. It prints a single result line for humans and
+supports `--format json` for orchestration.
 
 The installed tool bundles the COAD schemas, so a repository can adopt the
 methodology with contract files and `coad check .` without copying this repo's
@@ -22,26 +33,13 @@ methodology with contract files and `coad check .` without copying this repo's
 If `coad check .` fails, fix the contracts, proof, handoff, ledger, or policy
 issue it reports before claiming the work is complete.
 
-## 2-Minute Onboarding
+## First Adoption Bar
 
-1. Paste this into the repository `AGENTS.md`:
+The agent should:
 
-   ````markdown
-   Use COAD for agent development coordination.
-
-   Before claiming completion:
-
-   ```bash
-   coad check .
-   ```
-
-   Keep at least one `MODULE_CONTRACT.md` for the module being changed. Treat
-   that module as a workcell: one bounded agent workspace with one active write
-   agent. Keep its `README.md` and `TODO.md` current for future agents.
-   ````
-
-2. Add one `MODULE_CONTRACT.md`.
-3. Add or update the module `README.md` and `TODO.md`.
+1. Add or update repository `AGENTS.md` with COAD guidance.
+2. Add one `MODULE_CONTRACT.md` for a real module/workcell.
+3. Add or update the workcell `README.md` and `TODO.md`.
 4. Run `coad check .`.
 
 That is enough to start. Add goal, task, proof, handoff, review, integration,

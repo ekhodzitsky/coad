@@ -2,6 +2,15 @@
 
 COAD should be easy to hand to another agent.
 
+The intended user action is:
+
+```text
+Give the agent https://github.com/ekhodzitsky/coad and ask it to adopt COAD.
+```
+
+The agent should then follow `AGENT_ONBOARDING.md`. The user should not need to
+paste snippets, copy templates, or create files manually.
+
 The integration contract is:
 
 ```bash
@@ -28,14 +37,22 @@ The installed validator bundles the COAD schemas. Adopting repositories need
 contract files and the command above; they do not need to vendor this repo's
 `schema/` directory.
 
-For a copy-paste start, use `GETTING_STARTED.md` and
-`templates/onboarding/`. For a complete minimal example, see
+For agent-led onboarding, use `AGENT_ONBOARDING.md`. For templates and a
+complete minimal example, see `templates/onboarding/` and
 `examples/onboarding/`.
 
-## AGENTS.md Snippet
+## Target AGENTS.md Guidance
+
+Agents adopting COAD should add this guidance to the target repository
+`AGENTS.md`, preserving any existing project-specific instructions:
 
 ````markdown
 Use COAD for agent development coordination.
+
+COAD repository: https://github.com/ekhodzitsky/coad
+
+Before editing, identify the relevant workcell and read its
+`MODULE_CONTRACT.md`, `README.md`, and `TODO.md`.
 
 Before claiming completion, run:
 
@@ -44,20 +61,24 @@ coad check .
 ```
 
 Keep at least one `MODULE_CONTRACT.md` for the module being changed. The module
-directory must include `README.md` and `TODO.md` so the next agent has local
-context.
+is a workcell: one bounded agent workspace with ownership, surfaces, consumers,
+invariants, verification, and write authority. The module directory must include
+`README.md` and `TODO.md` so the next agent has local context.
 
 If it fails, fix the contract, module context, proof, handoff, ledger, or policy
 issue before claiming the work is complete. Use `coad check . --format json`
 when structured output is needed.
 ````
 
-## 2-Minute Onboarding
+## Agent-Led Onboarding
 
-1. Paste the snippet above into `AGENTS.md`.
-2. Add one `MODULE_CONTRACT.md`.
-3. Add module `README.md` and `TODO.md`.
-4. Run `coad check .`.
+1. Read `AGENT_ONBOARDING.md`.
+2. Inspect the target repository.
+3. Choose one real module/workcell.
+4. Add or update `AGENTS.md` with COAD guidance.
+5. Add one `MODULE_CONTRACT.md`.
+6. Add module `README.md` and `TODO.md`.
+7. Run `coad check .`.
 
 ## What It Checks
 

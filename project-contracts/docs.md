@@ -55,6 +55,9 @@ consumers:
   - path: README.md
     uses:
       - MethodologyDocs
+  - path: AGENT_ONBOARDING.md
+    uses:
+      - MethodologyDocs
   - path: templates/README.md
     uses:
       - MethodologyDocs
@@ -77,6 +80,12 @@ invariants:
       kind: static-check
       target: README.md COAD_PROJECT_STANDARD.md AGENT_FLOW.md docs/workcells.md
       command: rg "workcell|write lease|Composite" README.md COAD_PROJECT_STANDARD.md AGENT_FLOW.md docs/workcells.md
+  - id: onboarding-is-agent-led
+    rule: Public onboarding tells users to give agents the COAD repository link rather than manually pasting files.
+    proof:
+      kind: static-check
+      target: README.md GETTING_STARTED.md ADOPTION.md AGENT_ONBOARDING.md docs/agent-integration.md
+      command: rg "https://github.com/ekhodzitsky/coad|AGENT_ONBOARDING.md" README.md GETTING_STARTED.md ADOPTION.md AGENT_ONBOARDING.md docs/agent-integration.md
 verification:
   pre_change:
     - coad check .

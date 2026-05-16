@@ -4,6 +4,7 @@ Purpose: explain COAD adoption, orchestration, reports, and operating rules.
 
 Public API:
 
+- `AGENT_ONBOARDING.md`
 - `COAD_PROJECT_STANDARD.md`
 - `AGENT_FLOW.md`
 - `workcells.md`

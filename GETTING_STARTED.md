@@ -2,7 +2,31 @@
 
 COAD adoption should take minutes, not a migration project.
 
+For users, the intended onboarding is one link:
+
+```text
+https://github.com/ekhodzitsky/coad
+```
+
+Give that link to your coding agent and ask it to adopt COAD in your
+repository. The agent should follow `AGENT_ONBOARDING.md`, make the minimal
+repository changes, and prove the result with `coad check .`.
+
+You should not need to paste snippets or copy templates by hand.
+
 ## Install
+
+Agents can run the validator directly from the COAD repository URL:
+
+```bash
+uvx --from 'git+https://github.com/ekhodzitsky/coad.git#subdirectory=tools/coad-validator' coad check .
+```
+
+For private repository access over SSH:
+
+```bash
+uvx --from 'git+ssh://git@github.com/ekhodzitsky/coad.git#subdirectory=tools/coad-validator' coad check .
+```
 
 From this repository:
 
@@ -17,27 +41,17 @@ Or run from a local clone without installing:
 uv run --project tools/coad-validator coad check .
 ```
 
-## 2-Minute Onboarding
+## Agent-Led Onboarding
 
-1. Paste this into your repository `AGENTS.md`:
+The agent should:
 
-   ````markdown
-   Use COAD for agent development coordination.
-
-   Before claiming completion:
-
-   ```bash
-   coad check .
-   ```
-
-   Keep at least one `MODULE_CONTRACT.md` for the module being changed. The
-   module is a workcell: one bounded agent workspace. The module directory must
-   include `README.md` and `TODO.md` for future agents.
-   ````
-
-2. Add one `MODULE_CONTRACT.md` for a real module.
-3. Add that module's `README.md` and `TODO.md`.
-4. Run:
+1. Read `AGENT_ONBOARDING.md`.
+2. Inspect the target repository.
+3. Choose one real module/workcell.
+4. Add or update `AGENTS.md` with COAD guidance.
+5. Add one `MODULE_CONTRACT.md` for that real workcell.
+6. Add or update that workcell's `README.md` and `TODO.md`.
+7. Run:
 
    ```bash
    coad check .
