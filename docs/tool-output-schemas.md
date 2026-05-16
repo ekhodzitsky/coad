@@ -13,6 +13,7 @@ Report schemas live under `schema/reports/`:
 - `ledger-report.schema.json` covers `coad-ledger`.
 - `profile-report.schema.json` covers `coad-profile`.
 - `policy-report.schema.json` covers `coad-policy`.
+- `attestation-report.schema.json` covers `coad-attest`.
 - `drift-report.schema.json` covers `coad-drift`.
 - `context-pack.schema.json` covers successful `coad-pack` output.
 - `pack-error.schema.json` covers failed `coad-pack` output.

@@ -48,7 +48,7 @@ def build_ledger_report(root: Path, schema_dir: Path | None = None) -> dict[str,
         for path in _ledger_paths(contract_report.root)
     ]
     if not ledgers:
-        issues.append(LedgerIssue(contract_report.root, "missing execution ledger"))
+        issues.append(LedgerIssue(contract_report.root / "EXECUTION_LEDGER.json", "missing execution ledger"))
 
     return versioned_report(
         {

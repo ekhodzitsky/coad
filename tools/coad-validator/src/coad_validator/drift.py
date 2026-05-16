@@ -19,6 +19,7 @@ REPORT_SCHEMAS = {
     "coad-ledger": ["ledger-report.schema.json"],
     "coad-profile": ["profile-report.schema.json"],
     "coad-policy": ["policy-report.schema.json"],
+    "coad-attest": ["attestation-report.schema.json"],
     "coad-pack": ["context-pack.schema.json", "pack-error.schema.json"],
 }
 

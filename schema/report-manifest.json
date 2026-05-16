@@ -58,6 +58,13 @@
       "stability": "stable"
     },
     {
+      "name": "attestation-report",
+      "producer": "coad-attest",
+      "schema": "reports/attestation-report.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
       "name": "drift-report",
       "producer": "coad-drift",
       "schema": "reports/drift-report.schema.json",

@@ -72,6 +72,13 @@
       "required": true
     },
     {
+      "id": "attestation-bundle",
+      "name": "Build attestation bundle",
+      "command": "uv run --locked coad-attest ../.. --schema-dir ../../schema",
+      "working_directory": "tools/coad-validator",
+      "required": true
+    },
+    {
       "id": "repository-drift",
       "name": "Check repository drift",
       "command": "uv run --locked coad-drift ../..",

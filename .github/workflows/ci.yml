@@ -61,6 +61,10 @@ jobs:
         working-directory: tools/coad-validator
         run: uv run --locked coad-policy ../.. --schema-dir ../../schema
 
+      - name: Build attestation bundle
+        working-directory: tools/coad-validator
+        run: uv run --locked coad-attest ../.. --schema-dir ../../schema
+
       - name: Check repository drift
         working-directory: tools/coad-validator
         run: uv run --locked coad-drift ../..

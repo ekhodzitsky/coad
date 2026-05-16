@@ -15,6 +15,7 @@ uv run coad-schedule ../.. --schema-dir ../../schema
 uv run coad-ledger ../.. --schema-dir ../../schema
 uv run coad-profile ../.. --schema-dir ../../schema
 uv run coad-policy ../.. --schema-dir ../../schema
+uv run coad-attest ../.. --schema-dir ../../schema
 uv run coad-drift ../..
 uv run coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
 ```
@@ -31,6 +32,8 @@ claim success without passing every required task proof command.
 tool evidence supporting it.
 `coad-policy` enforces goal policy constraints such as external side-effect
 permission and required contract update handoff fields.
+`coad-attest` builds a hashable bundle that binds the required reports together
+for acceptance and audit.
 
 JSON outputs are covered by report schemas in `../../schema/reports/`.
 
