@@ -12,6 +12,11 @@ def main() -> int:
     parser.add_argument("path", nargs="?", default=".", help="Path containing COAD contract Markdown files")
     parser.add_argument("--schema-dir", help="Directory containing COAD JSON schemas")
     parser.add_argument("--format", choices=["json"], default="json", help="Output format")
+    parser.add_argument(
+        "--fail-on-not-ready",
+        action="store_true",
+        help="Exit with status 1 when the graph is valid but not ready",
+    )
     args = parser.parse_args()
 
     root = Path(args.path)
@@ -35,7 +40,11 @@ def main() -> int:
         }
 
     print(json.dumps(payload, indent=2, sort_keys=True))
-    return 0 if payload["ok"] else 1
+    if not payload["ok"]:
+        return 1
+    if args.fail_on_not_ready and not payload["ready"]:
+        return 1
+    return 0
 
 
 if __name__ == "__main__":

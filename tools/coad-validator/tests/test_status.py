@@ -68,5 +68,55 @@ def test_status_cli_json_output_for_invalid_contracts() -> None:
     assert "missing proof contract: missing-proof-contract" in payload["issues"][0]["message"]
 
 
+def test_status_cli_can_fail_on_not_ready_graph() -> None:
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "coad_validator.status_cli",
+            str(FIXTURES / "valid" / "minimal-graph"),
+            "--schema-dir",
+            str(SCHEMA_DIR),
+            "--fail-on-not-ready",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 1
+    payload = json.loads(result.stdout)
+    assert payload["ok"] is True
+    assert payload["ready"] is False
+
+
+def test_status_cli_fail_on_not_ready_accepts_ready_graph(tmp_path: Path) -> None:
+    source = FIXTURES / "valid" / "minimal-graph"
+    target = tmp_path / "ready-graph"
+    shutil.copytree(source, target)
+    _replace_text(target / "GOAL_CONTRACT.md", "status: proposed", "status: ready")
+    _replace_text(target / "TASK_CONTRACT.md", "status: pending", "status: complete")
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "coad_validator.status_cli",
+            str(target),
+            "--schema-dir",
+            str(SCHEMA_DIR),
+            "--fail-on-not-ready",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+    assert result.returncode == 0
+    payload = json.loads(result.stdout)
+    assert payload["ok"] is True
+    assert payload["ready"] is True
+
+
 def _replace_text(path: Path, old: str, new: str) -> None:
     path.write_text(path.read_text(encoding="utf-8").replace(old, new), encoding="utf-8")

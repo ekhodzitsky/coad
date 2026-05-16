@@ -8,6 +8,7 @@ Reference validator for COAD contract files.
 uv run coad-validate ../../examples/minimal --schema-dir ../../schema
 uv run coad-validate ../.. --schema-dir ../../schema --format json
 uv run coad-status ../.. --schema-dir ../../schema
+uv run coad-status ../.. --schema-dir ../../schema --fail-on-not-ready
 uv run coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
 ```
 

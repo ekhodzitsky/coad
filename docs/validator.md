@@ -82,6 +82,16 @@ The status report is intentionally conservative. A goal is `ready` only when:
 Valid but incomplete graphs return `ok: true` and `ready: false` with blockers.
 Invalid graphs return `ok: false`, `ready: false`, and validation issues.
 
+For hard readiness gates, add `--fail-on-not-ready`:
+
+```bash
+uv run coad-status ../.. --schema-dir ../../schema --fail-on-not-ready
+```
+
+This keeps status reporting and acceptance gating separate. A CI job can publish
+readiness without failing, while an orchestrator can fail a handoff or release
+gate on the same report.
+
 ## Test Suite
 
 ```bash
