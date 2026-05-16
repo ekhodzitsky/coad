@@ -102,6 +102,18 @@ def test_pack_error_json_output_matches_report_schema() -> None:
     _assert_matches_report_schema("pack-error.schema.json", payload)
 
 
+def test_report_manifest_matches_manifest_schema() -> None:
+    manifest_path = SCHEMA_DIR / "report-manifest.json"
+    manifest_schema_path = SCHEMA_DIR / "report-manifest.schema.json"
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest_schema = json.loads(manifest_schema_path.read_text(encoding="utf-8"))
+
+    Draft202012Validator.check_schema(manifest_schema)
+    Draft202012Validator(manifest_schema).validate(manifest)
+    for report in manifest["reports"]:
+        assert (SCHEMA_DIR / report["schema"]).is_file()
+
+
 def _run_json(args: list[str]) -> dict[str, Any]:
     result = subprocess.run(args, check=False, capture_output=True, text=True)
     return json.loads(result.stdout)

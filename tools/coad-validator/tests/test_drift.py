@@ -51,6 +51,27 @@ def test_drift_report_detects_missing_tool_docs(tmp_path: Path) -> None:
     _assert_matches_report_schema("drift-report.schema.json", payload)
 
 
+def test_drift_report_detects_unlisted_report_schema(tmp_path: Path) -> None:
+    target = _copy_repo_subset(tmp_path)
+    manifest = target / "schema" / "report-manifest.json"
+    payload = json.loads(manifest.read_text(encoding="utf-8"))
+    payload["reports"] = [
+        report
+        for report in payload["reports"]
+        if report["schema"] != "reports/graph-report.schema.json"
+    ]
+    manifest.write_text(json.dumps(payload, indent=2, sort_keys=True), encoding="utf-8")
+
+    payload = build_drift_report(target)
+
+    assert payload["ok"] is False
+    assert {
+        "severity": "error",
+        "path": "schema/report-manifest.json",
+        "message": "report schema missing from manifest: reports/graph-report.schema.json",
+    } in payload["issues"]
+
+
 def test_drift_cli_reports_structured_issues(tmp_path: Path) -> None:
     target = _copy_repo_subset(tmp_path)
     workflow = target / ".github" / "workflows" / "ci.yml"

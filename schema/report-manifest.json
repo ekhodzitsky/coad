@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "reports": [
+    {
+      "name": "validation-report",
+      "producer": "coad-validate",
+      "schema": "reports/validation-report.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
+      "name": "status-report",
+      "producer": "coad-status",
+      "schema": "reports/status-report.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
+      "name": "proof-matrix",
+      "producer": "coad-proof-matrix",
+      "schema": "reports/proof-matrix.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
+      "name": "graph-report",
+      "producer": "coad-graph",
+      "schema": "reports/graph-report.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
+      "name": "drift-report",
+      "producer": "coad-drift",
+      "schema": "reports/drift-report.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
+      "name": "context-pack",
+      "producer": "coad-pack",
+      "schema": "reports/context-pack.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
+      "name": "pack-error",
+      "producer": "coad-pack",
+      "schema": "reports/pack-error.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    }
+  ]
+}
