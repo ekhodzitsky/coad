@@ -1,0 +1,15 @@
+# Local artifacts
+.DS_Store
+.env
+.env.*
+*.log
+
+# Tool caches
+.cache/
+.tmp/
+tmp/
+
+# Generated outputs
+coverage/
+dist/
+build/
