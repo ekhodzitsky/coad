@@ -96,6 +96,8 @@ agent_policy:
   the module directory.
   Resolution tries the validation root first, then the directory containing the
   module contract. Absolute paths and `..` escapes are invalid.
+- `workcell.context_path` may override that default when the workcell has a
+  logical identifier but shares or centralizes its local agent context.
 - `surface` lists promises, not every private function.
 - `dependencies` must include reason and scope.
 - `consumers` should be specific enough to test or inspect.

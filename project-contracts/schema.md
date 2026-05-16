@@ -9,11 +9,16 @@ status: pilot
 owners:
   - validator-maintainers
 workcell:
-  type: leaf
+  type: composite
   parent: project
-  children: []
+  children:
+    - schema/contracts
+    - schema/report-core
+    - schema/report-aux
+    - schema/manifests
   owns_paths:
-    - schema/
+    - schema/README.md
+    - schema/TODO.md
   context_budget:
     max_files: 12
     max_source_lines: 1500
@@ -22,11 +27,6 @@ workcell:
     max_todo_lines: 80
     max_surfaces: 8
     max_invariants: 8
-  budget_exceptions:
-    - metric: max_files
-      reason: Schema workcell owns contract and report schemas together until report schemas justify a child workcell.
-    - metric: max_source_lines
-      reason: JSON schemas are verbose executable contracts; split report schemas when schema maintenance becomes parallel.
 authority:
   write_policy: single_active_write_lease
   orchestrator: project

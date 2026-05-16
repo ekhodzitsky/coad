@@ -9,11 +9,14 @@ status: pilot
 owners:
   - methodology-maintainers
 workcell:
-  type: leaf
+  type: composite
   parent: project
-  children: []
+  children:
+    - templates/contracts
+    - templates/onboarding
   owns_paths:
-    - templates/
+    - templates/README.md
+    - templates/TODO.md
   context_budget:
     max_files: 12
     max_source_lines: 1500
@@ -22,9 +25,6 @@ workcell:
     max_todo_lines: 80
     max_surfaces: 8
     max_invariants: 8
-  budget_exceptions:
-    - metric: max_files
-      reason: Template family is temporarily kept together so onboarding stays coherent while the starter set is still changing.
 authority:
   write_policy: single_active_write_lease
   orchestrator: project

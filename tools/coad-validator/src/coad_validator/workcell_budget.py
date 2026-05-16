@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from .model import ContractDocument, ValidationIssue
-from .module_context import module_directory
+from .module_context import module_context_path, module_directory
 
 _AGENT_CONTEXT_FILES = {"AGENTS.md", "MODULE_CONTRACT.md", "README.md", "TODO.md"}
 _SKIP_DIRS = {
@@ -37,11 +37,11 @@ def validate_workcell_budgets(documents: list[ContractDocument], root: Path) -> 
         module = document.data.get("module")
         if not isinstance(module, str) or not module:
             continue
-        module_path = Path(module)
-        if module_path.is_absolute() or ".." in module_path.parts:
+        context_path = module_context_path(document, module)
+        if context_path.is_absolute() or ".." in context_path.parts:
             continue
 
-        module_dir = module_directory(root, document, module_path)
+        module_dir = module_directory(root, document, context_path)
         if not module_dir.exists():
             continue
 

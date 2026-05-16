@@ -200,6 +200,7 @@ workcell:
   type: leaf # project | composite | leaf
   parent: <parent-workcell-or-empty>
   children: []
+  context_path: <relative path to README.md and TODO.md when module is logical>
   owns_paths:
     - <relative path>
   context_budget:

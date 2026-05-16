@@ -9,11 +9,25 @@ status: pilot
 owners:
   - validator-maintainers
 workcell:
-  type: leaf
+  type: composite
   parent: project
-  children: []
+  children:
+    - validator/core
+    - validator/check-surface
+    - validator/report-builders-core
+    - validator/report-builders-governance
+    - validator/cli-adapters
+    - validator/tests-core
+    - validator/tests-reports
+    - validator/bundled-contract-schemas
+    - validator/bundled-manifest-schemas
+    - validator/bundled-report-schemas-core
+    - validator/bundled-report-schemas-aux
   owns_paths:
-    - tools/coad-validator/
+    - tools/coad-validator/README.md
+    - tools/coad-validator/TODO.md
+    - tools/coad-validator/pyproject.toml
+    - tools/coad-validator/uv.lock
   context_budget:
     max_files: 12
     max_source_lines: 1500
@@ -22,11 +36,6 @@ workcell:
     max_todo_lines: 80
     max_surfaces: 8
     max_invariants: 8
-  budget_exceptions:
-    - metric: max_files
-      reason: Validator package includes CLI, reports, schemas, and tests; split report builders into child workcells after the public check surface stabilizes.
-    - metric: max_source_lines
-      reason: Current line count includes validator tests and bundled report schemas; keep visible until the validator module is decomposed.
 authority:
   write_policy: single_active_write_lease
   orchestrator: project

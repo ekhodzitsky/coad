@@ -41,7 +41,7 @@ def test_repository_validation_skips_templates_and_test_fixtures() -> None:
     report = validate_path(ROOT, schema_dir=SCHEMA_DIR)
 
     assert report.ok, [issue.format(report.root) for issue in report.issues]
-    assert len(report.documents) == 15
+    assert len(report.documents) == 37
 
 
 def test_repository_declares_real_project_module_contracts() -> None:
@@ -53,6 +53,20 @@ def test_repository_declares_real_project_module_contracts() -> None:
         if document.kind == "module_contract"
     }
     assert PROJECT_SELF_MODULES.issubset(modules)
+
+
+def test_repository_self_contracts_do_not_need_budget_exceptions() -> None:
+    report = validate_path(ROOT, schema_dir=SCHEMA_DIR)
+
+    exceptions = [
+        document.identifier
+        for document in report.documents
+        if document.path.parent == ROOT / "project-contracts"
+        and isinstance(document.data.get("workcell"), dict)
+        and document.data["workcell"].get("budget_exceptions")
+    ]
+
+    assert exceptions == []
 
 
 def test_methodology_entry_docs_are_discoverable() -> None:
@@ -279,6 +293,64 @@ def test_module_contract_allows_documented_workcell_budget_exception(tmp_path: P
     (target / "checkout" / "TODO.md").write_text("one\ntwo\nthree\n", encoding="utf-8")
 
     report = validate_path(target, schema_dir=SCHEMA_DIR)
+
+    assert report.ok, [issue.format(report.root) for issue in report.issues]
+
+
+def test_module_contract_can_use_logical_module_with_context_path(tmp_path: Path) -> None:
+    module_dir = tmp_path / "src" / "checkout"
+    module_dir.mkdir(parents=True)
+    (module_dir / "README.md").write_text("# checkout\n", encoding="utf-8")
+    (module_dir / "TODO.md").write_text("# checkout TODO\n", encoding="utf-8")
+    contract_path = tmp_path / "MODULE_CONTRACT.md"
+    contract_path.write_text(
+        """---
+schema_version: 1
+kind: module_contract
+module: commerce/checkout
+level: subsystem
+purpose: Logical checkout workcell backed by an existing source directory.
+status: pilot
+workcell:
+  type: leaf
+  context_path: src/checkout
+  owns_paths:
+    - src/checkout/README.md
+    - src/checkout/TODO.md
+  context_budget:
+    max_files: 2
+    max_source_lines: 1
+    max_contract_lines: 80
+    max_readme_lines: 10
+    max_todo_lines: 10
+    max_surfaces: 1
+    max_invariants: 0
+surface:
+  - name: Checkout
+    kind: module
+    visibility: internal
+    contract: Owns checkout decisions.
+    proof:
+      kind: static-check
+      target: src/checkout
+      command: test checkout
+dependencies:
+  internal: []
+  external: []
+consumers: []
+invariants: []
+verification:
+  pre_change:
+    - test checkout
+  full:
+    - test all
+---
+# commerce/checkout
+""",
+        encoding="utf-8",
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
 
     assert report.ok, [issue.format(report.root) for issue in report.issues]
 

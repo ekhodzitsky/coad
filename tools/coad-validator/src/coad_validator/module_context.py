@@ -15,16 +15,16 @@ def validate_module_context(documents: list[ContractDocument], root: Path) -> li
         module = document.data.get("module")
         if not isinstance(module, str) or not module:
             continue
-        module_path = Path(module)
-        if module_path.is_absolute() or ".." in module_path.parts:
+        context_path = module_context_path(document, module)
+        if context_path.is_absolute() or ".." in context_path.parts:
             issues.append(
                 ValidationIssue(
                     document.path,
-                    f"module path must be relative and stay inside the repository: {module}",
+                    f"module context path must be relative and stay inside the repository: {context_path}",
                 )
             )
             continue
-        directory = module_directory(root, document, module_path)
+        directory = module_directory(root, document, context_path)
         if not directory.is_dir():
             issues.append(ValidationIssue(directory, f"module directory does not exist: {module}"))
             continue
@@ -45,3 +45,12 @@ def module_directory(root: Path, document: ContractDocument, module_path: Path) 
         return local_candidate
 
     return root_candidate
+
+
+def module_context_path(document: ContractDocument, module: str) -> Path:
+    workcell = document.data.get("workcell")
+    if isinstance(workcell, dict):
+        context_path = workcell.get("context_path")
+        if isinstance(context_path, str) and context_path:
+            return Path(context_path)
+    return Path(module)
