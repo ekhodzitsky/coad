@@ -27,6 +27,7 @@ def test_profile_report_verifies_current_repository() -> None:
         "contracts-valid": "pass",
         "schedule-builds": "pass",
         "execution-ledger-verified": "pass",
+        "policy-enforced": "pass",
         "release-gates-clean": "pass",
     }
     _assert_matches_report_schema("profile-report.schema.json", payload)

@@ -65,6 +65,13 @@
       "required": true
     },
     {
+      "id": "policy-enforcement",
+      "name": "Enforce orchestration policy",
+      "command": "uv run --locked coad-policy ../.. --schema-dir ../../schema",
+      "working_directory": "tools/coad-validator",
+      "required": true
+    },
+    {
       "id": "repository-drift",
       "name": "Check repository drift",
       "command": "uv run --locked coad-drift ../..",

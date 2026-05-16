@@ -51,6 +51,13 @@
       "stability": "stable"
     },
     {
+      "name": "policy-report",
+      "producer": "coad-policy",
+      "schema": "reports/policy-report.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
       "name": "drift-report",
       "producer": "coad-drift",
       "schema": "reports/drift-report.schema.json",

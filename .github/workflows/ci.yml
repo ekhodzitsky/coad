@@ -57,6 +57,10 @@ jobs:
         working-directory: tools/coad-validator
         run: uv run --locked coad-profile ../.. --schema-dir ../../schema
 
+      - name: Enforce orchestration policy
+        working-directory: tools/coad-validator
+        run: uv run --locked coad-policy ../.. --schema-dir ../../schema
+
       - name: Check repository drift
         working-directory: tools/coad-validator
         run: uv run --locked coad-drift ../..

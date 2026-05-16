@@ -24,6 +24,7 @@ Current required checks:
 - `contracts-valid` via `coad-validate`;
 - `schedule-builds` via `coad-schedule`;
 - `execution-ledger-verified` via `coad-ledger`;
+- `policy-enforced` via `coad-policy`;
 - `release-gates-clean` via `coad-drift`.
 
 ## Local Verification

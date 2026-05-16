@@ -131,6 +131,21 @@ def test_profile_json_output_matches_report_schema() -> None:
     _assert_matches_report_schema("profile-report.schema.json", payload)
 
 
+def test_policy_json_output_matches_report_schema() -> None:
+    payload = _run_json(
+        [
+            sys.executable,
+            "-m",
+            "coad_validator.policy_cli",
+            str(FIXTURES / "valid" / "minimal-graph"),
+            "--schema-dir",
+            str(SCHEMA_DIR),
+        ]
+    )
+
+    _assert_matches_report_schema("policy-report.schema.json", payload)
+
+
 def test_pack_error_json_output_matches_report_schema() -> None:
     payload = _run_json(
         [

@@ -14,6 +14,7 @@ uv run coad-graph ../.. --schema-dir ../../schema
 uv run coad-schedule ../.. --schema-dir ../../schema
 uv run coad-ledger ../.. --schema-dir ../../schema
 uv run coad-profile ../.. --schema-dir ../../schema
+uv run coad-policy ../.. --schema-dir ../../schema
 uv run coad-drift ../..
 uv run coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
 ```
@@ -28,6 +29,8 @@ that an orchestrator can dispatch without overlapping writes inside a wave.
 claim success without passing every required task proof command.
 `coad-profile` reports the declared COAD conformance level and the concrete
 tool evidence supporting it.
+`coad-policy` enforces goal policy constraints such as external side-effect
+permission and required contract update handoff fields.
 
 JSON outputs are covered by report schemas in `../../schema/reports/`.
 

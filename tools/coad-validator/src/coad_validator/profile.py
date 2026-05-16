@@ -9,6 +9,7 @@ from jsonschema import Draft202012Validator
 
 from .drift import build_drift_report
 from .ledger import build_ledger_report
+from .policy import build_policy_report
 from .report import versioned_report
 from .schedule import build_schedule_report
 from .validate import find_schema_dir, validate_path
@@ -117,6 +118,9 @@ def _check_status(check_id: str, root: Path, schema_dir: Path) -> tuple[str, str
     if check_id == "execution-ledger-verified":
         report = build_ledger_report(root, schema_dir=schema_dir)
         return ("pass" if report["ok"] else "fail"), f"coad-ledger status={report['status']}"
+    if check_id == "policy-enforced":
+        report = build_policy_report(root, schema_dir=schema_dir)
+        return ("pass" if report["ok"] else "fail"), f"coad-policy status={report['status']}"
     if check_id == "release-gates-clean":
         report = build_drift_report(root)
         return ("pass" if report["ok"] else "fail"), f"coad-drift status={report['status']}"

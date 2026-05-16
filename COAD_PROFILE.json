@@ -23,6 +23,12 @@
       "description": "Completed execution events include passing required proof commands."
     },
     {
+      "id": "policy-enforced",
+      "tool": "coad-policy",
+      "required": true,
+      "description": "Goal policy constraints are enforced across task contracts."
+    },
+    {
       "id": "release-gates-clean",
       "tool": "coad-drift",
       "required": true,
