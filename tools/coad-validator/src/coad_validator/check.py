@@ -1,71 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
-from .graph_report import build_graph_report
-from .ledger import build_ledger_report
-from .policy import build_policy_report
-from .proof_matrix import build_proof_matrix
 from .report import versioned_report
-from .schedule import build_schedule_report
-from .status import build_status_report
-from .validate import find_schema_dir, validate_path
-
-
-@dataclass(frozen=True)
-class CheckSource:
-    name: str
-    producer: str
-    required: bool
-    build: Callable[[Path, Path], dict[str, Any]]
-
-
-CHECK_SOURCES = [
-    CheckSource(
-        "validation-report",
-        "coad-validate",
-        True,
-        lambda root, schema_dir: _validation_report(root, schema_dir),
-    ),
-    CheckSource(
-        "status-report",
-        "coad-status",
-        True,
-        lambda root, schema_dir: build_status_report(root, schema_dir=schema_dir),
-    ),
-    CheckSource(
-        "proof-matrix",
-        "coad-proof-matrix",
-        True,
-        lambda root, schema_dir: build_proof_matrix(root, schema_dir=schema_dir),
-    ),
-    CheckSource(
-        "graph-report",
-        "coad-graph",
-        True,
-        lambda root, schema_dir: build_graph_report(root, schema_dir=schema_dir),
-    ),
-    CheckSource(
-        "schedule-report",
-        "coad-schedule",
-        True,
-        lambda root, schema_dir: build_schedule_report(root, schema_dir=schema_dir),
-    ),
-    CheckSource(
-        "ledger-report",
-        "coad-ledger",
-        True,
-        lambda root, schema_dir: build_ledger_report(root, schema_dir=schema_dir),
-    ),
-    CheckSource(
-        "policy-report",
-        "coad-policy",
-        True,
-        lambda root, schema_dir: build_policy_report(root, schema_dir=schema_dir),
-    ),
-]
+from .report_sources import CORE_METHODOLOGY_SOURCES, ReportSource
+from .validate import find_schema_dir
 
 
 def build_check_report(root: Path, schema_dir: Path | None = None) -> dict[str, Any]:
@@ -74,7 +14,7 @@ def build_check_report(root: Path, schema_dir: Path | None = None) -> dict[str, 
     issues: list[dict[str, str]] = []
     checks = [
         _check_source(source, resolved_root, resolved_schema_dir, issues)
-        for source in CHECK_SOURCES
+        for source in CORE_METHODOLOGY_SOURCES
     ]
     ok = not issues
     return versioned_report(
@@ -88,7 +28,7 @@ def build_check_report(root: Path, schema_dir: Path | None = None) -> dict[str, 
 
 
 def _check_source(
-    source: CheckSource,
+    source: ReportSource,
     root: Path,
     schema_dir: Path,
     issues: list[dict[str, str]],
@@ -138,17 +78,6 @@ def _extend_issues(
             "severity": "error",
             "path": _relative_path(root, root),
             "message": f"{source_name} failed",
-        }
-    )
-
-
-def _validation_report(root: Path, schema_dir: Path) -> dict[str, Any]:
-    report = validate_path(root, schema_dir=schema_dir)
-    return versioned_report(
-        {
-            "contracts": len(report.documents),
-            "issues": [issue.to_json(report.root) for issue in report.issues],
-            "ok": report.ok,
         }
     )
 

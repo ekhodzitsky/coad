@@ -5,8 +5,9 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .attest import SOURCES, AttestationSource, build_attestation_report
+from .attest import build_attestation_report
 from .report import versioned_report
+from .report_sources import ATTESTATION_SOURCES, ReportSource
 
 
 def export_artifacts(
@@ -34,7 +35,7 @@ def export_artifacts(
         )
     )
 
-    for source in SOURCES:
+    for source in ATTESTATION_SOURCES:
         payload = source.build(resolved_root, resolved_schema_dir)
         artifacts.append(
             _write_source_artifact(
@@ -78,7 +79,7 @@ def export_artifacts(
 
 def _write_source_artifact(
     output_dir: Path,
-    source: AttestationSource,
+    source: ReportSource,
     payload: dict[str, Any],
     root: Path,
     issues: list[dict[str, str]],

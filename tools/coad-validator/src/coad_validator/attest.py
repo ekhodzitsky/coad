@@ -2,41 +2,14 @@ from __future__ import annotations
 
 import hashlib
 import json
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
-from .drift import build_drift_report
-from .graph_report import build_graph_report
-from .ledger import build_ledger_report
-from .policy import build_policy_report
-from .profile import build_profile_report
-from .proof_matrix import build_proof_matrix
 from .report import versioned_report
-from .schedule import build_schedule_report
-from .status import build_status_report
-from .validate import validate_path
+from .report_sources import ATTESTATION_SOURCES, ReportSource
 
 
-@dataclass(frozen=True)
-class AttestationSource:
-    name: str
-    producer: str
-    required: bool
-    build: Callable[[Path, Path], dict[str, Any]]
-
-
-SOURCES = [
-    AttestationSource("validation-report", "coad-validate", True, lambda root, schema_dir: _validation_report(root, schema_dir)),
-    AttestationSource("status-report", "coad-status", True, lambda root, schema_dir: build_status_report(root, schema_dir=schema_dir)),
-    AttestationSource("proof-matrix", "coad-proof-matrix", True, lambda root, schema_dir: build_proof_matrix(root, schema_dir=schema_dir)),
-    AttestationSource("graph-report", "coad-graph", True, lambda root, schema_dir: build_graph_report(root, schema_dir=schema_dir)),
-    AttestationSource("schedule-report", "coad-schedule", True, lambda root, schema_dir: build_schedule_report(root, schema_dir=schema_dir)),
-    AttestationSource("ledger-report", "coad-ledger", True, lambda root, schema_dir: build_ledger_report(root, schema_dir=schema_dir)),
-    AttestationSource("profile-report", "coad-profile", True, lambda root, schema_dir: build_profile_report(root, schema_dir=schema_dir)),
-    AttestationSource("policy-report", "coad-policy", True, lambda root, schema_dir: build_policy_report(root, schema_dir=schema_dir)),
-    AttestationSource("drift-report", "coad-drift", True, lambda root, _schema_dir: build_drift_report(root)),
-]
+SOURCES = ATTESTATION_SOURCES
 
 
 def build_attestation_report(root: Path, schema_dir: Path | None = None) -> dict[str, Any]:
@@ -72,7 +45,7 @@ def build_attestation_report(root: Path, schema_dir: Path | None = None) -> dict
 
 
 def _attested_report(
-    source: AttestationSource,
+    source: ReportSource,
     root: Path,
     schema_dir: Path,
     issues: list[dict[str, str]],
@@ -96,17 +69,6 @@ def _attested_report(
         "status": status if isinstance(status, str) else "",
         "digest": _sha256(payload),
     }
-
-
-def _validation_report(root: Path, schema_dir: Path) -> dict[str, Any]:
-    report = validate_path(root, schema_dir=schema_dir)
-    return versioned_report(
-        {
-            "contracts": len(report.documents),
-            "issues": [issue.to_json(report.root) for issue in report.issues],
-            "ok": report.ok,
-        }
-    )
 
 
 def _issue_path(payload: dict[str, Any], root: Path) -> str:
