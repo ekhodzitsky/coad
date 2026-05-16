@@ -8,6 +8,7 @@
   placeholders, too-generic purposes, public surfaces without consumers,
   placeholder proof commands, empty local context files, and missing
   `owns_paths`.
+- Adoption smoke test notes for one-link onboarding against `phonex`.
 
 ## 0.5.1 - 2026-05-16
 

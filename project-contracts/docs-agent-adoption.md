@@ -16,6 +16,7 @@ workcell:
   owns_paths:
     - docs/agent-decision-rules.md
     - docs/agent-integration.md
+    - docs/adoption-smoke-tests.md
     - docs/anti-patterns.md
     - docs/context-packs.md
     - docs/landscape.md

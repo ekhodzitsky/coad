@@ -190,6 +190,7 @@ CHANGELOG.md        Human-readable release history.
 - [COAD_PROJECT_STANDARD.md](COAD_PROJECT_STANDARD.md) - project shape and adoption levels.
 - [AGENT_ONBOARDING.md](AGENT_ONBOARDING.md) - what an agent should do after receiving the COAD link.
 - [AGENT_FLOW.md](AGENT_FLOW.md) - how agents enter, edit, prove, and hand off.
+- [docs/adoption-smoke-tests.md](docs/adoption-smoke-tests.md) - real one-link onboarding checks against external repositories.
 - [docs/workcells.md](docs/workcells.md) - workcell tree, context budgets, write leases, and authority.
 - [docs/module-contract-checklist.md](docs/module-contract-checklist.md) - semantic quality checklist for module contracts.
 - [docs/landscape.md](docs/landscape.md) - comparison with adjacent agent-development projects.

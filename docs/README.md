@@ -11,6 +11,7 @@ Public API:
 - `landscape.md`
 - `module-contract-checklist.md`
 - `agent-integration.md`
+- `adoption-smoke-tests.md`
 - `validator.md`
 - `contract-graph.md`
 - `proof-matrix.md`
