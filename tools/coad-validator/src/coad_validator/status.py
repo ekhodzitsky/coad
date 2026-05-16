@@ -1,21 +1,11 @@
 from __future__ import annotations
 
-from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+from .graph_index import ContractIndex
 from .model import ContractDocument
 from .validate import validate_path
-
-_INDEX_KEYS = {
-    "goal_contract": "goal_id",
-    "module_contract": "module",
-    "task_contract": "task_id",
-    "proof_contract": "proof_id",
-    "review_contract": "review_id",
-    "handoff_contract": "task_id",
-    "integration_contract": "integration_id",
-}
 
 
 def build_status_report(root: Path, schema_dir: Path | None = None) -> dict[str, Any]:
@@ -29,10 +19,10 @@ def build_status_report(root: Path, schema_dir: Path | None = None) -> dict[str,
             "issues": [issue.to_json(report.root) for issue in report.issues],
         }
 
-    by_kind = _index_by_kind(report.documents)
+    index = ContractIndex.from_documents(report.documents)
     goals = [
-        _goal_status(goal, by_kind, report.root)
-        for goal in sorted(by_kind["goal_contract"].values(), key=lambda item: item.identifier)
+        _goal_status(goal, index, report.root)
+        for goal in index.goals()
     ]
     ready = bool(goals) and all(goal["ready"] for goal in goals)
     return {
@@ -46,7 +36,7 @@ def build_status_report(root: Path, schema_dir: Path | None = None) -> dict[str,
 
 def _goal_status(
     goal: ContractDocument,
-    by_kind: dict[str, dict[str, ContractDocument]],
+    index: ContractIndex,
     root: Path,
 ) -> dict[str, Any]:
     blockers: list[dict[str, str]] = []
@@ -55,8 +45,8 @@ def _goal_status(
         blockers.append(_blocker(goal, root, f"goal status is {declared_status}"))
 
     task_statuses = [
-        _task_status(task, by_kind, root)
-        for task in _goal_tasks(goal, by_kind["task_contract"])
+        _task_status(task, index, root)
+        for task in index.goal_tasks(goal)
     ]
     for task_status in task_statuses:
         blockers.extend(task_status["blockers"])
@@ -75,7 +65,7 @@ def _goal_status(
 
 def _task_status(
     task: ContractDocument,
-    by_kind: dict[str, dict[str, ContractDocument]],
+    index: ContractIndex,
     root: Path,
 ) -> dict[str, Any]:
     blockers: list[dict[str, str]] = []
@@ -84,7 +74,7 @@ def _task_status(
     if declared_status != "complete":
         blockers.append(_blocker(task, root, f"task {task_id} status is {declared_status}"))
 
-    handoff = by_kind["handoff_contract"].get(task_id)
+    handoff = index.handoff_for_task(task_id)
     if handoff is None:
         blockers.append(_blocker(task, root, f"task {task_id} has no handoff"))
     else:
@@ -155,42 +145,6 @@ def _passing_handoff_commands(handoff: ContractDocument) -> list[str]:
     return commands
 
 
-def _goal_tasks(
-    goal: ContractDocument,
-    task_index: dict[str, ContractDocument],
-) -> list[ContractDocument]:
-    task_ids: list[str] = []
-    contracts = goal.data.get("contracts")
-    if isinstance(contracts, dict):
-        task_ids.extend(_string_list(contracts.get("tasks")))
-    decomposition = goal.data.get("decomposition")
-    if isinstance(decomposition, dict):
-        task_ids.extend(_string_list(decomposition.get("tasks")))
-
-    tasks: list[ContractDocument] = []
-    seen: set[str] = set()
-    for task_id in task_ids:
-        if task_id in seen:
-            continue
-        seen.add(task_id)
-        task = task_index.get(task_id)
-        if task is not None:
-            tasks.append(task)
-    return tasks
-
-
-def _index_by_kind(documents: list[ContractDocument]) -> dict[str, dict[str, ContractDocument]]:
-    by_kind: dict[str, dict[str, ContractDocument]] = defaultdict(dict)
-    for document in documents:
-        key = _INDEX_KEYS.get(document.kind)
-        if key is None:
-            continue
-        value = document.data.get(key)
-        if isinstance(value, str) and value:
-            by_kind[document.kind][value] = document
-    return by_kind
-
-
 def _blocker(document: ContractDocument, root: Path, message: str) -> dict[str, str]:
     return {
         "kind": document.kind,
@@ -205,12 +159,6 @@ def _relative_path(document: ContractDocument, root: Path) -> str:
         return str(document.path.relative_to(root))
     except ValueError:
         return str(document.path)
-
-
-def _string_list(value: object) -> list[str]:
-    if not isinstance(value, list):
-        return []
-    return [item for item in value if isinstance(item, str)]
 
 
 def _string_value(value: object, fallback: str) -> str:

@@ -1,21 +1,11 @@
 from __future__ import annotations
 
-from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+from .graph_index import ContractIndex
 from .model import ContractDocument
 from .validate import validate_path
-
-_INDEX_KEYS = {
-    "goal_contract": "goal_id",
-    "module_contract": "module",
-    "task_contract": "task_id",
-    "proof_contract": "proof_id",
-    "review_contract": "review_id",
-    "handoff_contract": "task_id",
-    "integration_contract": "integration_id",
-}
 
 
 def build_proof_matrix(root: Path, schema_dir: Path | None = None) -> dict[str, Any]:
@@ -29,10 +19,10 @@ def build_proof_matrix(root: Path, schema_dir: Path | None = None) -> dict[str, 
             "issues": [issue.to_json(report.root) for issue in report.issues],
         }
 
-    by_kind = _index_by_kind(report.documents)
+    index = ContractIndex.from_documents(report.documents)
     goals = [
-        _goal_matrix(goal, by_kind, report.root)
-        for goal in sorted(by_kind["goal_contract"].values(), key=lambda item: item.identifier)
+        _goal_matrix(goal, index, report.root)
+        for goal in index.goals()
     ]
     ready = bool(goals) and all(goal["ready"] for goal in goals)
     return {
@@ -46,10 +36,10 @@ def build_proof_matrix(root: Path, schema_dir: Path | None = None) -> dict[str, 
 
 def _goal_matrix(
     goal: ContractDocument,
-    by_kind: dict[str, dict[str, ContractDocument]],
+    index: ContractIndex,
     root: Path,
 ) -> dict[str, Any]:
-    tasks = [_task_matrix(task, by_kind, root) for task in _goal_tasks(goal, by_kind["task_contract"])]
+    tasks = [_task_matrix(task, index, root) for task in index.goal_tasks(goal)]
     blockers = [blocker for task in tasks for blocker in task["blockers"]]
     ready = not blockers
     return {
@@ -64,13 +54,13 @@ def _goal_matrix(
 
 def _task_matrix(
     task: ContractDocument,
-    by_kind: dict[str, dict[str, ContractDocument]],
+    index: ContractIndex,
     root: Path,
 ) -> dict[str, Any]:
     task_id = task.identifier
-    handoff = by_kind["handoff_contract"].get(task_id)
+    handoff = index.handoff_for_task(task_id)
     proofs = [
-        _proof_entry(task, required, handoff, by_kind["proof_contract"], root)
+        _proof_entry(task, required, handoff, index, root)
         for required in _required_task_proofs(task)
     ]
     blockers = [
@@ -94,12 +84,12 @@ def _proof_entry(
     task: ContractDocument,
     required: dict[str, Any],
     handoff: ContractDocument | None,
-    proof_index: dict[str, ContractDocument],
+    index: ContractIndex,
     root: Path,
 ) -> dict[str, Any]:
     proof_id = _string_value(required.get("proof_id"), "")
     command = _string_value(required.get("command"), "")
-    proof_contract = proof_index.get(proof_id)
+    proof_contract = index.proof(proof_id)
     evidence = _handoff_evidence(command, handoff, root)
     status = "pass" if evidence is not None and evidence["status"] == "pass" else "missing_evidence"
     return {
@@ -146,42 +136,6 @@ def _required_task_proofs(task: ContractDocument) -> list[dict[str, Any]]:
     return [item for item in required if isinstance(item, dict)]
 
 
-def _goal_tasks(
-    goal: ContractDocument,
-    task_index: dict[str, ContractDocument],
-) -> list[ContractDocument]:
-    task_ids: list[str] = []
-    contracts = goal.data.get("contracts")
-    if isinstance(contracts, dict):
-        task_ids.extend(_string_list(contracts.get("tasks")))
-    decomposition = goal.data.get("decomposition")
-    if isinstance(decomposition, dict):
-        task_ids.extend(_string_list(decomposition.get("tasks")))
-
-    tasks: list[ContractDocument] = []
-    seen: set[str] = set()
-    for task_id in task_ids:
-        if task_id in seen:
-            continue
-        seen.add(task_id)
-        task = task_index.get(task_id)
-        if task is not None:
-            tasks.append(task)
-    return tasks
-
-
-def _index_by_kind(documents: list[ContractDocument]) -> dict[str, dict[str, ContractDocument]]:
-    by_kind: dict[str, dict[str, ContractDocument]] = defaultdict(dict)
-    for document in documents:
-        key = _INDEX_KEYS.get(document.kind)
-        if key is None:
-            continue
-        value = document.data.get(key)
-        if isinstance(value, str) and value:
-            by_kind[document.kind][value] = document
-    return by_kind
-
-
 def _contract_ref(document: ContractDocument | None, root: Path) -> dict[str, str] | None:
     if document is None:
         return None
@@ -205,12 +159,6 @@ def _relative_path(document: ContractDocument, root: Path) -> str:
         return str(document.path.relative_to(root))
     except ValueError:
         return str(document.path)
-
-
-def _string_list(value: object) -> list[str]:
-    if not isinstance(value, list):
-        return []
-    return [item for item in value if isinstance(item, str)]
 
 
 def _string_value(value: object, fallback: str) -> str:
