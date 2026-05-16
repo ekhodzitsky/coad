@@ -6,6 +6,10 @@
 
 # Tool caches
 .cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
+__pycache__/
 .tmp/
 tmp/
 

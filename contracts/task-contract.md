@@ -34,10 +34,12 @@ acceptance:
   - Existing deterministic total invariant remains true.
 proof:
   required:
-    - kind: unit-test
+    - proof_id: billing-tax-rounding-proof
+      kind: unit-test
       target: billing.invoice_calculator.tax_rounding
       command: test billing.invoice_calculator.tax_rounding
-    - kind: regression-test
+    - proof_id: billing-tax-rounding-proof
+      kind: regression-test
       target: billing.invoice_calculator.deterministic_totals
       command: test billing.invoice_calculator.deterministic_totals
 handoff:

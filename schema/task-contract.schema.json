@@ -20,7 +20,28 @@
     "allowed_mutations": { "type": "array", "items": { "type": "string" } },
     "forbidden_mutations": { "type": "array", "items": { "type": "string" } },
     "acceptance": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } },
-    "proof": { "type": "object", "required": ["required"], "additionalProperties": true },
+    "proof": {
+      "type": "object",
+      "required": ["required"],
+      "properties": {
+        "required": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["proof_id", "kind", "target", "command"],
+            "properties": {
+              "proof_id": { "type": "string", "minLength": 1 },
+              "kind": { "type": "string", "minLength": 1 },
+              "target": { "type": "string" },
+              "command": { "type": "string" }
+            },
+            "additionalProperties": true
+          }
+        }
+      },
+      "additionalProperties": true
+    },
     "handoff": { "type": "object", "required": ["required_fields"], "additionalProperties": true }
   },
   "additionalProperties": true

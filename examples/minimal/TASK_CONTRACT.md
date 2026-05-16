@@ -26,10 +26,12 @@ acceptance:
   - Existing payment and fulfillment consumers remain compatible.
 proof:
   required:
-    - kind: unit-test
+    - proof_id: checkout-negative-total-proof
+      kind: unit-test
       target: checkout.checkout_service.rejects_negative_total
       command: test checkout.checkout_service.rejects_negative_total
-    - kind: schema
+    - proof_id: checkout-negative-total-proof
+      kind: schema
       target: schemas/checkout-decision.schema.json
       command: test schemas/checkout-decision.schema.json
 handoff:

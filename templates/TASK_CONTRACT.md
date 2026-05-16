@@ -22,7 +22,8 @@ acceptance:
   - <observable acceptance criterion>
 proof:
   required:
-    - kind: <proof-kind>
+    - proof_id: <proof-id>
+      kind: <proof-kind>
       target: <target>
       command: <command>
 handoff:
