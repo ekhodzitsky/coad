@@ -11,6 +11,13 @@ executable before heavier orchestration tooling exists.
 - JSON Schema conformance for each contract type.
 - Module contracts point to real module directories with `README.md` and
   `TODO.md` agent context files.
+- Workcell context budgets declared in `workcell.context_budget`: file count,
+  source lines, contract length, README length, TODO length, surface count, and
+  invariant count.
+- Release metadata when a repository opts into it through `VERSION`,
+  `CHANGELOG.md`, or the COAD validator package: `VERSION`,
+  `[project].version`, package `__version__`, and a changelog entry for the
+  current version must agree.
 - Cross-contract graph references:
   - goal to modules, tasks, proofs, reviews, and integration;
   - task to modules and proof contracts;
@@ -55,6 +62,14 @@ A repository can start with only:
 `coad check .` passes this shape without requiring goal, task, proof, handoff,
 review, integration, or ledger contracts. When those execution contracts appear,
 the command automatically expands to the deeper orchestration checks.
+
+Workcell budget failures are blocking by default. If a workcell is temporarily
+too large, document the exception in `workcell.budget_exceptions` with a clear
+reason, then split or shrink the workcell later.
+
+Release metadata is intentionally opt-in for adopting repositories. A simple
+application can start without `VERSION` and `CHANGELOG.md`. A repository that
+ships COAD tooling or already has release metadata must keep it consistent.
 
 ## JSON Output
 

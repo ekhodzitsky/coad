@@ -4,6 +4,7 @@ import json
 import shutil
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 
 from coad_validator.validate import validate_path
@@ -212,3 +213,160 @@ def test_module_contract_requires_readme_and_todo(tmp_path: Path) -> None:
     assert not report.ok
     assert any("module agent context is missing README.md" in issue.message for issue in report.issues)
     assert any("module agent context is missing TODO.md" in issue.message for issue in report.issues)
+
+
+def test_module_contract_enforces_workcell_context_budgets(tmp_path: Path) -> None:
+    source = ROOT / "examples" / "minimal"
+    target = tmp_path / "minimal"
+    shutil.copytree(source, target)
+    contract_path = target / "MODULE_CONTRACT.md"
+    contract_path.write_text(
+        contract_path.read_text(encoding="utf-8")
+        .replace("max_files: 12", "max_files: 2")
+        .replace("max_source_lines: 1500", "max_source_lines: 1")
+        .replace("max_contract_lines: 180", "max_contract_lines: 10")
+        .replace("max_readme_lines: 120", "max_readme_lines: 2")
+        .replace("max_todo_lines: 80", "max_todo_lines: 2")
+        .replace("max_surfaces: 8", "max_surfaces: 1")
+        .replace("max_invariants: 8", "max_invariants: 0"),
+        encoding="utf-8",
+    )
+    (target / "checkout" / "extra.py").write_text("print('extra')\n", encoding="utf-8")
+    (target / "checkout" / "logic.py").write_text("a = 1\nb = 2\n", encoding="utf-8")
+    (target / "checkout" / "README.md").write_text("one\ntwo\nthree\n", encoding="utf-8")
+    (target / "checkout" / "TODO.md").write_text("one\ntwo\nthree\n", encoding="utf-8")
+
+    report = validate_path(target, schema_dir=SCHEMA_DIR)
+
+    messages = [issue.message for issue in report.issues]
+    assert not report.ok
+    assert any("workcell budget exceeded: max_files" in message for message in messages)
+    assert any("workcell budget exceeded: max_source_lines" in message for message in messages)
+    assert any("workcell budget exceeded: max_contract_lines" in message for message in messages)
+    assert any("workcell budget exceeded: max_readme_lines" in message for message in messages)
+    assert any("workcell budget exceeded: max_todo_lines" in message for message in messages)
+    assert any("workcell budget exceeded: max_surfaces" in message for message in messages)
+    assert any("workcell budget exceeded: max_invariants" in message for message in messages)
+
+
+def test_module_contract_allows_documented_workcell_budget_exception(tmp_path: Path) -> None:
+    source = ROOT / "examples" / "minimal"
+    target = tmp_path / "minimal"
+    shutil.copytree(source, target)
+    contract_path = target / "MODULE_CONTRACT.md"
+    contract_path.write_text(
+        contract_path.read_text(encoding="utf-8")
+        .replace("max_files: 12", "max_files: 2")
+        .replace("max_source_lines: 1500", "max_source_lines: 1")
+        .replace("max_contract_lines: 180", "max_contract_lines: 10")
+        .replace("max_readme_lines: 120", "max_readme_lines: 2")
+        .replace("max_todo_lines: 80", "max_todo_lines: 2")
+        .replace("max_surfaces: 8", "max_surfaces: 1")
+        .replace("max_invariants: 8", "max_invariants: 0")
+        .replace(
+            "    max_invariants: 0\nauthority:",
+            "    max_invariants: 0\n"
+            "  budget_exceptions:\n"
+            "    - metric: context_budget\n"
+            "      reason: Legacy fixture intentionally exceeds all budgets while awaiting split.\n"
+            "authority:",
+        ),
+        encoding="utf-8",
+    )
+    (target / "checkout" / "extra.py").write_text("print('extra')\n", encoding="utf-8")
+    (target / "checkout" / "logic.py").write_text("a = 1\nb = 2\n", encoding="utf-8")
+    (target / "checkout" / "README.md").write_text("one\ntwo\nthree\n", encoding="utf-8")
+    (target / "checkout" / "TODO.md").write_text("one\ntwo\nthree\n", encoding="utf-8")
+
+    report = validate_path(target, schema_dir=SCHEMA_DIR)
+
+    assert report.ok, [issue.format(report.root) for issue in report.issues]
+
+
+def test_release_metadata_requires_version_and_changelog_for_validator_repo(tmp_path: Path) -> None:
+    validator_dir = tmp_path / "tools" / "coad-validator"
+    validator_dir.mkdir(parents=True)
+    (validator_dir / "pyproject.toml").write_text(
+        textwrap.dedent(
+            """
+            [project]
+            name = "coad-validator"
+            version = "0.1.0"
+            """
+        ).strip(),
+        encoding="utf-8",
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any("release metadata is missing VERSION" in issue.message for issue in report.issues)
+    assert any("release metadata is missing CHANGELOG.md" in issue.message for issue in report.issues)
+
+
+def test_release_metadata_requires_pyproject_version_to_match_version_file(tmp_path: Path) -> None:
+    validator_dir = tmp_path / "tools" / "coad-validator"
+    validator_dir.mkdir(parents=True)
+    (validator_dir / "pyproject.toml").write_text(
+        textwrap.dedent(
+            """
+            [project]
+            name = "coad-validator"
+            version = "0.1.0"
+            """
+        ).strip(),
+        encoding="utf-8",
+    )
+    (tmp_path / "VERSION").write_text("0.2.0\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n## 0.2.0 - 2026-05-16\n", encoding="utf-8")
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any("pyproject version 0.1.0 does not match VERSION 0.2.0" in issue.message for issue in report.issues)
+
+
+def test_release_metadata_requires_changelog_entry_for_current_version(tmp_path: Path) -> None:
+    validator_dir = tmp_path / "tools" / "coad-validator"
+    validator_dir.mkdir(parents=True)
+    (validator_dir / "pyproject.toml").write_text(
+        textwrap.dedent(
+            """
+            [project]
+            name = "coad-validator"
+            version = "0.1.0"
+            """
+        ).strip(),
+        encoding="utf-8",
+    )
+    (tmp_path / "VERSION").write_text("0.1.0\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n## 0.0.9 - 2026-05-15\n", encoding="utf-8")
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any("CHANGELOG.md is missing an entry for VERSION 0.1.0" in issue.message for issue in report.issues)
+
+
+def test_release_metadata_requires_package_version_to_match_version_file(tmp_path: Path) -> None:
+    validator_dir = tmp_path / "tools" / "coad-validator"
+    package_dir = validator_dir / "src" / "coad_validator"
+    package_dir.mkdir(parents=True)
+    (validator_dir / "pyproject.toml").write_text(
+        textwrap.dedent(
+            """
+            [project]
+            name = "coad-validator"
+            version = "0.1.0"
+            """
+        ).strip(),
+        encoding="utf-8",
+    )
+    (package_dir / "__init__.py").write_text('__version__ = "0.0.9"\n', encoding="utf-8")
+    (tmp_path / "VERSION").write_text("0.1.0\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n## 0.1.0 - 2026-05-16\n", encoding="utf-8")
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any("package __version__ 0.0.9 does not match VERSION 0.1.0" in issue.message for issue in report.issues)

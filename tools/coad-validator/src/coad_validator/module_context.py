@@ -24,7 +24,7 @@ def validate_module_context(documents: list[ContractDocument], root: Path) -> li
                 )
             )
             continue
-        directory = _module_directory(root, document, module_path)
+        directory = module_directory(root, document, module_path)
         if not directory.is_dir():
             issues.append(ValidationIssue(directory, f"module directory does not exist: {module}"))
             continue
@@ -35,7 +35,7 @@ def validate_module_context(documents: list[ContractDocument], root: Path) -> li
     return issues
 
 
-def _module_directory(root: Path, document: ContractDocument, module_path: Path) -> Path:
+def module_directory(root: Path, document: ContractDocument, module_path: Path) -> Path:
     root_candidate = root / module_path
     if root_candidate.exists():
         return root_candidate

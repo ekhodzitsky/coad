@@ -120,6 +120,8 @@ Default advisory budgets:
 
 These are not universal laws. A repository may tune them, but a larger budget
 must be justified by evidence that agents can still orient quickly and safely.
+`coad check .` treats declared budget overruns as failures unless the contract
+records a visible `budget_exceptions` reason.
 
 The two-minute orientation rule is stronger than any numeric budget: if a fresh
 agent cannot understand the workcell boundary, surfaces, risks, and proof in
@@ -206,6 +208,11 @@ workcell:
     max_contract_lines: 180
     max_readme_lines: 120
     max_todo_lines: 80
+    max_surfaces: 8
+    max_invariants: 8
+  budget_exceptions:
+    - metric: max_source_lines
+      reason: Temporary migration workcell; split after the parser rewrite lands.
 authority:
   write_policy: single_active_write_lease
   orchestrator: <owner or parent workcell>
@@ -215,8 +222,10 @@ authority:
     - public surface migration
 ```
 
-The validator may initially treat these fields as advisory. The methodology
-still treats them as the authority model for coordinated agent work.
+Use `metric: context_budget` only for a broad temporary exception. Prefer a
+specific metric such as `max_files`, `max_source_lines`, `max_contract_lines`,
+`max_readme_lines`, `max_todo_lines`, `max_surfaces`, or `max_invariants`.
+Exceptions should be rare and easy for an agent to understand.
 
 ## Decision Rules
 

@@ -91,6 +91,10 @@ A workcell must fit into an agent's working context. Default advisory budgets:
 - invariants: 12;
 - active write agents: 1.
 
+`coad check .` enforces declared context budgets. A temporary over-budget
+workcell must carry a `workcell.budget_exceptions` reason in its contract; the
+better long-term answer is usually to split the workcell.
+
 The two-minute orientation rule is stronger than any numeric budget. If a fresh
 agent cannot understand the boundary, surfaces, risks, and proof quickly, split
 the workcell or improve its local context.

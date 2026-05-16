@@ -98,7 +98,9 @@ def _copy_repo_subset(tmp_path: Path) -> Path:
     shutil.copytree(ROOT / "schema", target / "schema")
     shutil.copytree(ROOT / "tools", target / "tools", ignore=shutil.ignore_patterns(".venv", "__pycache__"))
     shutil.copy2(ROOT / "COAD_PROFILE.json", target / "COAD_PROFILE.json")
+    shutil.copy2(ROOT / "CHANGELOG.md", target / "CHANGELOG.md")
     shutil.copy2(ROOT / "README.md", target / "README.md")
+    shutil.copy2(ROOT / "VERSION", target / "VERSION")
     return target
 
 

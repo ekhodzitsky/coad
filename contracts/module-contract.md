@@ -33,6 +33,8 @@ workcell:
     max_contract_lines: 180
     max_readme_lines: 120
     max_todo_lines: 80
+    max_surfaces: 8
+    max_invariants: 8
 authority:
   write_policy: single_active_write_lease
   orchestrator: commerce
@@ -102,6 +104,8 @@ agent_policy:
 - `agent_policy` tells agents what they may do without guessing.
 - `workcell` describes whether the contract is for a project, composite, or
   leaf workcell, plus parent/child relationships and context budgets.
+- `workcell.budget_exceptions` records temporary, reasoned exceptions when a
+  workcell exceeds its declared context budget.
 - `authority` describes who may write, who may read, and when a migration lease
   is required.
 
@@ -125,7 +129,8 @@ must contain:
 `AGENTS.md` is optional and should be added only when the module has rules that
 differ from the repository default.
 
-`coad check .` enforces the directory, `README.md`, and `TODO.md` requirements.
+`coad check .` enforces the directory, `README.md`, `TODO.md`, and declared
+context budget requirements.
 
 ## Agent Use
 

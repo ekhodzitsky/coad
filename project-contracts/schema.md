@@ -20,6 +20,13 @@ workcell:
     max_contract_lines: 180
     max_readme_lines: 120
     max_todo_lines: 80
+    max_surfaces: 8
+    max_invariants: 8
+  budget_exceptions:
+    - metric: max_files
+      reason: Schema workcell owns contract and report schemas together until report schemas justify a child workcell.
+    - metric: max_source_lines
+      reason: JSON schemas are verbose executable contracts; split report schemas when schema maintenance becomes parallel.
 authority:
   write_policy: single_active_write_lease
   orchestrator: project

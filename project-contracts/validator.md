@@ -20,6 +20,13 @@ workcell:
     max_contract_lines: 180
     max_readme_lines: 120
     max_todo_lines: 80
+    max_surfaces: 8
+    max_invariants: 8
+  budget_exceptions:
+    - metric: max_files
+      reason: Validator package includes CLI, reports, schemas, and tests; split report builders into child workcells after the public check surface stabilizes.
+    - metric: max_source_lines
+      reason: Current line count includes validator tests and bundled report schemas; keep visible until the validator module is decomposed.
 authority:
   write_policy: single_active_write_lease
   orchestrator: project

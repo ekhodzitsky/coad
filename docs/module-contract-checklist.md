@@ -95,6 +95,8 @@ If the contract cannot answer those questions, it is present but not useful.
 - README, TODO, and contract files are short operating briefs, not long essays.
 - If the contract lists many unrelated surfaces or invariants, the workcell has
   a split candidate.
+- Any budget exception names the exact metric and gives a reason an agent can
+  use to decide whether to split, shrink, or proceed.
 - If an agent cannot orient in two minutes, size or documentation is failing.
 
 ### Local Docs
@@ -107,6 +109,8 @@ If the contract cannot answer those questions, it is present but not useful.
 
 - The purpose could describe three different modules.
 - The workcell is too large for one agent to hold in context.
+- Budget exceptions exist without a reason, or become permanent hiding places
+  for modules that should be split.
 - Surfaces are listed as names without behavioral promises.
 - Consumers are missing, vague, or wrong.
 - Proof commands are absent, stale, or only test unrelated behavior.

@@ -48,9 +48,35 @@
             "max_source_lines": { "type": "integer", "minimum": 1 },
             "max_contract_lines": { "type": "integer", "minimum": 1 },
             "max_readme_lines": { "type": "integer", "minimum": 1 },
-            "max_todo_lines": { "type": "integer", "minimum": 1 }
+            "max_todo_lines": { "type": "integer", "minimum": 1 },
+            "max_surfaces": { "type": "integer", "minimum": 1 },
+            "max_invariants": { "type": "integer", "minimum": 0 }
           },
           "additionalProperties": true
+        },
+        "budget_exceptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["reason"],
+            "properties": {
+              "metric": {
+                "enum": [
+                  "context_budget",
+                  "max_files",
+                  "max_source_lines",
+                  "max_contract_lines",
+                  "max_readme_lines",
+                  "max_todo_lines",
+                  "max_surfaces",
+                  "max_invariants"
+                ]
+              },
+              "reason": { "type": "string", "minLength": 1 },
+              "expires": { "type": "string", "minLength": 1 }
+            },
+            "additionalProperties": true
+          }
         }
       },
       "additionalProperties": true

@@ -20,6 +20,11 @@ workcell:
     max_contract_lines: 180
     max_readme_lines: 120
     max_todo_lines: 80
+    max_surfaces: 8
+    max_invariants: 8
+  budget_exceptions:
+    - metric: max_files
+      reason: Examples currently include onboarding and full-orchestration fixtures in one workcell; split examples when more scenario families appear.
 authority:
   write_policy: single_active_write_lease
   orchestrator: project

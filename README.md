@@ -3,6 +3,7 @@
 [![CI](https://github.com/ekhodzitsky/coad/actions/workflows/ci.yml/badge.svg)](https://github.com/ekhodzitsky/coad/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-%3E%3D3.11-3776AB?logo=python&logoColor=white)
 ![CLI](https://img.shields.io/badge/CLI-coad%20check%20.-111827)
+![Version](https://img.shields.io/badge/version-0.1.0-2563EB)
 ![Standard](https://img.shields.io/badge/standard-agent--navigable%20codebases-7C3AED)
 ![Status](https://img.shields.io/badge/status-early%20draft-F59E0B)
 
@@ -171,6 +172,8 @@ playbooks/          Repeatable orchestration flows.
 examples/           Reference COAD project shapes.
 project-contracts/  COAD contracts for this repository itself.
 tools/              Reference validator. Public command: coad check .
+VERSION             Current validator/methodology package version.
+CHANGELOG.md        Human-readable release history.
 ```
 
 ## Key Docs
@@ -208,7 +211,8 @@ ownership, proof, and safe write scope to any agent.
 ## Status
 
 Public early draft. The stable integration target is intentionally small:
-`coad check .`.
+`coad check .`. The current version is recorded in [VERSION](VERSION), with
+release notes in [CHANGELOG.md](CHANGELOG.md).
 
 Keywords: AI agents, agentic development, multi-agent software engineering,
 codebase standards, contracts, workcells, orchestration, validation.
