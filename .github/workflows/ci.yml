@@ -53,6 +53,10 @@ jobs:
         working-directory: tools/coad-validator
         run: uv run --locked coad-ledger ../.. --schema-dir ../../schema
 
+      - name: Report conformance profile
+        working-directory: tools/coad-validator
+        run: uv run --locked coad-profile ../.. --schema-dir ../../schema
+
       - name: Check repository drift
         working-directory: tools/coad-validator
         run: uv run --locked coad-drift ../..

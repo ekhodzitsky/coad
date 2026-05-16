@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coad.dev/schema/reports/profile-report.schema.json",
+  "title": "COAD Profile Report",
+  "type": "object",
+  "required": ["schema_version", "ok", "status", "profile_id", "level", "checks", "issues"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "status": {
+      "enum": ["conformant", "nonconformant"]
+    },
+    "profile_id": {
+      "type": "string"
+    },
+    "level": {
+      "type": "string"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/check"
+      }
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/issue"
+      }
+    }
+  },
+  "$defs": {
+    "check": {
+      "type": "object",
+      "required": ["id", "status", "required", "evidence"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "enum": ["pass", "fail", "unknown"]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "evidence": {
+          "type": "string"
+        }
+      }
+    },
+    "issue": {
+      "type": "object",
+      "required": ["severity", "path", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "severity": {
+          "enum": ["error", "warning", "info"]
+        },
+        "path": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

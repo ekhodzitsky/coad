@@ -81,6 +81,7 @@ Private draft. The goal is to turn the original Module Contract Pattern into a b
 7. `docs/validator.md`
 8. `docs/release-gates.md`
 9. `docs/execution-ledger.md`
-10. `docs/tool-output-schemas.md`
-11. `docs/report-versioning.md`
-12. `examples/minimal/`
+10. `docs/conformance-profile.md`
+11. `docs/tool-output-schemas.md`
+12. `docs/report-versioning.md`
+13. `examples/minimal/`

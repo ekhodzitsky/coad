@@ -11,6 +11,7 @@ Current tools:
 - `coad-graph` - exports contract nodes and typed graph edges.
 - `coad-schedule` - builds dependency/write-scope execution waves for tasks.
 - `coad-ledger` - audits durable execution ledgers against task proof contracts.
+- `coad-profile` - reports declared COAD conformance profile status.
 - `coad-drift` - checks whether tool docs, schemas, and CI are aligned.
 
 Planned tools:

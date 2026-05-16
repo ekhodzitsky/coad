@@ -116,6 +116,21 @@ def test_ledger_json_output_matches_report_schema() -> None:
     _assert_matches_report_schema("ledger-report.schema.json", payload)
 
 
+def test_profile_json_output_matches_report_schema() -> None:
+    payload = _run_json(
+        [
+            sys.executable,
+            "-m",
+            "coad_validator.profile_cli",
+            str(ROOT),
+            "--schema-dir",
+            str(SCHEMA_DIR),
+        ]
+    )
+
+    _assert_matches_report_schema("profile-report.schema.json", payload)
+
+
 def test_pack_error_json_output_matches_report_schema() -> None:
     payload = _run_json(
         [
@@ -163,6 +178,16 @@ def test_example_execution_ledger_matches_ledger_schema() -> None:
 
     Draft202012Validator.check_schema(ledger_schema)
     Draft202012Validator(ledger_schema).validate(ledger)
+
+
+def test_conformance_profile_matches_profile_schema() -> None:
+    profile_path = ROOT / "COAD_PROFILE.json"
+    profile_schema_path = SCHEMA_DIR / "conformance-profile.schema.json"
+    profile = json.loads(profile_path.read_text(encoding="utf-8"))
+    profile_schema = json.loads(profile_schema_path.read_text(encoding="utf-8"))
+
+    Draft202012Validator.check_schema(profile_schema)
+    Draft202012Validator(profile_schema).validate(profile)
 
 
 def _run_json(args: list[str]) -> dict[str, Any]:

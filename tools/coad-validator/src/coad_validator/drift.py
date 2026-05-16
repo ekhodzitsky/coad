@@ -17,6 +17,7 @@ REPORT_SCHEMAS = {
     "coad-graph": ["graph-report.schema.json"],
     "coad-schedule": ["schedule-report.schema.json"],
     "coad-ledger": ["ledger-report.schema.json"],
+    "coad-profile": ["profile-report.schema.json"],
     "coad-pack": ["context-pack.schema.json", "pack-error.schema.json"],
 }
 

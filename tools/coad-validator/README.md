@@ -13,6 +13,7 @@ uv run coad-proof-matrix ../.. --schema-dir ../../schema
 uv run coad-graph ../.. --schema-dir ../../schema
 uv run coad-schedule ../.. --schema-dir ../../schema
 uv run coad-ledger ../.. --schema-dir ../../schema
+uv run coad-profile ../.. --schema-dir ../../schema
 uv run coad-drift ../..
 uv run coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
 ```
@@ -25,6 +26,8 @@ reported as `ok: true` and `ready: false` with explicit blockers.
 that an orchestrator can dispatch without overlapping writes inside a wave.
 `coad-ledger` audits durable execution ledgers so completed task events cannot
 claim success without passing every required task proof command.
+`coad-profile` reports the declared COAD conformance level and the concrete
+tool evidence supporting it.
 
 JSON outputs are covered by report schemas in `../../schema/reports/`.
 

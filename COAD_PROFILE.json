@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "kind": "conformance_profile",
+  "profile_id": "coad-ledger-audited-orchestration",
+  "level": "ledger_audited_orchestration",
+  "checks": [
+    {
+      "id": "contracts-valid",
+      "tool": "coad-validate",
+      "required": true,
+      "description": "Contract files validate against schemas and graph references."
+    },
+    {
+      "id": "schedule-builds",
+      "tool": "coad-schedule",
+      "required": true,
+      "description": "Task contracts can be converted into execution waves."
+    },
+    {
+      "id": "execution-ledger-verified",
+      "tool": "coad-ledger",
+      "required": true,
+      "description": "Completed execution events include passing required proof commands."
+    },
+    {
+      "id": "release-gates-clean",
+      "tool": "coad-drift",
+      "required": true,
+      "description": "Release gates, tool docs, report schemas, and CI remain aligned."
+    }
+  ]
+}
