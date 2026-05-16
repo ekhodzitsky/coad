@@ -6,6 +6,7 @@ Current tools:
 
 - `coad-validator` - validates contract schemas and graph references.
 - `coad-pack` - emits bounded task context packs for orchestrators and agents.
+- `coad-status` - reports whether a contract graph is ready or blocked.
 
 Planned tools:
 

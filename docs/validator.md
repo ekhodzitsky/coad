@@ -62,6 +62,26 @@ Failed output includes structured issues:
 }
 ```
 
+## Readiness Status
+
+Use `coad-status` when an orchestrator needs to know whether the validated
+contract graph is ready or blocked:
+
+```bash
+cd tools/coad-validator
+uv run coad-status ../.. --schema-dir ../../schema
+```
+
+The status report is intentionally conservative. A goal is `ready` only when:
+
+- the goal contract declares `status: ready`;
+- every referenced task contract declares `status: complete`;
+- every task has a complete handoff;
+- every required task proof command appears as a passing handoff proof result.
+
+Valid but incomplete graphs return `ok: true` and `ready: false` with blockers.
+Invalid graphs return `ok: false`, `ready: false`, and validation issues.
+
 ## Test Suite
 
 ```bash
@@ -81,6 +101,7 @@ cd tools/coad-validator
 uv run --locked pytest
 uv run --locked coad-validate ../.. --schema-dir ../../schema
 uv run --locked coad-validate ../.. --schema-dir ../../schema --format json
+uv run --locked coad-status ../.. --schema-dir ../../schema
 uv run --locked coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
 jq empty ../../schema/*.json
 ```
