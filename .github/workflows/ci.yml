@@ -45,6 +45,10 @@ jobs:
         working-directory: tools/coad-validator
         run: uv run --locked coad-graph ../.. --schema-dir ../../schema
 
+      - name: Check repository drift
+        working-directory: tools/coad-validator
+        run: uv run --locked coad-drift ../..
+
       - name: Build minimal context pack
         working-directory: tools/coad-validator
         run: uv run --locked coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema > /tmp/coad-pack.json
