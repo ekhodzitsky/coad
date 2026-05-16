@@ -1,15 +1,36 @@
-# COAD: Contract-Orchestrated Agent Development
+# COAD
 
-**Agent-Navigable Codebase Standard**
+**The agent-navigable codebase standard.**
 
-COAD is a lightweight methodology for making software repositories easy for AI
-agents to understand, change, verify, and hand off.
+Make repositories legible to coding agents: small workcells, explicit write
+authority, proof-backed handoffs, and one validator.
 
-COAD does not run agents. COAD makes a codebase understandable to agents.
+```bash
+coad check .
+```
 
-It gives every important part of a project a small local contract: what it
-owns, what it exposes, who depends on it, what must stay true, who may write,
-and which proof is required before work can be called done.
+COAD is not an agent runtime, IDE plugin, prompt pack, or project management
+framework. It is a repository standard for shaping codebases so agents can
+orient quickly, edit inside clear boundaries, and prove their work.
+
+Contract-Orchestrated Agent Development (COAD) is the methodology behind that
+standard.
+
+## Positioning
+
+COAD makes a codebase understandable to agents before they start editing.
+
+It gives every important part of a project a small local contract:
+
+- what it owns;
+- what it exposes;
+- who depends on it;
+- what must stay true;
+- who may write;
+- which proof is required before work can be called done.
+
+Use COAD when you want agents to work from durable repo context instead of chat
+memory, whole-repository dumps, and vague "looks done" claims.
 
 ## Why COAD
 
@@ -22,12 +43,8 @@ Agentic development breaks down when agents:
 - claim completion without repeatable proof;
 - invent abstractions because real boundaries are invisible.
 
-COAD turns those hidden assumptions into repo-native contracts and validates the
-result with one command.
-
-```bash
-coad check .
-```
+COAD turns those hidden assumptions into repo-native contracts and validates
+the result with one command.
 
 ## Core Model
 
@@ -169,7 +186,8 @@ ownership, proof, and safe write scope to any agent.
 
 ## Status
 
-Private draft.
+Early draft. The stable public integration target is intentionally small:
+`coad check .`.
 
 Keywords: AI agents, agentic development, multi-agent software engineering,
 codebase standards, contracts, workcells, orchestration, validation.
