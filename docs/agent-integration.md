@@ -27,6 +27,10 @@ Run it before claiming a task, handoff, review, or PR is complete. A passing
 result means the repository's COAD contracts are structurally valid and the
 methodology evidence is consistent.
 
+`coad check .` does not execute arbitrary proof commands from module contracts.
+Agents must also run the relevant workcell verification commands before
+claiming the adopted workcell is ready.
+
 Default text output is intentionally one line:
 
 ```text

@@ -19,9 +19,10 @@ coad check .
 3. Add or update the target repository `AGENTS.md` with COAD guidance.
 4. Add one `MODULE_CONTRACT.md` for that real workcell.
 5. Ensure the workcell has `README.md` and `TODO.md`.
-6. Run `coad check .`.
-7. Fix any reported COAD adoption issues.
-8. Report changed files, selected workcell, verification output, and remaining
+6. Run the workcell verification commands listed in `MODULE_CONTRACT.md`.
+7. Run `coad check .`.
+8. Fix any reported COAD adoption issues.
+9. Report changed files, selected workcell, verification output, and remaining
    adoption gaps.
 
 Do not ask the user to paste files manually. Ask only when repository access,
@@ -138,6 +139,8 @@ COAD onboarding is done when:
 - the target repository has COAD guidance in `AGENTS.md`;
 - at least one real workcell has `MODULE_CONTRACT.md`, `README.md`, and
   `TODO.md`;
+- the selected workcell verification commands have been run or explicitly
+  reported as blocked;
 - `coad check .` passes;
 - the handoff tells the user what was adopted and what remains outside the
   initial workcell.

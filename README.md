@@ -146,8 +146,8 @@ https://github.com/ekhodzitsky/coad
 
 Tell it to adopt COAD in your repository. The agent should read
 [AGENT_ONBOARDING.md](AGENT_ONBOARDING.md), choose one real workcell, add the
-minimal COAD files, run the validator from the public COAD link, and report the
-result.
+minimal COAD files, run the selected workcell verification commands, run the
+validator from the public COAD link, and report the result.
 
 You should not need to paste snippets, copy templates, or create files by hand.
 If the agent cannot install/run the validator because of network or package
