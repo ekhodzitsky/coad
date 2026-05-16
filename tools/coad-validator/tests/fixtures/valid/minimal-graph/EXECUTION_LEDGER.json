@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "kind": "execution_ledger",
+  "run_id": "run-checkout-negative-total-example",
+  "goal_id": "checkout-negative-total-hardening",
+  "entries": [
+    {
+      "event_id": "event-checkout-negative-total-completed",
+      "task_id": "checkout-negative-total-guard",
+      "wave": 1,
+      "agent_id": "codex-example",
+      "role": "executor",
+      "status": "completed",
+      "started_at": "2026-05-16T11:00:00Z",
+      "completed_at": "2026-05-16T11:05:00Z",
+      "proof_results": [
+        {
+          "command": "test checkout.checkout_service.rejects_negative_total",
+          "status": "pass",
+          "artifact": "artifacts/unit-test.txt"
+        },
+        {
+          "command": "test schemas/checkout-decision.schema.json",
+          "status": "pass",
+          "artifact": "artifacts/schema-test.txt"
+        }
+      ],
+      "changed_files": [
+        "checkout/service.py"
+      ],
+      "handoff_path": "HANDOFF.md"
+    }
+  ]
+}

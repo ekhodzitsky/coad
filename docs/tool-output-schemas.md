@@ -10,6 +10,7 @@ Report schemas live under `schema/reports/`:
 - `proof-matrix.schema.json` covers `coad-proof-matrix`.
 - `graph-report.schema.json` covers `coad-graph`.
 - `schedule-report.schema.json` covers `coad-schedule`.
+- `ledger-report.schema.json` covers `coad-ledger`.
 - `drift-report.schema.json` covers `coad-drift`.
 - `context-pack.schema.json` covers successful `coad-pack` output.
 - `pack-error.schema.json` covers failed `coad-pack` output.

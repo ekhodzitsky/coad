@@ -126,6 +126,7 @@ uv run --locked coad-status ../.. --schema-dir ../../schema
 uv run --locked coad-proof-matrix ../.. --schema-dir ../../schema
 uv run --locked coad-graph ../.. --schema-dir ../../schema
 uv run --locked coad-schedule ../.. --schema-dir ../../schema
+uv run --locked coad-ledger ../.. --schema-dir ../../schema
 uv run --locked coad-drift ../..
 uv run --locked coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
 jq empty ../../schema/*.json ../../schema/reports/*.json

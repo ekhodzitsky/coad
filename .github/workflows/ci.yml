@@ -49,6 +49,10 @@ jobs:
         working-directory: tools/coad-validator
         run: uv run --locked coad-schedule ../.. --schema-dir ../../schema
 
+      - name: Audit execution ledgers
+        working-directory: tools/coad-validator
+        run: uv run --locked coad-ledger ../.. --schema-dir ../../schema
+
       - name: Check repository drift
         working-directory: tools/coad-validator
         run: uv run --locked coad-drift ../..

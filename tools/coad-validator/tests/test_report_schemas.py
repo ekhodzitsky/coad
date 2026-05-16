@@ -101,6 +101,21 @@ def test_schedule_json_output_matches_report_schema() -> None:
     _assert_matches_report_schema("schedule-report.schema.json", payload)
 
 
+def test_ledger_json_output_matches_report_schema() -> None:
+    payload = _run_json(
+        [
+            sys.executable,
+            "-m",
+            "coad_validator.ledger_cli",
+            str(FIXTURES / "valid" / "minimal-graph"),
+            "--schema-dir",
+            str(SCHEMA_DIR),
+        ]
+    )
+
+    _assert_matches_report_schema("ledger-report.schema.json", payload)
+
+
 def test_pack_error_json_output_matches_report_schema() -> None:
     payload = _run_json(
         [
@@ -138,6 +153,16 @@ def test_release_manifest_matches_manifest_schema() -> None:
     Draft202012Validator.check_schema(manifest_schema)
     Draft202012Validator(manifest_schema).validate(manifest)
     assert all(gate["required"] is True for gate in manifest["release_gates"])
+
+
+def test_example_execution_ledger_matches_ledger_schema() -> None:
+    ledger_path = ROOT / "examples" / "minimal" / "EXECUTION_LEDGER.json"
+    ledger_schema_path = SCHEMA_DIR / "execution-ledger.schema.json"
+    ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
+    ledger_schema = json.loads(ledger_schema_path.read_text(encoding="utf-8"))
+
+    Draft202012Validator.check_schema(ledger_schema)
+    Draft202012Validator(ledger_schema).validate(ledger)
 
 
 def _run_json(args: list[str]) -> dict[str, Any]:

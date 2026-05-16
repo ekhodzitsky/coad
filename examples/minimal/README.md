@@ -9,6 +9,7 @@ This example shows the smallest useful COAD contract graph:
 - a handoff artifact shape;
 - a review gate;
 - an integration contract;
+- an execution ledger with observed proof results;
 - explicit forbidden mutations that prevent scope drift.
 
 The files are illustrative and do not require an actual checkout implementation.

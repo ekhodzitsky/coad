@@ -12,6 +12,7 @@ uv run coad-status ../.. --schema-dir ../../schema --fail-on-not-ready
 uv run coad-proof-matrix ../.. --schema-dir ../../schema
 uv run coad-graph ../.. --schema-dir ../../schema
 uv run coad-schedule ../.. --schema-dir ../../schema
+uv run coad-ledger ../.. --schema-dir ../../schema
 uv run coad-drift ../..
 uv run coad-pack checkout-negative-total-guard ../../examples/minimal --schema-dir ../../schema
 ```
@@ -22,6 +23,8 @@ conservative readiness report for orchestrators: valid-but-incomplete graphs are
 reported as `ok: true` and `ready: false` with explicit blockers.
 `coad-schedule` turns task dependencies and write scopes into execution waves
 that an orchestrator can dispatch without overlapping writes inside a wave.
+`coad-ledger` audits durable execution ledgers so completed task events cannot
+claim success without passing every required task proof command.
 
 JSON outputs are covered by report schemas in `../../schema/reports/`.
 

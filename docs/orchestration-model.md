@@ -60,5 +60,6 @@ The orchestrator accepts work only when:
 - proof contract passes;
 - review contract passes;
 - handoff contract is complete;
+- execution ledger entries prove completed task claims;
 - contract drift is resolved or accepted;
 - integration contract remains satisfiable.

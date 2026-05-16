@@ -51,6 +51,13 @@
       "required": true
     },
     {
+      "id": "execution-ledger",
+      "name": "Audit execution ledgers",
+      "command": "uv run --locked coad-ledger ../.. --schema-dir ../../schema",
+      "working_directory": "tools/coad-validator",
+      "required": true
+    },
+    {
       "id": "repository-drift",
       "name": "Check repository drift",
       "command": "uv run --locked coad-drift ../..",
