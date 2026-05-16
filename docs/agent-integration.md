@@ -17,6 +17,12 @@ The integration contract is:
 coad check .
 ```
 
+Agents can run that command directly from the public COAD repository:
+
+```bash
+uvx --from 'git+https://github.com/ekhodzitsky/coad.git#subdirectory=tools/coad-validator' coad check .
+```
+
 Run it before claiming a task, handoff, review, or PR is complete. A passing
 result means the repository's COAD contracts are structurally valid and the
 methodology evidence is consistent.

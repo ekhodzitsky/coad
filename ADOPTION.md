@@ -22,6 +22,12 @@ coad check .
 The user should not need to paste snippets, copy templates, or create files by
 hand.
 
+The agent can run the validator directly from the public COAD repository:
+
+```bash
+uvx --from 'git+https://github.com/ekhodzitsky/coad.git#subdirectory=tools/coad-validator' coad check .
+```
+
 The command is the default integration point. It should be run before a
 handoff, review, or PR claim. It prints a single result line for humans and
 supports `--format json` for orchestration.

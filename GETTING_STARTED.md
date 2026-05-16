@@ -16,16 +16,10 @@ You should not need to paste snippets or copy templates by hand.
 
 ## Install
 
-Agents can run the validator directly from the COAD repository URL:
+Agents can run the validator directly from the public COAD repository URL:
 
 ```bash
 uvx --from 'git+https://github.com/ekhodzitsky/coad.git#subdirectory=tools/coad-validator' coad check .
-```
-
-For private repository access over SSH:
-
-```bash
-uvx --from 'git+ssh://git@github.com/ekhodzitsky/coad.git#subdirectory=tools/coad-validator' coad check .
 ```
 
 From this repository:

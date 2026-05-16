@@ -29,29 +29,17 @@ network access, package installation, or write authority is blocked.
 
 ## Validator
 
-If COAD is already installed:
-
-```bash
-coad check .
-```
-
-If you can install from the public GitHub URL:
+The COAD repository is public. Run the validator directly from the public HTTPS
+URL:
 
 ```bash
 uvx --from 'git+https://github.com/ekhodzitsky/coad.git#subdirectory=tools/coad-validator' coad check .
 ```
 
-If the repository is private and the environment has SSH access:
+If `coad` is already installed:
 
 ```bash
-uvx --from 'git+ssh://git@github.com/ekhodzitsky/coad.git#subdirectory=tools/coad-validator' coad check .
-```
-
-If the repository is private and GitHub CLI is authenticated:
-
-```bash
-gh repo clone ekhodzitsky/coad /tmp/coad
-uvx --from /tmp/coad/tools/coad-validator coad check .
+coad check .
 ```
 
 If you are working from a local COAD clone:
@@ -63,6 +51,10 @@ uvx --from /path/to/coad/tools/coad-validator coad check /path/to/target/reposit
 The validator bundles COAD schemas. Do not copy this repository's `schema/`
 directory into the target project unless the user explicitly wants to vendor
 schemas.
+
+If network or Python package tooling prevents the command from running, report
+that as an onboarding blocker instead of asking the user to perform manual
+COAD setup.
 
 ## Minimal Target Shape
 

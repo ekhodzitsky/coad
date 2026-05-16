@@ -11,7 +11,8 @@
 Make repositories legible to coding agents: small workcells, explicit write
 authority, proof-backed handoffs, and one validator.
 
-Give your agent this repository link; the agent should do the onboarding.
+Give your agent `https://github.com/ekhodzitsky/coad`; the agent should do the
+onboarding.
 
 ```bash
 coad check .
@@ -103,14 +104,14 @@ is probably too large and should be split.
 
 ## One Command
 
-Install from a local clone:
+From any target repository, an agent can run the validator directly from the
+public COAD repository:
 
 ```bash
-cd tools/coad-validator
-uv tool install .
+uvx --from 'git+https://github.com/ekhodzitsky/coad.git#subdirectory=tools/coad-validator' coad check .
 ```
 
-Run the public check:
+If `coad` is already installed, the command is simply:
 
 ```bash
 coad check .
@@ -128,7 +129,7 @@ For structured agent/orchestrator output:
 coad check . --format json
 ```
 
-From this repository without installing:
+From a local COAD clone:
 
 ```bash
 cd tools/coad-validator
@@ -145,11 +146,12 @@ https://github.com/ekhodzitsky/coad
 
 Tell it to adopt COAD in your repository. The agent should read
 [AGENT_ONBOARDING.md](AGENT_ONBOARDING.md), choose one real workcell, add the
-minimal COAD files, run `coad check .`, and report the result.
+minimal COAD files, run the validator from the public COAD link, and report the
+result.
 
 You should not need to paste snippets, copy templates, or create files by hand.
-If the agent cannot install/run the validator because of network, package, or
-repository-access limits, that is a tooling blocker for the agent to report.
+If the agent cannot install/run the validator because of network or package
+tooling limits, that is a blocker for the agent to report.
 
 The first adoption bar is intentionally small. Add task, proof, handoff,
 review, integration, and ledger contracts only when the workflow needs more
@@ -205,7 +207,7 @@ ownership, proof, and safe write scope to any agent.
 
 ## Status
 
-Early draft. The stable public integration target is intentionally small:
+Public early draft. The stable integration target is intentionally small:
 `coad check .`.
 
 Keywords: AI agents, agentic development, multi-agent software engineering,
