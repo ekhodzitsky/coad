@@ -143,6 +143,11 @@ Semantic quality failures use codes such as `semantic.placeholder`,
 are intentionally conservative: they catch contracts that are structurally
 valid but not useful enough for a fresh agent to edit safely.
 
+The fixture
+`tools/coad-validator/tests/fixtures/invalid/missing-consumer` demonstrates the
+quality gate: it has COAD guidance and module context files, but fails because
+the public `BillingTotals` surface has no declared consumer.
+
 ## Tool Output Schemas
 
 The JSON output from `coad check . --format json` includes

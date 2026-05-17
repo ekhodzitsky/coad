@@ -64,7 +64,7 @@ def test_repository_validation_skips_templates_and_test_fixtures() -> None:
     report = validate_path(ROOT, schema_dir=SCHEMA_DIR)
 
     assert report.ok, [issue.format(report.root) for issue in report.issues]
-    assert len(report.documents) == 42
+    assert len(report.documents) == 44
 
 
 def test_repository_declares_real_project_module_contracts() -> None:

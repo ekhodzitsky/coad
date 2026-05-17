@@ -7,58 +7,145 @@
 ![Standard](https://img.shields.io/badge/standard-agent--navigable%20codebases-7C3AED)
 ![Status](https://img.shields.io/badge/status-early%20draft-F59E0B)
 
-**The agent-navigable codebase standard.**
+**Stop coding agents from editing across invisible boundaries.**
 
-Make repositories legible to coding agents: small workcells, explicit write
-authority, proof-backed handoffs, and one validator.
+A coding agent can change `src/billing/discounts.ts`, run the obvious tests,
+and still break checkout because the real contract lived in someone's head:
 
-Give your agent `https://github.com/ekhodzitsky/coad`; the agent should do the
-onboarding.
+- checkout consumes discount totals;
+- invoices serialize the same fields;
+- analytics depends on old event names;
+- only one focused proof command catches the full behavior.
+
+COAD puts that context beside the code before the agent edits. Every important
+module gets a small local contract for ownership, surfaces, consumers,
+invariants, allowed writes, forbidden mutations, and proof.
+
+COAD does not run agents. COAD makes repositories understandable to agents.
 
 ```bash
 coad check .
 ```
 
-COAD is not an agent runtime, IDE plugin, prompt pack, or project management
-framework. It is a repository standard for shaping codebases so agents can
-orient quickly, edit inside clear boundaries, and prove their work.
+## 60-Second Demo
 
-Contract-Orchestrated Agent Development (COAD) is the methodology behind that
-standard.
+Before COAD, the agent has to infer the boundary from source files and chat:
 
-## Positioning
+```text
+src/
+  checkout/
+  billing/
+  invoices/
+```
 
-COAD makes a codebase understandable to agents before they start editing.
+The handoff often becomes:
 
-It gives every important part of a project a small local contract:
+```text
+Changed billing. Tests pass.
+```
 
-- what it owns;
-- what it exposes;
-- who depends on it;
-- what must stay true;
-- who may write;
-- which proof is required before work can be called done.
+That is not enough information for autonomous edits.
 
-Use COAD when you want agents to work from durable repo context instead of chat
-memory, whole-repository dumps, and vague "looks done" claims.
+After COAD, the boundary is repo-native:
 
-## Why COAD
+```text
+AGENTS.md
+src/
+  billing/
+    MODULE_CONTRACT.md
+    README.md
+    TODO.md
+```
 
-Agentic development breaks down when agents:
+`MODULE_CONTRACT.md` answers the questions an agent normally has to
+reverse-engineer:
 
-- read too much irrelevant context;
-- miss hidden consumers and invariants;
-- edit overlapping scopes in parallel;
-- hand off chat summaries instead of evidence;
-- claim completion without repeatable proof;
-- invent abstractions because real boundaries are invisible.
+- what `billing` owns and does not own;
+- which public surfaces checkout, invoices, and analytics consume;
+- which invariants must not change silently;
+- which files may be edited;
+- which proof command must pass before handoff.
 
-COAD turns those hidden assumptions into repo-native contracts and validates
-the result with one command.
+Run the reproducible version in [examples/before-after/](examples/before-after/):
 
-The validator also rejects obvious documentation theater: placeholder purposes,
-empty local guidance, missing owned paths, and public surfaces that have no
-declared consumer.
+```bash
+$ uv run --project tools/coad-validator coad check examples/before-after/before --schema-dir schema
+coad check: fail
+
+$ uv run --project tools/coad-validator coad check examples/before-after/after --schema-dir schema
+coad check: pass
+```
+
+The `after/` contract names `BillingTotals`, its checkout consumer, the owned
+files, and the proof command. The next agent gets a durable map instead of a
+chat summary.
+
+COAD also rejects documentation theater. This fixture has `AGENTS.md`,
+`MODULE_CONTRACT.md`, `README.md`, and `TODO.md`, but its public
+`BillingTotals` surface names no consumer:
+
+```bash
+$ uv run --project tools/coad-validator coad check tools/coad-validator/tests/fixtures/invalid/missing-consumer --schema-dir schema --format json
+```
+
+It fails with `semantic.public_surface_without_consumer`. See
+[docs/demo-transcripts.md](docs/demo-transcripts.md) for full output.
+
+## Adopt COAD
+
+Give your coding agent this link:
+
+```text
+https://github.com/ekhodzitsky/coad
+```
+
+Tell it to adopt COAD in your repository. The agent should read
+[AGENT_ONBOARDING.md](AGENT_ONBOARDING.md), choose one real workcell, add the
+minimal COAD files, run the selected workcell verification commands, run the
+validator from the public COAD link, and report the result.
+
+You should not need to paste snippets, copy templates, or create files by hand.
+
+## What You Add
+
+Start with one real module:
+
+```text
+AGENTS.md
+src/
+  checkout/
+    MODULE_CONTRACT.md
+    README.md
+    TODO.md
+```
+
+The first adoption bar is intentionally small. Add task, proof, handoff,
+review, integration, and ledger contracts only when the workflow needs more
+orchestration.
+
+From any target repository, an agent can run the validator directly from the
+public COAD repository:
+
+```bash
+uvx --from 'git+https://github.com/ekhodzitsky/coad.git#subdirectory=tools/coad-validator' coad check .
+```
+
+If `coad` is already installed, the command is simply:
+
+```bash
+coad check .
+```
+
+For structured agent/orchestrator output:
+
+```bash
+coad check . --format json
+```
+
+See [GETTING_STARTED.md](GETTING_STARTED.md) and
+[examples/onboarding/](examples/onboarding/) for the smallest passing setup.
+For active write leases and parallel leaf ownership, see
+[examples/parallel-work/](examples/parallel-work/).
 
 ## Core Model
 
@@ -84,92 +171,6 @@ Active write ownership can be declared in `.coad/leases.yml`; `coad check .`
 rejects unknown workcells, composite write leases, duplicate write leases, and
 write scope outside the workcell's declared ownership.
 
-## What You Add
-
-Start with one real module:
-
-```text
-AGENTS.md
-src/
-  checkout/
-    MODULE_CONTRACT.md
-    README.md
-    TODO.md
-```
-
-The module contract defines:
-
-- ownership boundary;
-- public and internal surfaces;
-- dependencies and consumers;
-- invariants;
-- verification commands;
-- allowed and forbidden mutations;
-- workcell authority and write policy.
-
-Keep local docs short. If a module README becomes an encyclopedia, the workcell
-is probably too large and should be split.
-
-## One Command
-
-From any target repository, an agent can run the validator directly from the
-public COAD repository:
-
-```bash
-uvx --from 'git+https://github.com/ekhodzitsky/coad.git#subdirectory=tools/coad-validator' coad check .
-```
-
-If `coad` is already installed, the command is simply:
-
-```bash
-coad check .
-```
-
-Expected output:
-
-```text
-coad check: pass
-```
-
-For structured agent/orchestrator output:
-
-```bash
-coad check . --format json
-```
-
-From a local COAD clone:
-
-```bash
-cd tools/coad-validator
-uv run coad check ../..
-```
-
-## One-Link Onboarding
-
-Give your coding agent this link:
-
-```text
-https://github.com/ekhodzitsky/coad
-```
-
-Tell it to adopt COAD in your repository. The agent should read
-[AGENT_ONBOARDING.md](AGENT_ONBOARDING.md), choose one real workcell, add the
-minimal COAD files, run the selected workcell verification commands, run the
-validator from the public COAD link, and report the result.
-
-You should not need to paste snippets, copy templates, or create files by hand.
-If the agent cannot install/run the validator because of network or package
-tooling limits, that is a blocker for the agent to report.
-
-The first adoption bar is intentionally small. Add task, proof, handoff,
-review, integration, and ledger contracts only when the workflow needs more
-orchestration.
-
-See [GETTING_STARTED.md](GETTING_STARTED.md) and
-[examples/onboarding/](examples/onboarding/) for the smallest passing setup.
-For active write leases and parallel leaf ownership, see
-[examples/parallel-work/](examples/parallel-work/).
-
 ## Repository Map
 
 ```text
@@ -190,7 +191,9 @@ CHANGELOG.md        Human-readable release history.
 - [COAD_PROJECT_STANDARD.md](COAD_PROJECT_STANDARD.md) - project shape and adoption levels.
 - [AGENT_ONBOARDING.md](AGENT_ONBOARDING.md) - what an agent should do after receiving the COAD link.
 - [AGENT_FLOW.md](AGENT_FLOW.md) - how agents enter, edit, prove, and hand off.
+- [docs/demo-transcripts.md](docs/demo-transcripts.md) - reproducible adoption and semantic-quality demo output.
 - [docs/adoption-smoke-tests.md](docs/adoption-smoke-tests.md) - real one-link onboarding checks against external repositories.
+- [examples/before-after/](examples/before-after/) - reproducible fail/pass adoption demo.
 - [docs/workcells.md](docs/workcells.md) - workcell tree, context budgets, write leases, and authority.
 - [docs/module-contract-checklist.md](docs/module-contract-checklist.md) - semantic quality checklist for module contracts.
 - [docs/landscape.md](docs/landscape.md) - comparison with adjacent agent-development projects.

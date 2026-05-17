@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Reproducible before/after adoption demo showing `coad check` fail before
+  COAD onboarding and pass after adding a billing workcell contract.
+- Demo transcripts documenting both the adoption gate and the semantic quality
+  gate for public surfaces without declared consumers.
+- Regression fixture for `semantic.public_surface_without_consumer` so contract
+  quality checks stay visible in public examples and tests.
+
 ## 0.6.0 - 2026-05-16
 
 ### Added

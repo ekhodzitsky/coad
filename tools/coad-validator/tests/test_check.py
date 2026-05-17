@@ -18,7 +18,10 @@ REPORT_SCHEMA_DIR = SCHEMA_DIR / "reports"
 FIXTURES = Path(__file__).parent / "fixtures"
 MINIMAL_EXAMPLE = ROOT / "examples" / "minimal"
 ONBOARDING_EXAMPLE = ROOT / "examples" / "onboarding"
+BEFORE_AFTER_BEFORE = ROOT / "examples" / "before-after" / "before"
+BEFORE_AFTER_AFTER = ROOT / "examples" / "before-after" / "after"
 ONBOARDING_FIXTURE = FIXTURES / "valid" / "onboarding"
+MISSING_CONSUMER_FIXTURE = FIXTURES / "invalid" / "missing-consumer"
 
 
 def test_check_report_passes_for_valid_methodology_graph() -> None:
@@ -62,6 +65,43 @@ def test_check_report_passes_for_public_onboarding_example() -> None:
         "validation-report",
     }
     assert payload["issues"] == []
+    _assert_matches_report_schema("check-report.schema.json", payload)
+
+
+def test_before_after_example_demonstrates_contract_quality_failure_and_fix() -> None:
+    before = build_check_report(BEFORE_AFTER_BEFORE, schema_dir=SCHEMA_DIR)
+    after = build_check_report(BEFORE_AFTER_AFTER, schema_dir=SCHEMA_DIR)
+
+    assert before["ok"] is False
+    assert before["status"] == "fail"
+    assert {
+        "code": "agent-guidance.failed",
+        "severity": "error",
+        "path": "AGENTS.md",
+        "message": "agent-guidance: missing AGENTS.md with COAD onboarding guidance",
+    } in before["issues"]
+
+    assert after["ok"] is True
+    assert after["status"] == "pass"
+    assert after["issues"] == []
+    _assert_matches_report_schema("check-report.schema.json", before)
+    _assert_matches_report_schema("check-report.schema.json", after)
+
+
+def test_check_report_catches_public_surface_without_consumer() -> None:
+    payload = build_check_report(MISSING_CONSUMER_FIXTURE, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert payload["status"] == "fail"
+    assert {
+        "code": "semantic.public_surface_without_consumer",
+        "severity": "error",
+        "path": "MODULE_CONTRACT.md",
+        "message": (
+            "validation-report: public surface has no declared consumer: "
+            "BillingTotals"
+        ),
+    } in payload["issues"]
     _assert_matches_report_schema("check-report.schema.json", payload)
 
 

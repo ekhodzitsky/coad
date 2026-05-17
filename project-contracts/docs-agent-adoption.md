@@ -19,6 +19,7 @@ workcell:
     - docs/adoption-smoke-tests.md
     - docs/anti-patterns.md
     - docs/context-packs.md
+    - docs/demo-transcripts.md
     - docs/landscape.md
     - docs/maturity-model.md
     - docs/normative-language.md
@@ -52,6 +53,9 @@ dependencies:
   external: []
 consumers:
   - path: AGENT_ONBOARDING.md
+    uses:
+      - AgentAdoptionDocs
+  - path: README.md
     uses:
       - AgentAdoptionDocs
 invariants: []

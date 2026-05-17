@@ -12,6 +12,7 @@ workcell:
   type: composite
   parent: project
   children:
+    - examples/before-after-reference
     - examples/onboarding-reference
     - examples/minimal-reference
     - examples/parallel-work-reference
@@ -42,6 +43,14 @@ surface:
       kind: smoke
       target: examples/onboarding
       command: coad check examples/onboarding
+  - name: BeforeAfterAdoptionDemo
+    kind: example
+    visibility: public
+    contract: Shows a failing unstructured repository beside the smallest passing COAD adoption for the same module boundary.
+    proof:
+      kind: smoke
+      target: examples/before-after
+      command: uv run --project tools/coad-validator pytest tools/coad-validator/tests/test_check.py -q
   - name: MinimalOrchestrationExample
     kind: example
     visibility: public
@@ -76,15 +85,16 @@ consumers:
       - OnboardingExample
   - path: README.md
     uses:
+      - BeforeAfterAdoptionDemo
       - MinimalOrchestrationExample
       - ParallelWorkLeaseExample
 invariants:
   - id: examples-stay-runnable
-    rule: Every committed example must pass `coad check` from the repository root.
+    rule: Every positive committed example must pass `coad check` from the repository root; the before half of the before/after demo is intentionally failing and test-covered.
     proof:
       kind: smoke
       target: examples
-      command: coad check examples/onboarding && coad check examples/minimal && coad check examples/parallel-work
+      command: coad check examples/onboarding && coad check examples/minimal && coad check examples/parallel-work && coad check examples/before-after/after && uv run --project tools/coad-validator pytest tools/coad-validator/tests/test_check.py -q
 verification:
   pre_change:
     - coad check examples/onboarding
@@ -94,8 +104,9 @@ verification:
 agent_policy:
   allowed_mutations:
     - Add examples that demonstrate real adoption or orchestration flows.
+    - Add documented before/after demos when the failing half is covered by validator tests.
   forbidden_mutations:
-    - Add intentionally invalid examples outside tests/fixtures.
+    - Add intentionally invalid examples outside tests/fixtures or documented before/after demos.
   escalation:
     - Example that requires a new contract type
 ---
