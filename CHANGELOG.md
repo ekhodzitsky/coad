@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Added
+
+- Added report builder, CLI, required-source, and negative-path JSON Schema
+  compatibility coverage for manifest-backed report payloads.
+
 ### Fixed
 
 - Registered the required `agent-guidance` report in the report manifest and

@@ -8,11 +8,17 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
-from coad_validator.report_sources import ATTESTATION_SOURCES
+from coad_validator.artifact_export import export_artifacts
+from coad_validator.attest import build_attestation_report
+from coad_validator.check import build_check_report
+from coad_validator.pack import PackFailure, build_context_pack
+from coad_validator.report import versioned_report
+from coad_validator.report_sources import ATTESTATION_SOURCES, CORE_METHODOLOGY_SOURCES, build_source_payload
+from coad_validator.validate import validate_path
 
 ROOT = Path(__file__).resolve().parents[3]
 SCHEMA_DIR = ROOT / "schema"
-REPORT_SCHEMA_DIR = SCHEMA_DIR / "reports"
+BUNDLED_SCHEMA_DIR = ROOT / "tools" / "coad-validator" / "src" / "coad_validator" / "schema"
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
@@ -166,6 +172,49 @@ def test_policy_json_output_matches_report_schema() -> None:
     _assert_matches_report_schema("policy-report.schema.json", payload)
 
 
+def test_graph_json_output_matches_report_schema() -> None:
+    payload = _run_json(
+        [
+            sys.executable,
+            "-m",
+            "coad_validator.graph_report_cli",
+            str(FIXTURES / "valid" / "minimal-graph"),
+            "--schema-dir",
+            str(SCHEMA_DIR),
+        ]
+    )
+
+    _assert_matches_report_schema("graph-report.schema.json", payload)
+
+
+def test_proof_matrix_json_output_matches_report_schema() -> None:
+    payload = _run_json(
+        [
+            sys.executable,
+            "-m",
+            "coad_validator.proof_matrix_cli",
+            str(FIXTURES / "valid" / "minimal-graph"),
+            "--schema-dir",
+            str(SCHEMA_DIR),
+        ]
+    )
+
+    _assert_matches_report_schema("proof-matrix.schema.json", payload)
+
+
+def test_drift_json_output_matches_report_schema() -> None:
+    payload = _run_json(
+        [
+            sys.executable,
+            "-m",
+            "coad_validator.drift_cli",
+            str(ROOT),
+        ]
+    )
+
+    _assert_matches_report_schema("drift-report.schema.json", payload)
+
+
 def test_attestation_json_output_matches_report_schema() -> None:
     payload = _run_json(
         [
@@ -214,6 +263,47 @@ def test_pack_error_json_output_matches_report_schema() -> None:
     _assert_matches_report_schema("pack-error.schema.json", payload)
 
 
+def test_report_builders_match_manifest_schemas(tmp_path: Path) -> None:
+    validation_report = validate_path(ROOT, schema_dir=SCHEMA_DIR)
+    cases = {
+        "check-report": build_check_report(ROOT, schema_dir=SCHEMA_DIR),
+        "attestation-report": build_attestation_report(ROOT, schema_dir=SCHEMA_DIR, contract_report=validation_report),
+        "export-report": export_artifacts(ROOT, schema_dir=SCHEMA_DIR, output_dir=tmp_path / "coad-export"),
+        "context-pack": build_context_pack(FIXTURES / "valid" / "minimal-graph", "checkout-negative-total-guard", schema_dir=SCHEMA_DIR),
+        "pack-error": _pack_error_payload(),
+    }
+    cases.update(
+        {
+            source.name: build_source_payload(source, ROOT, SCHEMA_DIR, validation_report)
+            for source in ATTESTATION_SOURCES
+        }
+    )
+
+    assert set(cases) == set(_report_manifest())
+    for report_name, payload in cases.items():
+        _assert_matches_manifest_report(report_name, payload)
+
+
+def test_negative_report_payloads_match_manifest_schemas(tmp_path: Path) -> None:
+    root = FIXTURES / "invalid" / "missing-proof"
+    validation_report = validate_path(root, schema_dir=SCHEMA_DIR)
+    source_cases = {
+        source.name: build_source_payload(source, root, SCHEMA_DIR, validation_report)
+        for source in CORE_METHODOLOGY_SOURCES
+        if source.name in {"validation-report", "status-report", "proof-matrix", "graph-report", "schedule-report", "ledger-report", "policy-report"}
+    }
+    cases = {
+        "check-report": build_check_report(root, schema_dir=SCHEMA_DIR),
+        "attestation-report": build_attestation_report(root, schema_dir=SCHEMA_DIR, contract_report=validation_report),
+        "export-report": export_artifacts(root, schema_dir=SCHEMA_DIR, output_dir=tmp_path / "coad-export-invalid"),
+        **source_cases,
+    }
+
+    assert all(payload["ok"] is False for payload in cases.values())
+    for report_name, payload in cases.items():
+        _assert_matches_manifest_report(report_name, payload)
+
+
 def test_report_manifest_matches_manifest_schema() -> None:
     manifest_path = SCHEMA_DIR / "report-manifest.json"
     manifest_schema_path = SCHEMA_DIR / "report-manifest.schema.json"
@@ -259,13 +349,12 @@ def test_conformance_profile_matches_profile_schema() -> None:
 
 
 def test_bundled_schemas_match_repository_schemas() -> None:
-    bundled_schema_dir = ROOT / "tools" / "coad-validator" / "src" / "coad_validator" / "schema"
     root_schema_paths = sorted(SCHEMA_DIR.rglob("*.json"))
 
     assert root_schema_paths
     for root_schema_path in root_schema_paths:
         relative_path = root_schema_path.relative_to(SCHEMA_DIR)
-        bundled_schema_path = bundled_schema_dir / relative_path
+        bundled_schema_path = BUNDLED_SCHEMA_DIR / relative_path
         assert bundled_schema_path.is_file()
         assert bundled_schema_path.read_text(encoding="utf-8") == root_schema_path.read_text(encoding="utf-8")
 
@@ -276,7 +365,37 @@ def _run_json(args: list[str]) -> dict[str, Any]:
 
 
 def _assert_matches_report_schema(schema_name: str, payload: dict[str, Any]) -> None:
-    schema_path = REPORT_SCHEMA_DIR / schema_name
+    matches = [
+        report["name"]
+        for report in _report_manifest().values()
+        if Path(report["schema"]).name == schema_name
+    ]
+    assert matches
+    _assert_matches_manifest_report(matches[0], payload)
+
+
+def _assert_matches_manifest_report(report_name: str, payload: dict[str, Any]) -> None:
+    manifest = _report_manifest()
+    assert report_name in manifest
+    relative_schema = Path(manifest[report_name]["schema"])
+    schema_path = SCHEMA_DIR / relative_schema
+    bundled_schema_path = BUNDLED_SCHEMA_DIR / relative_schema
+    assert schema_path.is_file()
+    assert bundled_schema_path.is_file()
+    assert bundled_schema_path.read_text(encoding="utf-8") == schema_path.read_text(encoding="utf-8")
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema).validate(payload)
+
+
+def _report_manifest() -> dict[str, dict[str, Any]]:
+    manifest = json.loads((SCHEMA_DIR / "report-manifest.json").read_text(encoding="utf-8"))
+    return {report["name"]: report for report in manifest["reports"]}
+
+
+def _pack_error_payload() -> dict[str, Any]:
+    try:
+        build_context_pack(FIXTURES / "valid" / "minimal-graph", "missing-task", schema_dir=SCHEMA_DIR)
+    except PackFailure as exc:
+        return versioned_report({"ok": False, "error": str(exc)})
+    raise AssertionError("expected context pack failure")
