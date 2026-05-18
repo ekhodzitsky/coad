@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+### Changed
+
+- Agent onboarding docs, starter templates, and `examples/onboarding` now use
+  the same first-adoption shape: a root `MODULE_CONTRACT.md` points to a real
+  workcell with `workcell.context_path`, while that workcell owns its
+  `README.md` and `TODO.md`.
+
+### Fixed
+
+- Validator static analysis now passes with explicit type narrowing for release
+  gate metadata, lease manifest reads, and optional graph-index lookups.
+
 ## 0.6.1 - 2026-05-18
 
 ### Added

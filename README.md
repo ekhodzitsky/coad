@@ -230,10 +230,11 @@ ownership, proof, and safe write scope to any agent.
 ## Status
 
 Public early draft. The stable integration target is intentionally small:
-`coad check .`. Current version on `main`: `0.6.1`. This version hardens
-validator path and file-read handling so unsafe inputs become structured issues
-instead of process crashes. The current version is recorded in
-[VERSION](VERSION), with release notes in [CHANGELOG.md](CHANGELOG.md).
+`coad check .`. Current released package version: `0.6.1`. This version
+hardens validator path and file-read handling so unsafe inputs become
+structured issues instead of process crashes. The released version is recorded
+in [VERSION](VERSION), with post-release changes tracked under `Unreleased` in
+[CHANGELOG.md](CHANGELOG.md).
 
 Keywords: AI agents, agentic development, multi-agent software engineering,
 codebase standards, contracts, workcells, orchestration, validation.

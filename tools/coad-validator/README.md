@@ -2,7 +2,7 @@
 
 Reference validator for COAD contract files.
 
-Current package version: `0.6.1`.
+Current released package version: `0.6.1`.
 
 ## Usage
 
