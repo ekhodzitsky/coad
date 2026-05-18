@@ -51,6 +51,7 @@ def test_check_report_passes_for_valid_methodology_graph() -> None:
         "handoff-integrity",
         "task-scope-integrity",
         "proof-result-integrity",
+        "contract-update-integrity",
     }
     assert payload["issues"] == []
     _assert_matches_report_schema("check-report.schema.json", payload)
@@ -224,6 +225,9 @@ def test_check_report_skips_handoff_integrity_without_git_context(tmp_path: Path
     proof_result_check = _check(payload, "proof-result-integrity")
     assert proof_result_check["ok"] is True
     assert proof_result_check["status"] == "pass"
+    contract_update_check = _check(payload, "contract-update-integrity")
+    assert contract_update_check["ok"] is True
+    assert contract_update_check["status"] == "skipped"
 
 
 def test_check_report_passes_when_handoff_changed_files_match_git_diff(tmp_path: Path) -> None:
@@ -243,6 +247,9 @@ def test_check_report_passes_when_handoff_changed_files_match_git_diff(tmp_path:
     proof_result_check = _check(payload, "proof-result-integrity")
     assert proof_result_check["ok"] is True
     assert proof_result_check["status"] == "pass"
+    contract_update_check = _check(payload, "contract-update-integrity")
+    assert contract_update_check["ok"] is True
+    assert contract_update_check["status"] == "warning"
 
 
 def test_check_report_fails_when_handoff_changed_files_do_not_match_git_diff(tmp_path: Path) -> None:
@@ -406,6 +413,89 @@ def test_check_report_fails_when_ledger_proof_result_is_not_passing(tmp_path: Pa
     } in payload["issues"]
 
 
+def test_check_report_fails_when_contract_change_is_not_declared(tmp_path: Path) -> None:
+    target = _git_repo_from_minimal_example(
+        tmp_path,
+        task_contract_replacements={
+            "write_scope:\n  - checkout/**": "write_scope:\n  - checkout/**\n  - TASK_CONTRACT.md",
+        },
+    )
+    _replace_handoff_changed_files(target, ["TASK_CONTRACT.md"])
+    _replace_contract_updates(target, [])
+    _replace_text(
+        target / "TASK_CONTRACT.md",
+        "acceptance:\n  - CheckoutService rejects negative totals before producing CheckoutDecision.",
+        (
+            "acceptance:\n"
+            "  - CheckoutService rejects negative totals before producing CheckoutDecision.\n"
+            "  - Contract updates must be declared."
+        ),
+    )
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "handoff-integrity")["status"] == "pass"
+    assert _check(payload, "task-scope-integrity")["status"] == "pass"
+    assert _check(payload, "contract-update-integrity")["status"] == "violation"
+    assert {
+        "code": "contract_update.missing",
+        "severity": "error",
+        "path": "TASK_CONTRACT.md",
+        "message": (
+            "contract-update-integrity: changed methodology file is missing "
+            "from HANDOFF.contract_updates: TASK_CONTRACT.md"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_contract_update_reason_is_empty(tmp_path: Path) -> None:
+    target = _git_repo_from_minimal_example(
+        tmp_path,
+        task_contract_replacements={
+            "write_scope:\n  - checkout/**": "write_scope:\n  - checkout/**\n  - TASK_CONTRACT.md",
+        },
+    )
+    _replace_handoff_changed_files(target, ["TASK_CONTRACT.md"])
+    _replace_contract_updates(target, [("TASK_CONTRACT.md", "")])
+    _replace_text(
+        target / "TASK_CONTRACT.md",
+        "acceptance:\n  - CheckoutService rejects negative totals before producing CheckoutDecision.",
+        (
+            "acceptance:\n"
+            "  - CheckoutService rejects negative totals before producing CheckoutDecision.\n"
+            "  - Empty update reasons are rejected."
+        ),
+    )
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "contract-update-integrity")["status"] == "violation"
+    assert {
+        "code": "contract_update.empty_reason",
+        "severity": "error",
+        "path": "TASK_CONTRACT.md",
+        "message": (
+            "contract-update-integrity: HANDOFF.contract_updates entry "
+            "for TASK_CONTRACT.md must include a non-empty reason"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_warns_when_contract_update_entry_is_not_changed(tmp_path: Path) -> None:
+    target = _git_repo_from_minimal_example(tmp_path)
+    _write(target / "checkout" / "checkout_service.py", "def checkout():\n    return 'ok'\n")
+    _write(target / "checkout" / "test_checkout_service.py", "def test_checkout():\n    assert True\n")
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is True
+    contract_update_check = _check(payload, "contract-update-integrity")
+    assert contract_update_check["ok"] is True
+    assert contract_update_check["status"] == "warning"
+
+
 def test_coad_check_text_output_is_one_line() -> None:
     result = subprocess.run(
         [
@@ -563,6 +653,25 @@ def _replace_handoff_changed_files(root: Path, changed_files: list[str]) -> None
         root / "HANDOFF.md",
         "changed_files:\n  - checkout/checkout_service.py\n  - checkout/test_checkout_service.py",
         f"changed_files:\n{replacement}",
+    )
+
+
+def _replace_contract_updates(root: Path, updates: list[tuple[str, str]]) -> None:
+    if updates:
+        replacement = "\n".join(
+            f"  - path: {path}\n    reason: {json.dumps(reason)}"
+            for path, reason in updates
+        )
+    else:
+        replacement = "[]"
+    _replace_text(
+        root / "HANDOFF.md",
+        (
+            "contract_updates:\n"
+            "  - path: checkout/MODULE_CONTRACT.md\n"
+            "    reason: Added proof for the no-negative-total invariant."
+        ),
+        f"contract_updates: {replacement}" if not updates else f"contract_updates:\n{replacement}",
     )
 
 

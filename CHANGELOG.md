@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.6.5 - 2026-05-18
+
+### Added
+
+- `coad check .` now verifies contract update integrity for changed
+  methodology files, requiring `HANDOFF.contract_updates` entries with
+  non-empty reasons while reporting stale entries as warnings.
+
 ## 0.6.4 - 2026-05-18
 
 ### Added

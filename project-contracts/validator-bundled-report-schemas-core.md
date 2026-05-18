@@ -16,6 +16,7 @@ workcell:
   owns_paths:
     - tools/coad-validator/src/coad_validator/schema/reports/agent-guidance-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/check-report.schema.json
+    - tools/coad-validator/src/coad_validator/schema/reports/contract-update-integrity-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/graph-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/handoff-integrity-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/ledger-report.schema.json

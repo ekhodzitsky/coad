@@ -16,6 +16,7 @@ workcell:
   owns_paths:
     - schema/reports/agent-guidance-report.schema.json
     - schema/reports/check-report.schema.json
+    - schema/reports/contract-update-integrity-report.schema.json
     - schema/reports/graph-report.schema.json
     - schema/reports/handoff-integrity-report.schema.json
     - schema/reports/ledger-report.schema.json

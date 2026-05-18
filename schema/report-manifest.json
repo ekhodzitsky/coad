@@ -93,6 +93,13 @@
       "stability": "stable"
     },
     {
+      "name": "contract-update-integrity",
+      "producer": "coad",
+      "schema": "reports/contract-update-integrity-report.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
       "name": "attestation-report",
       "producer": "coad",
       "schema": "reports/attestation-report.schema.json",

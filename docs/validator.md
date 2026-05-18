@@ -43,6 +43,10 @@ executable before heavier orchestration tooling exists.
 - Proof result integrity when root handoff context is available: required proof
   commands from `TASK_CONTRACT.proof.required` must appear with `status: pass`
   in both `HANDOFF.md` and `EXECUTION_LEDGER.json`.
+- Contract update integrity when Git and root handoff context are available:
+  changed contracts, schemas, and methodology docs must appear in
+  `HANDOFF.contract_updates` with a non-empty `reason`; stale entries are
+  reported as warnings.
 - Cross-contract graph references:
   - goal to modules, tasks, proofs, reviews, and integration;
   - task to modules and proof contracts;

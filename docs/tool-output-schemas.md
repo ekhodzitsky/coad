@@ -12,8 +12,8 @@ Report schemas live under `schema/reports/`:
 - The remaining report schemas cover internal report payloads used by
   `coad check`, tests, and repository self-checks: validation, status, proof
   matrix, graph, schedule, ledger, profile, policy, handoff integrity,
-  task scope integrity, proof result integrity, attestation, export, drift,
-  context pack, and pack errors.
+  task scope integrity, proof result integrity, contract update integrity,
+  attestation, export, drift, context pack, and pack errors.
 
 The machine registry for these reports is `schema/report-manifest.json`.
 

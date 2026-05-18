@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coad.dev/schema/reports/contract-update-integrity-report.schema.json",
+  "title": "COAD Contract Update Integrity Report",
+  "type": "object",
+  "required": ["schema_version", "ok", "status", "base", "changed_methodology_files", "contract_updates", "issues"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "status": {
+      "enum": ["pass", "warning", "violation", "skipped"]
+    },
+    "base": {
+      "type": "string"
+    },
+    "changed_methodology_files": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "contract_updates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/contract_update"
+      }
+    },
+    "skip_reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/issue"
+      }
+    }
+  },
+  "$defs": {
+    "contract_update": {
+      "type": "object",
+      "required": ["path", "reason"],
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    },
+    "issue": {
+      "type": "object",
+      "required": ["code", "severity", "path", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": ["error", "warning", "info"]
+        },
+        "path": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

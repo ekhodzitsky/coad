@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .agent_guidance import build_agent_guidance_report
+from .contract_update_integrity import build_contract_update_integrity_report
 from .drift import build_drift_report
 from .graph_report import build_graph_report
 from .handoff_integrity import build_handoff_integrity_report
@@ -96,6 +97,12 @@ CORE_METHODOLOGY_SOURCES = [
         COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_proof_result_integrity_report(root, schema_dir),
+    ),
+    ReportSource(
+        "contract-update-integrity",
+        COAD_CHECK_PRODUCER,
+        True,
+        lambda root, schema_dir: build_contract_update_integrity_report(root, schema_dir),
     ),
 ]
 
@@ -191,6 +198,11 @@ _CACHED_SOURCE_BUILDERS: dict[str, Callable[[Path, Path, ValidationReport], dict
         report,
     ),
     "proof-result-integrity": lambda root, schema_dir, report: build_proof_result_integrity_report(
+        root,
+        schema_dir,
+        report,
+    ),
+    "contract-update-integrity": lambda root, schema_dir, report: build_contract_update_integrity_report(
         root,
         schema_dir,
         report,

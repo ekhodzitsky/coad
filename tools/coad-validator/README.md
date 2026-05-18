@@ -2,7 +2,7 @@
 
 Reference validator for COAD contract files.
 
-Current released package version: `0.6.4`.
+Current released package version: `0.6.5`.
 
 ## Usage
 
@@ -23,7 +23,8 @@ validation issue instead of terminating the process. When execution contracts
 are present, the same command also
 evaluates readiness, proof evidence, scheduling, ledger evidence, goal policy
 constraints, handoff diff honesty, task write-scope integrity, and proof result
-integrity across handoffs and ledgers.
+integrity across handoffs and ledgers. Methodology file changes must also be
+declared in `HANDOFF.contract_updates` with non-empty reasons.
 
 Internal report builders remain available to this package's tests, but they are
 not user-facing CLI commands.
