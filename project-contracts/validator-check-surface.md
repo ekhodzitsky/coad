@@ -36,7 +36,7 @@ surface:
   - name: coad check
     kind: cli
     visibility: public
-    contract: Runs the single public COAD methodology check command.
+    contract: Runs the single public COAD methodology check command and reuses one validation report across check source builders.
     proof:
       kind: unit-test
       target: tools/coad-validator/tests/test_check.py

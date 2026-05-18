@@ -8,6 +8,7 @@ import yaml
 from jsonschema import Draft202012Validator
 
 from .model import ContractDocument, ValidationIssue
+from .text_io import read_utf8
 from .workcell_graph import _contains_path, _owned_paths, _workcell, _workcell_type
 
 _LEASE_MANIFEST = Path(".coad") / "leases.yml"
@@ -65,7 +66,8 @@ def validate_lease_manifest(
             )
             continue
 
-        scope_paths = _scope_paths(root, document, lease)
+        scope_paths, scope_issues = _scope_paths(root, document, lease, manifest_path)
+        issues.extend(scope_issues)
         owned_paths = _owned_paths(root, document)
         for scope_path in scope_paths:
             if not _inside_any_owned_path(scope_path, owned_paths):
@@ -84,8 +86,18 @@ def validate_lease_manifest(
 
 
 def _read_manifest(path: Path, issues: list[ValidationIssue]) -> dict[str, Any] | None:
+    text, read_error = read_utf8(path)
+    if read_error is not None:
+        issues.append(
+            ValidationIssue(
+                path,
+                f"lease manifest {read_error}",
+                code="lease.manifest_unreadable",
+            )
+        )
+        return None
     try:
-        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        data = yaml.safe_load(text)
     except yaml.YAMLError as exc:
         issues.append(
             ValidationIssue(
@@ -145,15 +157,38 @@ def _scope_paths(
     root: Path,
     document: ContractDocument,
     lease: dict[str, Any],
-) -> list[Path]:
+    manifest_path: Path,
+) -> tuple[list[Path], list[ValidationIssue]]:
     scope = lease.get("scope")
     if not isinstance(scope, list) or not scope:
-        return _owned_paths(root, document)
+        return _owned_paths(root, document), []
     paths: list[Path] = []
+    issues: list[ValidationIssue] = []
     for raw_path in scope:
-        if isinstance(raw_path, str):
-            paths.append((root / raw_path).resolve())
-    return paths
+        if not isinstance(raw_path, str):
+            continue
+        scope_path = Path(raw_path)
+        if scope_path.is_absolute() or ".." in scope_path.parts:
+            issues.append(
+                ValidationIssue(
+                    manifest_path,
+                    f"lease scope must be relative and stay inside the repository: {raw_path}",
+                    code="lease.scope_invalid",
+                )
+            )
+            continue
+        resolved = (root / scope_path).resolve()
+        if not resolved.is_relative_to(root):
+            issues.append(
+                ValidationIssue(
+                    manifest_path,
+                    f"lease scope resolves outside repository: {raw_path}",
+                    code="lease.scope_outside_repository",
+                )
+            )
+            continue
+        paths.append(resolved)
+    return paths, issues
 
 
 def _inside_any_owned_path(scope_path: Path, owned_paths: list[Path]) -> bool:

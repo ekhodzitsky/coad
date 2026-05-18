@@ -4,7 +4,7 @@ kind: module_contract
 module: validator/core
 level: subsystem
 layer: tooling
-purpose: Own core contract discovery, schema validation, module context, budgets, semantic quality, lease manifests, and release metadata checks.
+purpose: Own core contract discovery, safe project-file reads, schema validation, module context, budgets, semantic quality, lease manifests, and release metadata checks.
 status: pilot
 owners:
   - validator-maintainers
@@ -23,11 +23,12 @@ workcell:
     - tools/coad-validator/src/coad_validator/release_metadata.py
     - tools/coad-validator/src/coad_validator/schema.py
     - tools/coad-validator/src/coad_validator/semantic_quality.py
+    - tools/coad-validator/src/coad_validator/text_io.py
     - tools/coad-validator/src/coad_validator/validate.py
     - tools/coad-validator/src/coad_validator/workcell_budget.py
     - tools/coad-validator/src/coad_validator/workcell_graph.py
   context_budget:
-    max_files: 12
+    max_files: 13
     max_source_lines: 1500
     max_contract_lines: 180
     max_readme_lines: 120
@@ -47,6 +48,14 @@ surface:
       kind: unit-test
       target: tools/coad-validator/tests/test_validator.py
       command: uv run --locked pytest tests/test_validator.py
+  - name: read_utf8
+    kind: python-api
+    visibility: internal
+    contract: Converts unreadable project-controlled UTF-8 inputs into validation issues instead of process crashes.
+    proof:
+      kind: unit-test
+      target: tools/coad-validator/tests/test_check.py
+      command: uv run --locked pytest tests/test_check.py tests/test_validator.py
 dependencies:
   internal:
     - module: schema

@@ -1,20 +1,15 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
-from .graph_report import build_graph_report
-from .ledger import build_ledger_report
-from .policy import build_policy_report
-from .proof_matrix import build_proof_matrix
 from .report import versioned_report
 from .report_sources import (
     CORE_METHODOLOGY_SOURCES,
     ONBOARDING_METHODOLOGY_SOURCES,
     ReportSource,
+    build_source_payload,
 )
-from .schedule import build_schedule_report
-from .status import build_status_report
 from .validate import ValidationReport, find_schema_dir, validate_path
 
 EXECUTION_CONTRACT_KINDS = {
@@ -25,18 +20,6 @@ EXECUTION_CONTRACT_KINDS = {
     "integration_contract",
     "review_contract",
 }
-
-CachedSourceBuilder = Callable[..., dict[str, Any]]
-
-_CACHED_SOURCE_BUILDERS: dict[str, CachedSourceBuilder] = {
-    "status-report": build_status_report,
-    "proof-matrix": build_proof_matrix,
-    "graph-report": build_graph_report,
-    "schedule-report": build_schedule_report,
-    "ledger-report": build_ledger_report,
-    "policy-report": build_policy_report,
-}
-
 
 def build_check_report(root: Path, schema_dir: Path | None = None) -> dict[str, Any]:
     resolved_root = root.resolve()
@@ -92,22 +75,7 @@ def _source_payload(
     schema_dir: Path,
     validation_report: ValidationReport,
 ) -> dict[str, Any]:
-    if source.name == "validation-report":
-        return _validation_payload(validation_report)
-    cached_builder = _CACHED_SOURCE_BUILDERS.get(source.name)
-    if cached_builder is not None:
-        return cached_builder(root, schema_dir=schema_dir, contract_report=validation_report)
-    return source.build(root, schema_dir)
-
-
-def _validation_payload(report: ValidationReport) -> dict[str, Any]:
-    return versioned_report(
-        {
-            "contracts": len(report.documents),
-            "issues": [issue.to_json(report.root) for issue in report.issues],
-            "ok": report.ok,
-        }
-    )
+    return build_source_payload(source, root, schema_dir, validation_report)
 
 
 def _extend_issues(

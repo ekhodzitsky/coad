@@ -37,7 +37,7 @@ surface:
   - name: GovernanceReportBuilders
     kind: python-api
     visibility: internal
-    contract: Builds governance and export reports used by higher conformance levels.
+    contract: Builds governance and export reports used by higher conformance levels while sharing cached validation evidence.
     proof:
       kind: unit-test
       target: tools/coad-validator/tests/test_profile.py

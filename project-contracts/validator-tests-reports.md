@@ -4,7 +4,7 @@ kind: module_contract
 module: validator/tests-reports
 level: subsystem
 layer: tooling
-purpose: Own tests for report builders, report CLIs, exports, profiles, and packs.
+purpose: Own tests for report builders, cached report composition, report CLIs, exports, profiles, and packs.
 status: pilot
 owners:
   - validator-maintainers

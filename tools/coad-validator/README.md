@@ -2,6 +2,8 @@
 
 Reference validator for COAD contract files.
 
+Current package version: `0.6.1`.
+
 ## Usage
 
 ```bash
@@ -16,7 +18,9 @@ The validator checks root `AGENTS.md` onboarding guidance, Markdown YAML
 frontmatter against JSON schemas, module `README.md`/`TODO.md` context,
 semantic contract quality, workcell context budgets, optional `.coad/leases.yml`
 write ownership, release metadata consistency when present, and contract graph
-references. When execution contracts are present, the same command also
+references. Invalid UTF-8 in project-controlled inputs is reported as a
+validation issue instead of terminating the process. When execution contracts
+are present, the same command also
 evaluates readiness, proof evidence, scheduling, ledger evidence, and goal
 policy constraints.
 

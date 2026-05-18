@@ -717,6 +717,32 @@ def test_lease_manifest_reports_scope_outside_ownership(tmp_path: Path) -> None:
     )
 
 
+def test_lease_manifest_rejects_absolute_scope_paths(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "checkout")
+    absolute_scope = (tmp_path / "checkout" / "README.md").resolve()
+    _write_lease_manifest(
+        tmp_path,
+        f"""
+        version: 1
+        leases:
+          - workcell: checkout
+            owner: codex
+            mode: write
+            scope:
+              - {absolute_scope}
+        """,
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "lease.scope_invalid"
+        and f"lease scope must be relative and stay inside the repository: {absolute_scope}" in issue.message
+        for issue in report.issues
+    )
+
+
 def test_lease_manifest_rejects_duplicate_write_workcell(tmp_path: Path) -> None:
     _write_workcell_contract(tmp_path, "checkout")
     _write_lease_manifest(
@@ -905,6 +931,19 @@ def test_release_metadata_reports_invalid_package_init_python(tmp_path: Path) ->
     assert any("package __init__.py is invalid Python" in issue.message for issue in report.issues)
 
 
+def test_release_metadata_reports_invalid_utf8_version_without_crashing(tmp_path: Path) -> None:
+    (tmp_path / "VERSION").write_bytes(b"\xff")
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "release.version_unreadable"
+        and issue.message == "VERSION could not be read as UTF-8"
+        for issue in report.issues
+    )
+
+
 def test_semantic_quality_reports_contract_placeholders_and_generic_purpose(tmp_path: Path) -> None:
     _write_workcell_contract(tmp_path, "checkout")
     contract_path = tmp_path / "checkout.md"
@@ -969,6 +1008,24 @@ def test_contract_discovery_skips_generated_dependency_directories(tmp_path: Pat
     report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
 
     assert report.ok, [issue.format(report.root) for issue in report.issues]
+
+
+def test_module_context_rejects_symlink_escape_without_crashing(tmp_path: Path) -> None:
+    outside = tmp_path.parent / f"{tmp_path.name}-outside"
+    outside.mkdir()
+    (outside / "README.md").write_text("# Outside\n\nExternal context.\n", encoding="utf-8")
+    (outside / "TODO.md").write_text("# TODO\n\n- External work.\n", encoding="utf-8")
+    (tmp_path / "checkout").symlink_to(outside, target_is_directory=True)
+    _write_workcell_contract(tmp_path, "checkout", owns_paths=["checkout.md"])
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "module.context_outside_repository"
+        and "module context path resolves outside repository: checkout" in issue.message
+        for issue in report.issues
+    )
 
 
 def _write_workcell_contract(

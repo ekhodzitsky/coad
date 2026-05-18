@@ -8,6 +8,7 @@ REQUIRED_AGENT_CONTEXT_FILES = ("README.md", "TODO.md")
 
 
 def validate_module_context(documents: list[ContractDocument], root: Path) -> list[ValidationIssue]:
+    root = root.resolve()
     issues: list[ValidationIssue] = []
     for document in documents:
         if document.kind != "module_contract":
@@ -25,6 +26,15 @@ def validate_module_context(documents: list[ContractDocument], root: Path) -> li
             )
             continue
         directory = module_directory(root, document, context_path)
+        if not directory.resolve().is_relative_to(root):
+            issues.append(
+                ValidationIssue(
+                    document.path,
+                    f"module context path resolves outside repository: {context_path}",
+                    code="module.context_outside_repository",
+                )
+            )
+            continue
         if not directory.is_dir():
             issues.append(ValidationIssue(directory, f"module directory does not exist: {module}"))
             continue

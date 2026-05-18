@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.6.1 - 2026-05-18
+
 ### Added
 
 - Reproducible before/after adoption demo showing `coad check` fail before
@@ -10,6 +12,15 @@
   gate for public surfaces without declared consumers.
 - Regression fixture for `semantic.public_surface_without_consumer` so contract
   quality checks stay visible in public examples and tests.
+
+### Fixed
+
+- `coad check` now reports invalid UTF-8 in project-controlled inputs as
+  structured validation issues instead of terminating with a traceback.
+- Module context paths and lease write scopes now reject absolute paths,
+  `..` traversal, and symlink escapes outside the repository.
+- Attestation and export report builders now reuse cached validation evidence
+  instead of re-scanning contracts for each report source.
 
 ## 0.6.0 - 2026-05-16
 

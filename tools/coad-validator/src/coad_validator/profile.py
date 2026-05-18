@@ -12,7 +12,8 @@ from .ledger import build_ledger_report
 from .policy import build_policy_report
 from .report import versioned_report
 from .schedule import build_schedule_report
-from .validate import find_schema_dir, validate_path
+from .text_io import read_utf8
+from .validate import ValidationReport, find_schema_dir, validate_path
 
 
 @dataclass(frozen=True)
@@ -29,7 +30,11 @@ class ProfileIssue:
         }
 
 
-def build_profile_report(root: Path, schema_dir: Path | None = None) -> dict[str, Any]:
+def build_profile_report(
+    root: Path,
+    schema_dir: Path | None = None,
+    contract_report: ValidationReport | None = None,
+) -> dict[str, Any]:
     resolved_root = root.resolve()
     resolved_schema_dir = (schema_dir or find_schema_dir(resolved_root)).resolve()
     issues: list[ProfileIssue] = []
@@ -37,7 +42,7 @@ def build_profile_report(root: Path, schema_dir: Path | None = None) -> dict[str
     profile = _load_profile(profile_path, resolved_schema_dir, issues)
 
     checks = [
-        _evaluate_check(check, resolved_root, resolved_schema_dir)
+        _evaluate_check(check, resolved_root, resolved_schema_dir, contract_report)
         for check in _profile_checks(profile)
     ]
     for check in checks:
@@ -61,11 +66,15 @@ def _load_profile(
     schema_dir: Path,
     issues: list[ProfileIssue],
 ) -> dict[str, Any]:
-    try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except FileNotFoundError:
+    if not path.is_file():
         issues.append(ProfileIssue(path, "missing conformance profile"))
         return {}
+    text, read_error = read_utf8(path)
+    if read_error is not None:
+        issues.append(ProfileIssue(path, f"conformance profile {read_error}"))
+        return {}
+    try:
+        payload = json.loads(text or "")
     except json.JSONDecodeError as exc:
         issues.append(ProfileIssue(path, f"invalid conformance profile JSON: {exc.msg}"))
         return {}
@@ -95,11 +104,16 @@ def _profile_checks(profile: dict[str, Any]) -> list[dict[str, Any]]:
     return [check for check in checks if isinstance(check, dict)]
 
 
-def _evaluate_check(check: dict[str, Any], root: Path, schema_dir: Path) -> dict[str, Any]:
+def _evaluate_check(
+    check: dict[str, Any],
+    root: Path,
+    schema_dir: Path,
+    contract_report: ValidationReport | None,
+) -> dict[str, Any]:
     check_id = _string_value(check.get("id"))
     required = check.get("required")
     is_required = required if isinstance(required, bool) else False
-    status, evidence = _check_status(check_id, root, schema_dir)
+    status, evidence = _check_status(check_id, root, schema_dir, contract_report)
     return {
         "id": check_id,
         "status": status,
@@ -108,21 +122,26 @@ def _evaluate_check(check: dict[str, Any], root: Path, schema_dir: Path) -> dict
     }
 
 
-def _check_status(check_id: str, root: Path, schema_dir: Path) -> tuple[str, str]:
+def _check_status(
+    check_id: str,
+    root: Path,
+    schema_dir: Path,
+    contract_report: ValidationReport | None,
+) -> tuple[str, str]:
     if check_id == "contracts-valid":
-        report = validate_path(root, schema_dir=schema_dir)
+        report = contract_report or validate_path(root, schema_dir=schema_dir)
         evidence = f"coad check validation-report ok={str(report.ok).lower()}"
         return ("pass" if report.ok else "fail"), evidence
     if check_id == "schedule-builds":
-        report = build_schedule_report(root, schema_dir=schema_dir)
+        report = build_schedule_report(root, schema_dir=schema_dir, contract_report=contract_report)
         evidence = f"coad check schedule-report status={report['status']}"
         return ("pass" if report["ok"] else "fail"), evidence
     if check_id == "execution-ledger-verified":
-        report = build_ledger_report(root, schema_dir=schema_dir)
+        report = build_ledger_report(root, schema_dir=schema_dir, contract_report=contract_report)
         evidence = f"coad check ledger-report status={report['status']}"
         return ("pass" if report["ok"] else "fail"), evidence
     if check_id == "policy-enforced":
-        report = build_policy_report(root, schema_dir=schema_dir)
+        report = build_policy_report(root, schema_dir=schema_dir, contract_report=contract_report)
         evidence = f"coad check policy-report status={report['status']}"
         return ("pass" if report["ok"] else "fail"), evidence
     if check_id == "release-gates-clean":

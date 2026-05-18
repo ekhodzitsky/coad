@@ -150,6 +150,40 @@ def test_check_report_requires_at_least_one_module_contract(tmp_path: Path) -> N
     _assert_matches_report_schema("check-report.schema.json", payload)
 
 
+def test_check_report_reports_invalid_utf8_markdown_without_crashing(tmp_path: Path) -> None:
+    target = tmp_path / "onboarding"
+    shutil.copytree(ONBOARDING_FIXTURE, target)
+    (target / "bad.md").write_bytes(b"\xff")
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert {
+        "code": "frontmatter.read_failed",
+        "severity": "error",
+        "path": "bad.md",
+        "message": "validation-report: markdown file could not be read as UTF-8",
+    } in payload["issues"]
+    _assert_matches_report_schema("check-report.schema.json", payload)
+
+
+def test_check_report_reports_invalid_utf8_agents_guidance_without_crashing(tmp_path: Path) -> None:
+    target = tmp_path / "onboarding"
+    shutil.copytree(ONBOARDING_FIXTURE, target)
+    (target / "AGENTS.md").write_bytes(b"\xff")
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert {
+        "code": "agent-guidance.failed",
+        "severity": "error",
+        "path": "AGENTS.md",
+        "message": "agent-guidance: AGENTS.md could not be read as UTF-8",
+    } in payload["issues"]
+    _assert_matches_report_schema("check-report.schema.json", payload)
+
+
 def test_validator_package_exposes_only_coad_public_command() -> None:
     pyproject = ROOT / "tools" / "coad-validator" / "pyproject.toml"
     data = tomllib.loads(pyproject.read_text(encoding="utf-8"))

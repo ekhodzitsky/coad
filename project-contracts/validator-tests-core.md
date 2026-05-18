@@ -4,7 +4,7 @@ kind: module_contract
 module: validator/tests-core
 level: subsystem
 layer: tooling
-purpose: Own tests for core validation, public check behavior, report schemas, and report versioning.
+purpose: Own tests for core validation, path-safety regressions, public check behavior, report schemas, and report versioning.
 status: pilot
 owners:
   - validator-maintainers

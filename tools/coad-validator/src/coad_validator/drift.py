@@ -9,6 +9,7 @@ from typing import Any
 import yaml
 
 from .report import versioned_report
+from .text_io import read_utf8
 
 PUBLIC_REPORT_SCHEMAS = {
     "coad": ["check-report.schema.json"],
@@ -138,10 +139,17 @@ def build_drift_report(root: Path) -> dict[str, Any]:
 
 def _tool_scripts(root: Path, issues: list[DriftIssue]) -> list[str]:
     pyproject = root / "tools" / "coad-validator" / "pyproject.toml"
-    try:
-        data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
-    except FileNotFoundError:
+    if not pyproject.is_file():
         issues.append(DriftIssue(pyproject, "missing validator pyproject"))
+        return []
+    text, read_error = read_utf8(pyproject)
+    if read_error is not None:
+        issues.append(DriftIssue(pyproject, f"validator pyproject {read_error}"))
+        return []
+    try:
+        data = tomllib.loads(text or "")
+    except tomllib.TOMLDecodeError as exc:
+        issues.append(DriftIssue(pyproject, f"invalid validator pyproject TOML: {exc}"))
         return []
     scripts = data.get("project", {}).get("scripts", {})
     if not isinstance(scripts, dict):
@@ -162,11 +170,15 @@ def _public_command_needle(script: str) -> str:
 
 def _report_manifest(root: Path, issues: list[DriftIssue]) -> list[dict[str, Any]]:
     manifest_path = root / "schema" / "report-manifest.json"
-    try:
-        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except FileNotFoundError:
+    if not manifest_path.is_file():
         issues.append(DriftIssue(manifest_path, "missing report manifest"))
         return []
+    text, read_error = read_utf8(manifest_path)
+    if read_error is not None:
+        issues.append(DriftIssue(manifest_path, f"report manifest {read_error}"))
+        return []
+    try:
+        payload = json.loads(text or "")
     except json.JSONDecodeError as exc:
         issues.append(DriftIssue(manifest_path, f"invalid report manifest JSON: {exc.msg}"))
         return []
@@ -189,11 +201,15 @@ def _report_manifest(root: Path, issues: list[DriftIssue]) -> list[dict[str, Any
 
 def _release_manifest(root: Path, issues: list[DriftIssue]) -> list[dict[str, Any]]:
     manifest_path = root / "schema" / "release-manifest.json"
-    try:
-        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except FileNotFoundError:
+    if not manifest_path.is_file():
         issues.append(DriftIssue(manifest_path, "missing release manifest"))
         return []
+    text, read_error = read_utf8(manifest_path)
+    if read_error is not None:
+        issues.append(DriftIssue(manifest_path, f"release manifest {read_error}"))
+        return []
+    try:
+        payload = json.loads(text or "")
     except json.JSONDecodeError as exc:
         issues.append(DriftIssue(manifest_path, f"invalid release manifest JSON: {exc.msg}"))
         return []
@@ -252,11 +268,14 @@ def _workflow_has_gate(steps: list[dict[str, Any]], name: str, command: str, wor
 
 
 def _read_text(path: Path, issues: list[DriftIssue]) -> str:
-    try:
-        return path.read_text(encoding="utf-8")
-    except FileNotFoundError:
+    if not path.is_file():
         issues.append(DriftIssue(path, "missing required drift check file"))
         return ""
+    text, read_error = read_utf8(path)
+    if read_error is not None:
+        issues.append(DriftIssue(path, f"required drift check file {read_error}"))
+        return ""
+    return text or ""
 
 
 def _require_text(

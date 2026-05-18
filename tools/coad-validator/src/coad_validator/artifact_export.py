@@ -7,7 +7,13 @@ from typing import Any
 
 from .attest import build_attestation_report
 from .report import versioned_report
-from .report_sources import ATTESTATION_SOURCES, COAD_CHECK_PRODUCER, ReportSource
+from .report_sources import (
+    ATTESTATION_SOURCES,
+    COAD_CHECK_PRODUCER,
+    ReportSource,
+    build_source_payload,
+)
+from .validate import find_schema_dir, validate_path
 
 
 def export_artifacts(
@@ -16,14 +22,19 @@ def export_artifacts(
     output_dir: Path | None = None,
 ) -> dict[str, Any]:
     resolved_root = root.resolve()
-    resolved_schema_dir = (schema_dir or resolved_root / "schema").resolve()
+    resolved_schema_dir = (schema_dir or find_schema_dir(resolved_root)).resolve()
     resolved_output_dir = (output_dir or resolved_root / ".coad-export").resolve()
     resolved_output_dir.mkdir(parents=True, exist_ok=True)
+    validation_report = validate_path(resolved_root, schema_dir=resolved_schema_dir)
 
     issues: list[dict[str, str]] = []
     artifacts: list[dict[str, Any]] = []
 
-    attestation = build_attestation_report(resolved_root, schema_dir=resolved_schema_dir)
+    attestation = build_attestation_report(
+        resolved_root,
+        schema_dir=resolved_schema_dir,
+        contract_report=validation_report,
+    )
     artifacts.append(
         _write_artifact(
             resolved_output_dir,
@@ -36,7 +47,12 @@ def export_artifacts(
     )
 
     for source in ATTESTATION_SOURCES:
-        payload = source.build(resolved_root, resolved_schema_dir)
+        payload = build_source_payload(
+            source,
+            resolved_root,
+            resolved_schema_dir,
+            validation_report,
+        )
         artifacts.append(
             _write_source_artifact(
                 resolved_output_dir,

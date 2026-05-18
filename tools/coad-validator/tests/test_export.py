@@ -9,7 +9,18 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
+import coad_validator.artifact_export as artifact_export_module
+import coad_validator.attest as attest_module
+import coad_validator.graph_report as graph_report_module
+import coad_validator.ledger as ledger_module
+import coad_validator.policy as policy_module
+import coad_validator.profile as profile_module
+import coad_validator.proof_matrix as proof_matrix_module
+import coad_validator.report_sources as report_sources_module
+import coad_validator.schedule as schedule_module
+import coad_validator.status as status_module
 from coad_validator.artifact_export import export_artifacts
+from coad_validator.validate import validate_path as original_validate_path
 
 ROOT = Path(__file__).resolve().parents[3]
 SCHEMA_DIR = ROOT / "schema"
@@ -66,6 +77,40 @@ def test_export_artifacts_fails_when_required_report_fails(tmp_path: Path) -> No
         for artifact in payload["artifacts"]
     )
     _assert_matches_report_schema("export-report.schema.json", payload)
+
+
+def test_export_artifacts_reuses_validation_report_for_internal_sources(
+    monkeypatch: Any,
+    tmp_path: Path,
+) -> None:
+    calls = 0
+
+    def counting_validate_path(*args: Any, **kwargs: Any) -> Any:
+        nonlocal calls
+        calls += 1
+        return original_validate_path(*args, **kwargs)
+
+    def fail_revalidation(*_args: Any, **_kwargs: Any) -> Any:
+        raise AssertionError("export source builder revalidated contracts")
+
+    monkeypatch.setattr(artifact_export_module, "validate_path", counting_validate_path, raising=False)
+    monkeypatch.setattr(attest_module, "validate_path", fail_revalidation, raising=False)
+    for module in (
+        graph_report_module,
+        ledger_module,
+        policy_module,
+        profile_module,
+        proof_matrix_module,
+        report_sources_module,
+        schedule_module,
+        status_module,
+    ):
+        monkeypatch.setattr(module, "validate_path", fail_revalidation)
+
+    payload = export_artifacts(ROOT, schema_dir=SCHEMA_DIR, output_dir=tmp_path / "coad-export")
+
+    assert payload["ok"] is True
+    assert calls == 1
 
 
 def test_export_cli_output_matches_schema(tmp_path: Path) -> None:

@@ -14,7 +14,7 @@ from .proof_matrix import build_proof_matrix
 from .report import versioned_report
 from .schedule import build_schedule_report
 from .status import build_status_report
-from .validate import validate_path
+from .validate import ValidationReport, validate_path
 
 COAD_CHECK_PRODUCER = "coad check"
 
@@ -99,6 +99,26 @@ ATTESTATION_SOURCES = [
 
 def build_validation_report(root: Path, schema_dir: Path) -> dict[str, Any]:
     report = validate_path(root, schema_dir=schema_dir)
+    return build_validation_payload(report)
+
+
+def build_source_payload(
+    source: ReportSource,
+    root: Path,
+    schema_dir: Path,
+    contract_report: ValidationReport | None = None,
+) -> dict[str, Any]:
+    if contract_report is None:
+        return source.build(root, schema_dir)
+    if source.name == "validation-report":
+        return build_validation_payload(contract_report)
+    cached_builder = _CACHED_SOURCE_BUILDERS.get(source.name)
+    if cached_builder is not None:
+        return cached_builder(root, schema_dir, contract_report)
+    return source.build(root, schema_dir)
+
+
+def build_validation_payload(report: ValidationReport) -> dict[str, Any]:
     return versioned_report(
         {
             "contracts": len(report.documents),
@@ -106,3 +126,42 @@ def build_validation_report(root: Path, schema_dir: Path) -> dict[str, Any]:
             "ok": report.ok,
         }
     )
+
+
+_CACHED_SOURCE_BUILDERS: dict[str, Callable[[Path, Path, ValidationReport], dict[str, Any]]] = {
+    "status-report": lambda root, schema_dir, report: build_status_report(
+        root,
+        schema_dir=schema_dir,
+        contract_report=report,
+    ),
+    "proof-matrix": lambda root, schema_dir, report: build_proof_matrix(
+        root,
+        schema_dir=schema_dir,
+        contract_report=report,
+    ),
+    "graph-report": lambda root, schema_dir, report: build_graph_report(
+        root,
+        schema_dir=schema_dir,
+        contract_report=report,
+    ),
+    "schedule-report": lambda root, schema_dir, report: build_schedule_report(
+        root,
+        schema_dir=schema_dir,
+        contract_report=report,
+    ),
+    "ledger-report": lambda root, schema_dir, report: build_ledger_report(
+        root,
+        schema_dir=schema_dir,
+        contract_report=report,
+    ),
+    "policy-report": lambda root, schema_dir, report: build_policy_report(
+        root,
+        schema_dir=schema_dir,
+        contract_report=report,
+    ),
+    "profile-report": lambda root, schema_dir, report: build_profile_report(
+        root,
+        schema_dir=schema_dir,
+        contract_report=report,
+    ),
+}

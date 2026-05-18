@@ -6,6 +6,7 @@ from typing import Any
 import yaml
 
 from .model import ContractDocument, ValidationIssue
+from .text_io import read_utf8
 
 _DELIMITER = "---"
 _SKIP_DIRS = {
@@ -24,7 +25,15 @@ _SKIP_DIRS = {
 
 
 def read_contract(path: Path) -> tuple[ContractDocument | None, ValidationIssue | None]:
-    text = path.read_text(encoding="utf-8")
+    text, read_error = read_utf8(path)
+    if read_error is not None:
+        return None, ValidationIssue(
+            path,
+            f"markdown file {read_error}",
+            code="frontmatter.read_failed",
+        )
+    if text is None:
+        return None, None
     if not text.startswith(f"{_DELIMITER}\n"):
         return None, None
 

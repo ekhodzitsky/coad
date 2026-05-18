@@ -10,6 +10,7 @@ from jsonschema import Draft202012Validator
 from .graph_index import ContractIndex
 from .model import ContractDocument
 from .report import versioned_report
+from .text_io import read_utf8
 from .validate import ValidationReport, find_schema_dir, validate_path
 
 
@@ -72,8 +73,17 @@ def _ledger_payload(
     schema_dir: Path,
     issues: list[LedgerIssue],
 ) -> dict[str, Any]:
+    text, read_error = read_utf8(path)
+    if read_error is not None:
+        issues.append(LedgerIssue(path, f"execution ledger {read_error}"))
+        return {
+            "path": _relative_path(path, root),
+            "run_id": "",
+            "goal_id": "",
+            "entries": [],
+        }
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
+        payload = json.loads(text or "")
     except json.JSONDecodeError as exc:
         issues.append(LedgerIssue(path, f"invalid execution ledger JSON: {exc.msg}"))
         return {

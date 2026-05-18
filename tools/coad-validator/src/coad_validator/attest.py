@@ -6,18 +6,24 @@ from pathlib import Path
 from typing import Any
 
 from .report import versioned_report
-from .report_sources import ATTESTATION_SOURCES, ReportSource
+from .report_sources import ATTESTATION_SOURCES, ReportSource, build_source_payload
+from .validate import ValidationReport, find_schema_dir, validate_path
 
 
 SOURCES = ATTESTATION_SOURCES
 
 
-def build_attestation_report(root: Path, schema_dir: Path | None = None) -> dict[str, Any]:
+def build_attestation_report(
+    root: Path,
+    schema_dir: Path | None = None,
+    contract_report: ValidationReport | None = None,
+) -> dict[str, Any]:
     resolved_root = root.resolve()
-    resolved_schema_dir = (schema_dir or resolved_root / "schema").resolve()
+    resolved_schema_dir = (schema_dir or find_schema_dir(resolved_root)).resolve()
+    validation_report = contract_report or validate_path(resolved_root, schema_dir=resolved_schema_dir)
     issues: list[dict[str, str]] = []
     reports = [
-        _attested_report(source, resolved_root, resolved_schema_dir, issues)
+        _attested_report(source, resolved_root, resolved_schema_dir, validation_report, issues)
         for source in SOURCES
     ]
     bundle_digest = _sha256(
@@ -48,9 +54,10 @@ def _attested_report(
     source: ReportSource,
     root: Path,
     schema_dir: Path,
+    validation_report: ValidationReport,
     issues: list[dict[str, str]],
 ) -> dict[str, Any]:
-    payload = source.build(root, schema_dir)
+    payload = build_source_payload(source, root, schema_dir, validation_report)
     ok = payload.get("ok") is True
     if source.required and not ok:
         issues.append(

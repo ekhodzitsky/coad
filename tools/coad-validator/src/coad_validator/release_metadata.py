@@ -5,6 +5,7 @@ import tomllib
 from pathlib import Path
 
 from .model import ValidationIssue
+from .text_io import read_utf8
 
 
 def validate_release_metadata(root: Path) -> list[ValidationIssue]:
@@ -22,8 +23,10 @@ def validate_release_metadata(root: Path) -> list[ValidationIssue]:
     if not changelog_path.is_file():
         issues.append(ValidationIssue(changelog_path, "release metadata is missing CHANGELOG.md"))
 
-    version = _read_version(version_path)
-    if version_path.exists() and version is None:
+    version, version_issue = _read_version_report(version_path)
+    if version_issue is not None:
+        issues.append(version_issue)
+    elif version_path.exists() and version is None:
         issues.append(ValidationIssue(version_path, "VERSION must contain exactly one non-empty version line"))
 
     pyproject_version, pyproject_issue = _read_pyproject_version_report(pyproject_path)
@@ -52,24 +55,37 @@ def validate_release_metadata(root: Path) -> list[ValidationIssue]:
             )
         )
 
-    if version is not None and changelog_path.exists() and not _changelog_has_version(changelog_path, version):
-        issues.append(ValidationIssue(changelog_path, f"CHANGELOG.md is missing an entry for VERSION {version}"))
+    if version is not None and changelog_path.exists():
+        has_changelog_version, changelog_issue = _changelog_has_version_report(changelog_path, version)
+        if changelog_issue is not None:
+            issues.append(changelog_issue)
+        elif not has_changelog_version:
+            issues.append(ValidationIssue(changelog_path, f"CHANGELOG.md is missing an entry for VERSION {version}"))
 
     return issues
 
 
-def _read_version(path: Path) -> str | None:
+def _read_version_report(path: Path) -> tuple[str | None, ValidationIssue | None]:
     if not path.is_file():
-        return None
-    lines = [line.strip() for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
+        return None, None
+    text, read_error = read_utf8(path)
+    if read_error is not None:
+        return None, ValidationIssue(path, f"VERSION {read_error}", code="release.version_unreadable")
+    lines = [line.strip() for line in (text or "").splitlines() if line.strip()]
     if len(lines) != 1:
-        return None
-    return lines[0]
+        return None, None
+    return lines[0], None
 
 
 def _read_pyproject_version_report(path: Path) -> tuple[str | None, ValidationIssue | None]:
     try:
         return _read_pyproject_version(path), None
+    except _ReleaseReadError as exc:
+        return None, ValidationIssue(
+            path,
+            f"pyproject.toml {exc}",
+            code="release.pyproject_unreadable",
+        )
     except tomllib.TOMLDecodeError as exc:
         return None, ValidationIssue(path, f"pyproject.toml is invalid TOML: {exc}")
 
@@ -77,7 +93,10 @@ def _read_pyproject_version_report(path: Path) -> tuple[str | None, ValidationIs
 def _read_pyproject_version(path: Path) -> str | None:
     if not path.is_file():
         return None
-    data = tomllib.loads(path.read_text(encoding="utf-8"))
+    text, read_error = read_utf8(path)
+    if read_error is not None:
+        raise _ReleaseReadError(read_error)
+    data = tomllib.loads(text or "")
     project = data.get("project")
     if not isinstance(project, dict):
         return None
@@ -88,6 +107,12 @@ def _read_pyproject_version(path: Path) -> str | None:
 def _read_package_version_report(path: Path) -> tuple[str | None, ValidationIssue | None]:
     try:
         return _read_package_version(path), None
+    except _ReleaseReadError as exc:
+        return None, ValidationIssue(
+            path,
+            f"package __init__.py {exc}",
+            code="release.package_unreadable",
+        )
     except SyntaxError as exc:
         return None, ValidationIssue(path, f"package __init__.py is invalid Python: {exc.msg}")
 
@@ -95,7 +120,10 @@ def _read_package_version_report(path: Path) -> tuple[str | None, ValidationIssu
 def _read_package_version(path: Path) -> str | None:
     if not path.is_file():
         return None
-    tree = ast.parse(path.read_text(encoding="utf-8"))
+    text, read_error = read_utf8(path)
+    if read_error is not None:
+        raise _ReleaseReadError(read_error)
+    tree = ast.parse(text or "")
     for statement in tree.body:
         if not isinstance(statement, ast.Assign):
             continue
@@ -107,9 +135,16 @@ def _read_package_version(path: Path) -> str | None:
     return None
 
 
-def _changelog_has_version(path: Path, version: str) -> bool:
-    for line in path.read_text(encoding="utf-8").splitlines():
+def _changelog_has_version_report(path: Path, version: str) -> tuple[bool, ValidationIssue | None]:
+    text, read_error = read_utf8(path)
+    if read_error is not None:
+        return False, ValidationIssue(path, f"CHANGELOG.md {read_error}", code="release.changelog_unreadable")
+    for line in (text or "").splitlines():
         stripped = line.strip()
         if stripped.startswith("## ") and version in stripped:
-            return True
-    return False
+            return True, None
+    return False, None
+
+
+class _ReleaseReadError(Exception):
+    pass

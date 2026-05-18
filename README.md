@@ -3,7 +3,6 @@
 [![CI](https://github.com/ekhodzitsky/coad/actions/workflows/ci.yml/badge.svg)](https://github.com/ekhodzitsky/coad/actions/workflows/ci.yml)
 ![Python](https://img.shields.io/badge/python-%3E%3D3.11-3776AB?logo=python&logoColor=white)
 ![CLI](https://img.shields.io/badge/CLI-coad%20check%20.-111827)
-![Version](https://img.shields.io/badge/version-0.6.0-2563EB)
 ![Standard](https://img.shields.io/badge/standard-agent--navigable%20codebases-7C3AED)
 ![Status](https://img.shields.io/badge/status-early%20draft-F59E0B)
 
@@ -50,15 +49,16 @@ After COAD, the boundary is repo-native:
 
 ```text
 AGENTS.md
+MODULE_CONTRACT.md
 src/
   billing/
-    MODULE_CONTRACT.md
     README.md
     TODO.md
 ```
 
-`MODULE_CONTRACT.md` answers the questions an agent normally has to
-reverse-engineer:
+In this demo, the root `MODULE_CONTRACT.md` points at `src/billing` with
+`workcell.context_path`. The contract answers the questions an agent normally
+has to reverse-engineer:
 
 - what `billing` owns and does not own;
 - which public surfaces checkout, invoices, and analytics consume;
@@ -122,6 +122,8 @@ src/
 The first adoption bar is intentionally small. Add task, proof, handoff,
 review, integration, and ledger contracts only when the workflow needs more
 orchestration.
+
+The commands below require Python 3.11 or newer and `uv`.
 
 From any target repository, an agent can run the validator directly from the
 public COAD repository:
@@ -224,8 +226,10 @@ ownership, proof, and safe write scope to any agent.
 ## Status
 
 Public early draft. The stable integration target is intentionally small:
-`coad check .`. The current version is recorded in [VERSION](VERSION), with
-release notes in [CHANGELOG.md](CHANGELOG.md).
+`coad check .`. Current release: `0.6.1`. This release hardens validator
+path and file-read handling so unsafe inputs become structured issues instead
+of process crashes. The current version is recorded in [VERSION](VERSION),
+with release notes in [CHANGELOG.md](CHANGELOG.md).
 
 Keywords: AI agents, agentic development, multi-agent software engineering,
 codebase standards, contracts, workcells, orchestration, validation.

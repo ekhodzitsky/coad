@@ -10,7 +10,8 @@ executable before heavier orchestration tooling exists.
 - Markdown files with YAML frontmatter and `kind: *_contract`.
 - JSON Schema conformance for each contract type.
 - Module contracts point to real module directories with `README.md` and
-  `TODO.md` agent context files.
+  `TODO.md` agent context files. Context paths must stay inside the repository
+  after symlink resolution.
 - Module contract semantic quality: obvious placeholders, too-generic module
   purpose, public surfaces without declared consumers, placeholder proof
   targets or commands, empty local context files, and missing `owns_paths`.
@@ -21,7 +22,8 @@ executable before heavier orchestration tooling exists.
 - Leaf workcell ownership: `owns_paths` cannot overlap between leaf workcells.
 - Optional active lease manifest at `.coad/leases.yml`: write leases must point
   to known leaf workcells, must be unique per workcell, and must stay inside
-  declared ownership.
+  declared ownership. Explicit lease scopes must be repository-relative and
+  cannot escape through `..` or symlinks.
 - Workcell context budgets declared in `workcell.context_budget`: file count,
   source lines, contract length, README length, TODO length, surface count, and
   invariant count.
@@ -38,7 +40,9 @@ executable before heavier orchestration tooling exists.
 
 The validator skips `templates/` because templates contain placeholders. It also
 skips `tests/fixtures/` during repository-wide validation so intentional invalid
-fixtures do not fail CI.
+fixtures do not fail CI. Invalid UTF-8 in project-controlled Markdown,
+metadata, lease, ledger, profile, or drift-check inputs is reported as a
+structured issue instead of a process traceback.
 
 ## Local Usage
 
@@ -133,7 +137,8 @@ Issue `code` values are stable machine keys. Agents should branch on `code`
 instead of parsing English messages.
 
 Lease-related failures use codes such as `lease.workcell_unknown`,
-`lease.composite_write_forbidden`, `lease.scope_outside_ownership`, and
+`lease.composite_write_forbidden`, `lease.scope_invalid`,
+`lease.scope_outside_repository`, `lease.scope_outside_ownership`, and
 `lease.write_conflict`.
 
 Semantic quality failures use codes such as `semantic.placeholder`,
