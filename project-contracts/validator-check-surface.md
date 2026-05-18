@@ -19,12 +19,13 @@ workcell:
     - tools/coad-validator/src/coad_validator/cli.py
     - tools/coad-validator/src/coad_validator/coad_cli.py
     - tools/coad-validator/src/coad_validator/handoff_integrity.py
+    - tools/coad-validator/src/coad_validator/proof_result_integrity.py
     - tools/coad-validator/src/coad_validator/report.py
     - tools/coad-validator/src/coad_validator/report_sources.py
     - tools/coad-validator/src/coad_validator/task_scope_integrity.py
   context_budget:
     max_files: 12
-    max_source_lines: 1800
+    max_source_lines: 2250
     max_contract_lines: 180
     max_readme_lines: 120
     max_todo_lines: 80

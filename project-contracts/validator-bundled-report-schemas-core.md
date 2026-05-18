@@ -20,6 +20,7 @@ workcell:
     - tools/coad-validator/src/coad_validator/schema/reports/handoff-integrity-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/ledger-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/proof-matrix.schema.json
+    - tools/coad-validator/src/coad_validator/schema/reports/proof-result-integrity-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/schedule-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/status-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/task-scope-integrity-report.schema.json

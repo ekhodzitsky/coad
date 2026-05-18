@@ -20,6 +20,7 @@ workcell:
     - schema/reports/handoff-integrity-report.schema.json
     - schema/reports/ledger-report.schema.json
     - schema/reports/proof-matrix.schema.json
+    - schema/reports/proof-result-integrity-report.schema.json
     - schema/reports/schedule-report.schema.json
     - schema/reports/status-report.schema.json
     - schema/reports/task-scope-integrity-report.schema.json

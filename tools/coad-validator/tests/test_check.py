@@ -14,6 +14,7 @@ import coad_validator.graph_report as graph_report_module
 import coad_validator.ledger as ledger_module
 import coad_validator.policy as policy_module
 import coad_validator.proof_matrix as proof_matrix_module
+import coad_validator.proof_result_integrity as proof_result_integrity_module
 import coad_validator.report_sources as report_sources_module
 import coad_validator.schedule as schedule_module
 import coad_validator.status as status_module
@@ -49,6 +50,7 @@ def test_check_report_passes_for_valid_methodology_graph() -> None:
         "policy-report",
         "handoff-integrity",
         "task-scope-integrity",
+        "proof-result-integrity",
     }
     assert payload["issues"] == []
     _assert_matches_report_schema("check-report.schema.json", payload)
@@ -219,6 +221,9 @@ def test_check_report_skips_handoff_integrity_without_git_context(tmp_path: Path
     task_scope_check = _check(payload, "task-scope-integrity")
     assert task_scope_check["ok"] is True
     assert task_scope_check["status"] == "skipped"
+    proof_result_check = _check(payload, "proof-result-integrity")
+    assert proof_result_check["ok"] is True
+    assert proof_result_check["status"] == "pass"
 
 
 def test_check_report_passes_when_handoff_changed_files_match_git_diff(tmp_path: Path) -> None:
@@ -235,6 +240,9 @@ def test_check_report_passes_when_handoff_changed_files_match_git_diff(tmp_path:
     task_scope_check = _check(payload, "task-scope-integrity")
     assert task_scope_check["ok"] is True
     assert task_scope_check["status"] == "pass"
+    proof_result_check = _check(payload, "proof-result-integrity")
+    assert proof_result_check["ok"] is True
+    assert proof_result_check["status"] == "pass"
 
 
 def test_check_report_fails_when_handoff_changed_files_do_not_match_git_diff(tmp_path: Path) -> None:
@@ -305,6 +313,95 @@ def test_check_report_fails_when_git_diff_hits_forbidden_mutation(tmp_path: Path
         "message": (
             "task-scope-integrity: changed file matches TASK_CONTRACT.forbidden_mutations "
             "for checkout-negative-total-guard: billing/discounts.py matches billing/**"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_handoff_omits_required_proof_result(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _replace_text(
+        target / "HANDOFF.md",
+        (
+            "proof_results:\n"
+            "  - command: test checkout.checkout_service.rejects_negative_total\n"
+            "    status: pass\n"
+            "  - command: test schemas/checkout-decision.schema.json\n"
+            "    status: pass"
+        ),
+        (
+            "proof_results:\n"
+            "  - command: test schemas/checkout-decision.schema.json\n"
+            "    status: pass"
+        ),
+    )
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-result-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_result.handoff_missing",
+        "severity": "error",
+        "path": "HANDOFF.md",
+        "message": (
+            "proof-result-integrity: required proof command missing from "
+            "HANDOFF.proof_results for checkout-negative-total-guard: "
+            "test checkout.checkout_service.rejects_negative_total"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_handoff_proof_result_is_not_passing(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _replace_text(
+        target / "HANDOFF.md",
+        (
+            "  - command: test checkout.checkout_service.rejects_negative_total\n"
+            "    status: pass"
+        ),
+        (
+            "  - command: test checkout.checkout_service.rejects_negative_total\n"
+            "    status: fail"
+        ),
+    )
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-result-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_result.handoff_not_passing",
+        "severity": "error",
+        "path": "HANDOFF.md",
+        "message": (
+            "proof-result-integrity: required proof command is not passing in "
+            "HANDOFF.proof_results for checkout-negative-total-guard: "
+            "test checkout.checkout_service.rejects_negative_total has status fail"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_ledger_proof_result_is_not_passing(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    ledger = _read_ledger(target)
+    ledger["entries"][0]["proof_results"][0]["status"] = "fail"
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-result-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_result.ledger_not_passing",
+        "severity": "error",
+        "path": "EXECUTION_LEDGER.json",
+        "message": (
+            "proof-result-integrity: required proof command is not passing in "
+            "EXECUTION_LEDGER.json for checkout-negative-total-guard: "
+            "test checkout.checkout_service.rejects_negative_total has status fail"
         ),
     } in payload["issues"]
 
@@ -391,6 +488,7 @@ def test_coad_check_reuses_validation_report_for_internal_sources(monkeypatch: A
         ledger_module,
         policy_module,
         proof_matrix_module,
+        proof_result_integrity_module,
         report_sources_module,
         schedule_module,
         status_module,
@@ -473,6 +571,17 @@ def _replace_text(path: Path, old: str, new: str) -> None:
     if old not in text:
         raise AssertionError(f"missing fixture text in {path}: {old!r}")
     path.write_text(text.replace(old, new), encoding="utf-8")
+
+
+def _read_ledger(root: Path) -> dict[str, Any]:
+    return json.loads((root / "EXECUTION_LEDGER.json").read_text(encoding="utf-8"))
+
+
+def _write_ledger(root: Path, payload: dict[str, Any]) -> None:
+    (root / "EXECUTION_LEDGER.json").write_text(
+        json.dumps(payload, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
 
 def _assert_matches_report_schema(schema_name: str, payload: dict[str, Any]) -> None:

@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coad.dev/schema/reports/proof-result-integrity-report.schema.json",
+  "title": "COAD Proof Result Integrity Report",
+  "type": "object",
+  "required": ["schema_version", "ok", "status", "task_id", "required_commands", "handoff_results", "ledger_results", "issues"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "status": {
+      "enum": ["pass", "violation", "skipped"]
+    },
+    "task_id": {
+      "type": "string"
+    },
+    "required_commands": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "handoff_results": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/proof_result"
+      }
+    },
+    "ledger_results": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/proof_result"
+      }
+    },
+    "skip_reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/issue"
+      }
+    }
+  },
+  "$defs": {
+    "proof_result": {
+      "type": "object",
+      "required": ["command", "status", "source"],
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "type": "string",
+          "minLength": 1
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "source": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "issue": {
+      "type": "object",
+      "required": ["code", "severity", "path", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": ["error", "warning", "info"]
+        },
+        "path": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

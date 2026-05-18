@@ -232,8 +232,8 @@ ownership, proof, and safe write scope to any agent.
 ## Status
 
 Public early draft. The stable integration target is intentionally small:
-`coad check .`. Current released package version: `0.6.3`. This release
-hardens Git-backed execution integrity for root handoffs and task write scopes.
+`coad check .`. Current released package version: `0.6.4`. This release
+hardens proof result integrity across task contracts, handoffs, and ledgers.
 The released version is recorded in [VERSION](VERSION), with release
 notes in [CHANGELOG.md](CHANGELOG.md).
 

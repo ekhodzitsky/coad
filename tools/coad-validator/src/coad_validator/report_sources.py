@@ -12,6 +12,7 @@ from .ledger import build_ledger_report
 from .policy import build_policy_report
 from .profile import build_profile_report
 from .proof_matrix import build_proof_matrix
+from .proof_result_integrity import build_proof_result_integrity_report
 from .report import versioned_report
 from .schedule import build_schedule_report
 from .status import build_status_report
@@ -89,6 +90,12 @@ CORE_METHODOLOGY_SOURCES = [
         COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_task_scope_integrity_report(root, schema_dir),
+    ),
+    ReportSource(
+        "proof-result-integrity",
+        COAD_CHECK_PRODUCER,
+        True,
+        lambda root, schema_dir: build_proof_result_integrity_report(root, schema_dir),
     ),
 ]
 
@@ -179,6 +186,11 @@ _CACHED_SOURCE_BUILDERS: dict[str, Callable[[Path, Path, ValidationReport], dict
         report,
     ),
     "task-scope-integrity": lambda root, schema_dir, report: build_task_scope_integrity_report(
+        root,
+        schema_dir,
+        report,
+    ),
+    "proof-result-integrity": lambda root, schema_dir, report: build_proof_result_integrity_report(
         root,
         schema_dir,
         report,

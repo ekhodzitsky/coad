@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.6.4 - 2026-05-18
+
+### Added
+
+- `coad check .` now verifies proof result integrity across root `HANDOFF.md`,
+  the referenced `TASK_CONTRACT.proof.required`, and `EXECUTION_LEDGER.json`.
+
 ## 0.6.3 - 2026-05-18
 
 ### Added

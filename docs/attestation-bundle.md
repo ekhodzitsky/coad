@@ -25,6 +25,7 @@ The current bundle includes:
 - policy report;
 - handoff integrity report;
 - task scope integrity report;
+- proof result integrity report;
 - drift report.
 
 Every included report is required. If any required report has `ok: false`, the

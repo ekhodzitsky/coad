@@ -16,6 +16,7 @@ import coad_validator.ledger as ledger_module
 import coad_validator.policy as policy_module
 import coad_validator.profile as profile_module
 import coad_validator.proof_matrix as proof_matrix_module
+import coad_validator.proof_result_integrity as proof_result_integrity_module
 import coad_validator.report_sources as report_sources_module
 import coad_validator.schedule as schedule_module
 import coad_validator.status as status_module
@@ -49,6 +50,7 @@ def test_export_artifacts_writes_bundle_manifest_and_reports(tmp_path: Path) -> 
         "policy-report",
         "handoff-integrity",
         "task-scope-integrity",
+        "proof-result-integrity",
         "drift-report",
     }
     assert (output_dir / "manifest.json").is_file()
@@ -104,6 +106,7 @@ def test_export_artifacts_reuses_validation_report_for_internal_sources(
         policy_module,
         profile_module,
         proof_matrix_module,
+        proof_result_integrity_module,
         report_sources_module,
         schedule_module,
         status_module,
