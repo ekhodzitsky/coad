@@ -10,7 +10,7 @@ from jsonschema import Draft202012Validator
 from .graph_index import ContractIndex
 from .model import ContractDocument
 from .report import versioned_report
-from .validate import find_schema_dir, validate_path
+from .validate import ValidationReport, find_schema_dir, validate_path
 
 
 @dataclass(frozen=True)
@@ -27,8 +27,12 @@ class LedgerIssue:
         }
 
 
-def build_ledger_report(root: Path, schema_dir: Path | None = None) -> dict[str, Any]:
-    contract_report = validate_path(root, schema_dir=schema_dir)
+def build_ledger_report(
+    root: Path,
+    schema_dir: Path | None = None,
+    contract_report: ValidationReport | None = None,
+) -> dict[str, Any]:
+    contract_report = contract_report or validate_path(root, schema_dir=schema_dir)
     resolved_schema_dir = (schema_dir or find_schema_dir(contract_report.root)).resolve()
     if not contract_report.ok:
         return versioned_report(

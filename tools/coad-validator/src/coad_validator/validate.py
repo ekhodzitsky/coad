@@ -34,6 +34,7 @@ def validate_path(root: Path, schema_dir: Path | None = None, check_graph: bool 
     resolved_schema_dir = (schema_dir or find_schema_dir(resolved_root)).resolve()
 
     documents, issues = discover_contracts(resolved_root)
+    issues.extend(validate_required_contracts(documents, resolved_root))
     issues.extend(validate_schemas(documents, resolved_schema_dir))
     issues.extend(validate_module_context(documents, resolved_root))
     issues.extend(validate_workcell_budgets(documents, resolved_root))
@@ -45,6 +46,18 @@ def validate_path(root: Path, schema_dir: Path | None = None, check_graph: bool 
         issues.extend(validate_graph(documents))
 
     return ValidationReport(resolved_root, documents, issues)
+
+
+def validate_required_contracts(documents: list[ContractDocument], root: Path) -> list[ValidationIssue]:
+    if any(document.kind == "module_contract" for document in documents):
+        return []
+    return [
+        ValidationIssue(
+            root / "MODULE_CONTRACT.md",
+            "missing at least one module_contract",
+            code="validation.module_contract_missing",
+        )
+    ]
 
 
 def find_schema_dir(start: Path) -> Path:

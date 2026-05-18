@@ -9,8 +9,8 @@ from .module_context import (
     REQUIRED_AGENT_CONTEXT_FILES,
     module_context_path,
     module_directory,
-    resolve_contract_relative_path,
 )
+from .ownership import validate_owned_path_references
 
 _ANGLE_PLACEHOLDER = re.compile(
     r"<[^>\n]*(?:todo|tbd|replace|module|name|path|target|command|proof|owner)[^>\n]*>",
@@ -175,30 +175,7 @@ def _validate_context_files(root: Path, document: ContractDocument) -> list[Vali
 
 
 def _validate_owned_paths(root: Path, document: ContractDocument) -> list[ValidationIssue]:
-    workcell = document.data.get("workcell")
-    if not isinstance(workcell, dict):
-        return []
-    owns_paths = workcell.get("owns_paths")
-    if not isinstance(owns_paths, list):
-        return []
-
-    issues: list[ValidationIssue] = []
-    for raw_path in owns_paths:
-        if not isinstance(raw_path, str) or not raw_path:
-            continue
-        owned_path = Path(raw_path)
-        if owned_path.is_absolute() or ".." in owned_path.parts:
-            continue
-        target = resolve_contract_relative_path(root, document, owned_path)
-        if not target.exists():
-            issues.append(
-                _issue(
-                    document,
-                    f"workcell owns_path does not exist: {raw_path}",
-                    "semantic.owns_path_missing",
-                )
-            )
-    return issues
+    return validate_owned_path_references(root, document)
 
 
 def _contract_strings(data: dict[str, Any]) -> list[tuple[str, str]]:

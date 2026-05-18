@@ -10,6 +10,14 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
+import coad_validator.graph_report as graph_report_module
+import coad_validator.ledger as ledger_module
+import coad_validator.policy as policy_module
+import coad_validator.proof_matrix as proof_matrix_module
+import coad_validator.report_sources as report_sources_module
+import coad_validator.schedule as schedule_module
+import coad_validator.status as status_module
+from coad_validator import check as check_module
 from coad_validator.check import build_check_report
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -123,6 +131,25 @@ def test_check_report_requires_root_agents_onboarding_guidance(tmp_path: Path) -
     _assert_matches_report_schema("check-report.schema.json", payload)
 
 
+def test_check_report_requires_at_least_one_module_contract(tmp_path: Path) -> None:
+    (tmp_path / "AGENTS.md").write_text(
+        "Use COAD, run coad check ., and maintain MODULE_CONTRACT files.\n",
+        encoding="utf-8",
+    )
+
+    payload = build_check_report(tmp_path, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert payload["status"] == "fail"
+    assert {
+        "code": "validation.module_contract_missing",
+        "severity": "error",
+        "path": "MODULE_CONTRACT.md",
+        "message": "validation-report: missing at least one module_contract",
+    } in payload["issues"]
+    _assert_matches_report_schema("check-report.schema.json", payload)
+
+
 def test_validator_package_exposes_only_coad_public_command() -> None:
     pyproject = ROOT / "tools" / "coad-validator" / "pyproject.toml"
     data = tomllib.loads(pyproject.read_text(encoding="utf-8"))
@@ -204,6 +231,36 @@ def test_coad_check_uses_bundled_schemas_when_repo_has_no_schema_dir(tmp_path: P
     assert result.returncode == 0
     assert result.stdout == "coad check: pass\n"
     assert result.stderr == ""
+
+
+def test_coad_check_reuses_validation_report_for_internal_sources(monkeypatch: Any) -> None:
+    calls = 0
+    original_validate_path = check_module.validate_path
+
+    def counting_validate_path(*args: Any, **kwargs: Any) -> Any:
+        nonlocal calls
+        calls += 1
+        return original_validate_path(*args, **kwargs)
+
+    def fail_revalidation(*_args: Any, **_kwargs: Any) -> Any:
+        raise AssertionError("coad check source builder revalidated contracts")
+
+    monkeypatch.setattr(check_module, "validate_path", counting_validate_path)
+    for module in (
+        graph_report_module,
+        ledger_module,
+        policy_module,
+        proof_matrix_module,
+        report_sources_module,
+        schedule_module,
+        status_module,
+    ):
+        monkeypatch.setattr(module, "validate_path", fail_revalidation)
+
+    payload = build_check_report(MINIMAL_EXAMPLE, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is True
+    assert calls == 1
 
 
 def test_coad_check_json_output_matches_schema() -> None:

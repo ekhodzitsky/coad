@@ -554,6 +554,51 @@ def test_workcell_graph_reports_leaf_owned_path_overlap(tmp_path: Path) -> None:
     )
 
 
+def test_workcell_owned_paths_must_be_relative_repository_paths(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "checkout", owns_paths=["/tmp/outside", "../outside"])
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert [
+        issue.code
+        for issue in report.issues
+        if issue.code == "semantic.owns_path_invalid"
+    ] == ["semantic.owns_path_invalid", "semantic.owns_path_invalid"]
+
+
+def test_workcell_owned_paths_reject_symlink_escape_without_crashing(tmp_path: Path) -> None:
+    outside = tmp_path.parent / f"{tmp_path.name}-outside"
+    outside.mkdir()
+    _write_workcell_contract(tmp_path, "checkout", owns_paths=["checkout/outside-link"])
+    (tmp_path / "checkout" / "outside-link").symlink_to(outside, target_is_directory=True)
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "semantic.owns_path_outside_repository"
+        and "workcell owns_path resolves outside repository: checkout/outside-link" in issue.message
+        for issue in report.issues
+    )
+
+
+def test_workcell_owned_path_overlap_with_symlink_escape_reports_issue_instead_of_crashing(
+    tmp_path: Path,
+) -> None:
+    outside = tmp_path.parent / f"{tmp_path.name}-shared-outside"
+    outside.mkdir()
+    _write_workcell_contract(tmp_path, "checkout", owns_paths=["checkout/outside-link"])
+    _write_workcell_contract(tmp_path, "billing", owns_paths=["billing/outside-link"])
+    (tmp_path / "checkout" / "outside-link").symlink_to(outside, target_is_directory=True)
+    (tmp_path / "billing" / "outside-link").symlink_to(outside, target_is_directory=True)
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert sum(issue.code == "semantic.owns_path_outside_repository" for issue in report.issues) == 2
+
+
 def test_check_json_propagates_stable_issue_codes(tmp_path: Path) -> None:
     _write_workcell_contract(tmp_path, "checkout", parent="commerce")
     (tmp_path / "AGENTS.md").write_text("Use COAD and run coad check .\n", encoding="utf-8")
@@ -823,6 +868,43 @@ def test_release_metadata_requires_package_version_to_match_version_file(tmp_pat
     assert any("package __version__ 0.0.9 does not match VERSION 0.1.0" in issue.message for issue in report.issues)
 
 
+def test_release_metadata_reports_invalid_pyproject_toml(tmp_path: Path) -> None:
+    validator_dir = tmp_path / "tools" / "coad-validator"
+    validator_dir.mkdir(parents=True)
+    (validator_dir / "pyproject.toml").write_text("[project\n", encoding="utf-8")
+    (tmp_path / "VERSION").write_text("0.1.0\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n## 0.1.0 - 2026-05-16\n", encoding="utf-8")
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any("pyproject.toml is invalid TOML" in issue.message for issue in report.issues)
+
+
+def test_release_metadata_reports_invalid_package_init_python(tmp_path: Path) -> None:
+    validator_dir = tmp_path / "tools" / "coad-validator"
+    package_dir = validator_dir / "src" / "coad_validator"
+    package_dir.mkdir(parents=True)
+    (validator_dir / "pyproject.toml").write_text(
+        textwrap.dedent(
+            """
+            [project]
+            name = "coad-validator"
+            version = "0.1.0"
+            """
+        ).strip(),
+        encoding="utf-8",
+    )
+    (package_dir / "__init__.py").write_text("__version__ =\n", encoding="utf-8")
+    (tmp_path / "VERSION").write_text("0.1.0\n", encoding="utf-8")
+    (tmp_path / "CHANGELOG.md").write_text("# Changelog\n\n## 0.1.0 - 2026-05-16\n", encoding="utf-8")
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any("package __init__.py is invalid Python" in issue.message for issue in report.issues)
+
+
 def test_semantic_quality_reports_contract_placeholders_and_generic_purpose(tmp_path: Path) -> None:
     _write_workcell_contract(tmp_path, "checkout")
     contract_path = tmp_path / "checkout.md"
@@ -873,6 +955,20 @@ def test_semantic_quality_reports_empty_context_and_missing_owned_path(tmp_path:
     assert not report.ok
     assert "semantic.context_file_empty" in codes
     assert "semantic.owns_path_missing" in codes
+
+
+def test_contract_discovery_skips_generated_dependency_directories(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "checkout")
+    generated_dir = tmp_path / "node_modules" / "broken-package"
+    generated_dir.mkdir(parents=True)
+    (generated_dir / "README.md").write_text(
+        "---\nkind: module_contract\n",
+        encoding="utf-8",
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert report.ok, [issue.format(report.root) for issue in report.issues]
 
 
 def _write_workcell_contract(

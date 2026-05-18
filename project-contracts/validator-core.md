@@ -19,6 +19,7 @@ workcell:
     - tools/coad-validator/src/coad_validator/lease_manifest.py
     - tools/coad-validator/src/coad_validator/model.py
     - tools/coad-validator/src/coad_validator/module_context.py
+    - tools/coad-validator/src/coad_validator/ownership.py
     - tools/coad-validator/src/coad_validator/release_metadata.py
     - tools/coad-validator/src/coad_validator/schema.py
     - tools/coad-validator/src/coad_validator/semantic_quality.py

@@ -26,8 +26,10 @@ def validate_release_metadata(root: Path) -> list[ValidationIssue]:
     if version_path.exists() and version is None:
         issues.append(ValidationIssue(version_path, "VERSION must contain exactly one non-empty version line"))
 
-    pyproject_version = _read_pyproject_version(pyproject_path)
-    if pyproject_path.exists() and pyproject_version is None:
+    pyproject_version, pyproject_issue = _read_pyproject_version_report(pyproject_path)
+    if pyproject_issue is not None:
+        issues.append(pyproject_issue)
+    elif pyproject_path.exists() and pyproject_version is None:
         issues.append(ValidationIssue(pyproject_path, "pyproject.toml is missing [project].version"))
     if version is not None and pyproject_version is not None and pyproject_version != version:
         issues.append(
@@ -37,8 +39,10 @@ def validate_release_metadata(root: Path) -> list[ValidationIssue]:
             )
         )
 
-    package_version = _read_package_version(package_init_path)
-    if package_init_path.exists() and package_version is None:
+    package_version, package_issue = _read_package_version_report(package_init_path)
+    if package_issue is not None:
+        issues.append(package_issue)
+    elif package_init_path.exists() and package_version is None:
         issues.append(ValidationIssue(package_init_path, "package __init__.py is missing __version__"))
     if version is not None and package_version is not None and package_version != version:
         issues.append(
@@ -63,6 +67,13 @@ def _read_version(path: Path) -> str | None:
     return lines[0]
 
 
+def _read_pyproject_version_report(path: Path) -> tuple[str | None, ValidationIssue | None]:
+    try:
+        return _read_pyproject_version(path), None
+    except tomllib.TOMLDecodeError as exc:
+        return None, ValidationIssue(path, f"pyproject.toml is invalid TOML: {exc}")
+
+
 def _read_pyproject_version(path: Path) -> str | None:
     if not path.is_file():
         return None
@@ -72,6 +83,13 @@ def _read_pyproject_version(path: Path) -> str | None:
         return None
     version = project.get("version")
     return version if isinstance(version, str) and version else None
+
+
+def _read_package_version_report(path: Path) -> tuple[str | None, ValidationIssue | None]:
+    try:
+        return _read_package_version(path), None
+    except SyntaxError as exc:
+        return None, ValidationIssue(path, f"package __init__.py is invalid Python: {exc.msg}")
 
 
 def _read_package_version(path: Path) -> str | None:

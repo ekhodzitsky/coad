@@ -7,8 +7,8 @@ from .model import ContractDocument, ValidationIssue
 from .module_context import (
     module_context_path,
     module_directory,
-    resolve_contract_relative_path,
 )
+from .ownership import owned_paths
 
 _AGENT_CONTEXT_FILES = {"AGENTS.md", "MODULE_CONTRACT.md", "README.md", "TODO.md"}
 _SKIP_DIRS = {
@@ -81,14 +81,8 @@ def _owned_files(root: Path, document: ContractDocument, workcell: dict[str, Any
         return _walk_files(module_dir)
 
     files: list[Path] = []
-    for raw_path in raw_paths:
-        if not isinstance(raw_path, str) or not raw_path:
-            continue
-        owned_path = Path(raw_path)
-        if owned_path.is_absolute() or ".." in owned_path.parts:
-            continue
-
-        target = resolve_contract_relative_path(root, document, owned_path)
+    for entry in owned_paths(root, document):
+        target = entry.resolved
         if target.is_file() and _is_counted_file(target):
             files.append(target)
         elif target.is_dir():

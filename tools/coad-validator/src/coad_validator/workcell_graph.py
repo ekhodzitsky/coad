@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from .model import ContractDocument, ValidationIssue
-from .module_context import resolve_contract_relative_path
+from .ownership import owned_paths
 
 
 def validate_workcell_graph(documents: list[ContractDocument], root: Path) -> list[ValidationIssue]:
@@ -122,7 +122,7 @@ def _validate_composite_owned_paths(
                         ValidationIssue(
                             document.path,
                             "composite workcell owns child implementation path: "
-                            f"{module} owns {parent_path.relative_to(root)} used by {child}",
+                            f"{module} owns {_relative_path(parent_path, root)} used by {child}",
                             code="workcell.composite_owns_child_path",
                         )
                     )
@@ -152,8 +152,8 @@ def _validate_leaf_owned_path_overlaps(
                     ValidationIssue(
                         left_document.path,
                         "workcell owns_path overlaps: "
-                        f"{left_module} {left_path.relative_to(root)} overlaps with "
-                        f"{right_module} {right_path.relative_to(root)}",
+                        f"{left_module} {_relative_path(left_path, root)} overlaps with "
+                        f"{right_module} {_relative_path(right_path, root)}",
                         code="workcell.owns_path_overlap",
                     )
                 )
@@ -162,26 +162,18 @@ def _validate_leaf_owned_path_overlaps(
 
 
 def _owned_paths(root: Path, document: ContractDocument) -> list[Path]:
-    workcell = _workcell(document)
-    if workcell is None:
-        return []
-    owns_paths = workcell.get("owns_paths")
-    if not isinstance(owns_paths, list):
-        return []
-    paths: list[Path] = []
-    for raw_path in owns_paths:
-        if not isinstance(raw_path, str) or not raw_path:
-            continue
-        owned_path = Path(raw_path)
-        if owned_path.is_absolute() or ".." in owned_path.parts:
-            continue
-        target = resolve_contract_relative_path(root, document, owned_path)
-        paths.append(target.resolve())
-    return paths
+    return [entry.resolved for entry in owned_paths(root, document)]
 
 
 def _contains_path(parent_path: Path, child_path: Path) -> bool:
     return child_path == parent_path or child_path.is_relative_to(parent_path)
+
+
+def _relative_path(path: Path, root: Path) -> str:
+    try:
+        return str(path.relative_to(root))
+    except ValueError:
+        return str(path)
 
 
 def _workcell(document: ContractDocument) -> dict[str, Any] | None:

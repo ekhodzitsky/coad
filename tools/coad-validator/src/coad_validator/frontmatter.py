@@ -8,6 +8,19 @@ import yaml
 from .model import ContractDocument, ValidationIssue
 
 _DELIMITER = "---"
+_SKIP_DIRS = {
+    ".git",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".venv",
+    "__pycache__",
+    "build",
+    "dist",
+    "node_modules",
+    "target",
+    "templates",
+}
 
 
 def read_contract(path: Path) -> tuple[ContractDocument | None, ValidationIssue | None]:
@@ -49,7 +62,7 @@ def discover_contracts(root: Path) -> tuple[list[ContractDocument], list[Validat
 
 def _should_skip(path: Path, skip_test_fixtures: bool) -> bool:
     parts = path.parts
-    if any(part in {".git", ".venv", "templates", "__pycache__"} for part in parts):
+    if any(part in _SKIP_DIRS for part in parts):
         return True
     return skip_test_fixtures and _inside_test_fixtures(path)
 

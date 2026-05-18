@@ -7,7 +7,7 @@ from typing import Any
 from .graph_index import ContractIndex, string_list
 from .model import ContractDocument
 from .report import versioned_report
-from .validate import validate_path
+from .validate import ValidationReport, validate_path
 
 
 @dataclass(frozen=True)
@@ -24,8 +24,12 @@ class PolicyIssue:
         }
 
 
-def build_policy_report(root: Path, schema_dir: Path | None = None) -> dict[str, Any]:
-    report = validate_path(root, schema_dir=schema_dir)
+def build_policy_report(
+    root: Path,
+    schema_dir: Path | None = None,
+    contract_report: ValidationReport | None = None,
+) -> dict[str, Any]:
+    report = contract_report or validate_path(root, schema_dir=schema_dir)
     if not report.ok:
         return versioned_report(
             {
