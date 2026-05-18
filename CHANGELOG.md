@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.6.2 - 2026-05-18
+
 ### Changed
 
 - Agent onboarding docs, starter templates, and `examples/onboarding` now use
