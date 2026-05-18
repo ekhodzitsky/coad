@@ -113,11 +113,17 @@ def build_drift_report(root: Path) -> dict[str, Any]:
         command = gate.get("command")
         working_directory = gate.get("working_directory")
         required = gate.get("required")
-        has_gate_identity = all(
-            isinstance(value, str) and value
-            for value in (gate_id, name, command, working_directory)
-        )
-        if not has_gate_identity or not isinstance(required, bool):
+        if not (
+            isinstance(gate_id, str)
+            and gate_id
+            and isinstance(name, str)
+            and name
+            and isinstance(command, str)
+            and command
+            and isinstance(working_directory, str)
+            and working_directory
+            and isinstance(required, bool)
+        ):
             issues.append(
                 DriftIssue(
                     resolved_root / "schema" / "release-manifest.json",

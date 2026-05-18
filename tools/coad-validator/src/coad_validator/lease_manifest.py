@@ -96,6 +96,15 @@ def _read_manifest(path: Path, issues: list[ValidationIssue]) -> dict[str, Any] 
             )
         )
         return None
+    if text is None:
+        issues.append(
+            ValidationIssue(
+                path,
+                "lease manifest could not be read",
+                code="lease.manifest_unreadable",
+            )
+        )
+        return None
     try:
         data = yaml.safe_load(text)
     except yaml.YAMLError as exc:

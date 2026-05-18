@@ -17,8 +17,12 @@ def test_contract_index_resolves_task_graph_neighbors() -> None:
     task = index.task("checkout-negative-total-guard")
 
     assert task is not None
-    assert index.goal_for_task(task.identifier).identifier == "checkout-negative-total-hardening"
-    assert index.integration_for_task(task.identifier).identifier == "checkout-negative-total-integration"
+    goal = index.goal_for_task(task.identifier)
+    integration = index.integration_for_task(task.identifier)
+    assert goal is not None
+    assert integration is not None
+    assert goal.identifier == "checkout-negative-total-hardening"
+    assert integration.identifier == "checkout-negative-total-integration"
     assert [module.identifier for module in index.task_modules(task)] == ["checkout"]
     assert [proof.identifier for proof in index.task_proofs(task)] == ["checkout-negative-total-proof"]
     assert [review.identifier for review in index.reviews_for_task(task.identifier)] == [
