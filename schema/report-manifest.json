@@ -79,6 +79,13 @@
       "stability": "stable"
     },
     {
+      "name": "task-scope-integrity",
+      "producer": "coad",
+      "schema": "reports/task-scope-integrity-report.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
       "name": "attestation-report",
       "producer": "coad",
       "schema": "reports/attestation-report.schema.json",

@@ -100,7 +100,8 @@ when structured output is needed.
 - module contracts resolve to real module directories with `README.md` and
   `TODO.md` agent context files;
 - when execution contracts exist, readiness status, proof evidence, scheduling,
-  ledger evidence, and goal policy constraints.
+  ledger evidence, goal policy constraints, handoff changed-file honesty, and
+  task write-scope integrity.
 
 It does not do cryptographic provenance, runtime sandboxing, or supply-chain
 certification. COAD is a methodology and compliance checker for orchestrated

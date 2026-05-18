@@ -2,7 +2,7 @@
 
 Reference validator for COAD contract files.
 
-Current released package version: `0.6.2`.
+Current released package version: `0.6.3`.
 
 ## Usage
 
@@ -21,8 +21,8 @@ write ownership, release metadata consistency when present, and contract graph
 references. Invalid UTF-8 in project-controlled inputs is reported as a
 validation issue instead of terminating the process. When execution contracts
 are present, the same command also
-evaluates readiness, proof evidence, scheduling, ledger evidence, and goal
-policy constraints.
+evaluates readiness, proof evidence, scheduling, ledger evidence, goal policy
+constraints, handoff diff honesty, and task write-scope integrity.
 
 Internal report builders remain available to this package's tests, but they are
 not user-facing CLI commands.

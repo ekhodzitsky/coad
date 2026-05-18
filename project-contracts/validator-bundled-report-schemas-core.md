@@ -22,6 +22,7 @@ workcell:
     - tools/coad-validator/src/coad_validator/schema/reports/proof-matrix.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/schedule-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/status-report.schema.json
+    - tools/coad-validator/src/coad_validator/schema/reports/task-scope-integrity-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/validation-report.schema.json
   context_budget:
     max_files: 12

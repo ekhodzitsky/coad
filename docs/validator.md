@@ -37,6 +37,9 @@ executable before heavier orchestration tooling exists.
   real changed files with `handoff.changed_files`. Missing Git context,
   missing handoff, or an empty diff is reported as a skipped check rather than
   a failure.
+- Task scope integrity when the same Git and handoff context is available:
+  `coad check .` loads the referenced `TASK_CONTRACT.md`, then rejects changed
+  files outside `write_scope` or inside path-like `forbidden_mutations`.
 - Cross-contract graph references:
   - goal to modules, tasks, proofs, reviews, and integration;
   - task to modules and proof contracts;

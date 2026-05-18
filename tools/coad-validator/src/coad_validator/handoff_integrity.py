@@ -34,7 +34,7 @@ def build_handoff_integrity_report(
     if document is None or document.kind != "handoff_contract":
         return _mismatch([_issue("handoff.invalid", "HANDOFF.md", "HANDOFF.md is not a handoff_contract")], "", [])
 
-    diff, skip_reason = _git_diff(resolved_root)
+    diff, skip_reason = git_diff_for_root(resolved_root)
     if skip_reason is not None:
         return _skipped(skip_reason[0], skip_reason[1])
     assert diff is not None
@@ -61,6 +61,10 @@ def build_handoff_integrity_report(
             "issues": [],
         }
     )
+
+
+def git_diff_for_root(root: Path) -> tuple[GitDiff | None, tuple[str, str] | None]:
+    return _git_diff(root)
 
 
 def _git_diff(root: Path) -> tuple[GitDiff | None, tuple[str, str] | None]:

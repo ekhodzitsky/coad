@@ -22,6 +22,7 @@ workcell:
     - schema/reports/proof-matrix.schema.json
     - schema/reports/schedule-report.schema.json
     - schema/reports/status-report.schema.json
+    - schema/reports/task-scope-integrity-report.schema.json
     - schema/reports/validation-report.schema.json
   context_budget:
     max_files: 12

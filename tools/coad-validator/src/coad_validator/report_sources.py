@@ -15,6 +15,7 @@ from .proof_matrix import build_proof_matrix
 from .report import versioned_report
 from .schedule import build_schedule_report
 from .status import build_status_report
+from .task_scope_integrity import build_task_scope_integrity_report
 from .validate import ValidationReport, validate_path
 
 COAD_CHECK_PRODUCER = "coad check"
@@ -82,6 +83,12 @@ CORE_METHODOLOGY_SOURCES = [
         COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_handoff_integrity_report(root, schema_dir),
+    ),
+    ReportSource(
+        "task-scope-integrity",
+        COAD_CHECK_PRODUCER,
+        True,
+        lambda root, schema_dir: build_task_scope_integrity_report(root, schema_dir),
     ),
 ]
 
@@ -167,6 +174,11 @@ _CACHED_SOURCE_BUILDERS: dict[str, Callable[[Path, Path, ValidationReport], dict
         contract_report=report,
     ),
     "handoff-integrity": lambda root, schema_dir, report: build_handoff_integrity_report(
+        root,
+        schema_dir,
+        report,
+    ),
+    "task-scope-integrity": lambda root, schema_dir, report: build_task_scope_integrity_report(
         root,
         schema_dir,
         report,

@@ -18,6 +18,7 @@ import coad_validator.proof_matrix as proof_matrix_module
 import coad_validator.report_sources as report_sources_module
 import coad_validator.schedule as schedule_module
 import coad_validator.status as status_module
+import coad_validator.task_scope_integrity as task_scope_integrity_module
 from coad_validator.attest import build_attestation_report
 from coad_validator.validate import validate_path as original_validate_path
 
@@ -41,7 +42,9 @@ def test_attestation_report_binds_required_reports() -> None:
         "schedule-report",
         "ledger-report",
         "profile-report",
-        "policy-report", "handoff-integrity",
+        "policy-report",
+        "handoff-integrity",
+        "task-scope-integrity",
         "drift-report",
     }
     assert all(len(report["digest"]) == 64 for report in payload["reports"])
@@ -94,6 +97,7 @@ def test_attestation_report_reuses_validation_report_for_internal_sources(monkey
         report_sources_module,
         schedule_module,
         status_module,
+        task_scope_integrity_module,
     ):
         monkeypatch.setattr(module, "validate_path", fail_revalidation)
 

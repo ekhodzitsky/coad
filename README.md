@@ -28,7 +28,8 @@ coad check .
 
 That command is the gate after a repository has adopted the small COAD file
 shape below. It also uses available Git context: when a root `HANDOFF.md`
-exists, `coad check .` compares its `changed_files` against the real diff.
+exists, `coad check .` compares its `changed_files` against the real diff and
+checks those changes against the referenced task's write scope.
 
 ## 60-Second Demo
 
@@ -231,10 +232,9 @@ ownership, proof, and safe write scope to any agent.
 ## Status
 
 Public early draft. The stable integration target is intentionally small:
-`coad check .`. Current released package version: `0.6.2`. This release
-hardens workcell identity and authority checks for duplicate module contracts,
-missing workcell metadata, non-leaf implementation ownership, and project write
-leases. The released version is recorded in [VERSION](VERSION), with release
+`coad check .`. Current released package version: `0.6.3`. This release
+hardens Git-backed execution integrity for root handoffs and task write scopes.
+The released version is recorded in [VERSION](VERSION), with release
 notes in [CHANGELOG.md](CHANGELOG.md).
 
 Keywords: AI agents, agentic development, multi-agent software engineering,

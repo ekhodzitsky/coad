@@ -15,8 +15,8 @@ The output directory contains:
 - `manifest.json` - the export report and artifact index;
 - `attestation.json` - the attestation report;
 - one JSON file for each required report, such as `agent-guidance.json`,
-  `validation-report.json`, `handoff-integrity.json`, `ledger-report.json`,
-  and `drift-report.json`.
+  `validation-report.json`, `handoff-integrity.json`,
+  `task-scope-integrity.json`, `ledger-report.json`, and `drift-report.json`.
 
 The payload is covered by `schema/reports/export-report.schema.json`.
 

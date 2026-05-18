@@ -2,8 +2,13 @@
 
 ## Unreleased
 
+## 0.6.3 - 2026-05-18
+
 ### Added
 
+- `coad check .` now checks Git diff files against the task referenced by root
+  `HANDOFF.md`, failing when changed files escape `TASK_CONTRACT.write_scope`
+  or match path-like `forbidden_mutations`.
 - `coad check .` now includes a context-aware handoff integrity check that
   compares root `HANDOFF.md` `changed_files` with the Git diff when that context
   is available.

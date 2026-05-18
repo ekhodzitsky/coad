@@ -17,6 +17,7 @@ import coad_validator.proof_matrix as proof_matrix_module
 import coad_validator.report_sources as report_sources_module
 import coad_validator.schedule as schedule_module
 import coad_validator.status as status_module
+import coad_validator.task_scope_integrity as task_scope_integrity_module
 from coad_validator import check as check_module
 from coad_validator.check import build_check_report
 
@@ -47,6 +48,7 @@ def test_check_report_passes_for_valid_methodology_graph() -> None:
         "ledger-report",
         "policy-report",
         "handoff-integrity",
+        "task-scope-integrity",
     }
     assert payload["issues"] == []
     _assert_matches_report_schema("check-report.schema.json", payload)
@@ -214,6 +216,9 @@ def test_check_report_skips_handoff_integrity_without_git_context(tmp_path: Path
     handoff_check = _check(payload, "handoff-integrity")
     assert handoff_check["ok"] is True
     assert handoff_check["status"] == "skipped"
+    task_scope_check = _check(payload, "task-scope-integrity")
+    assert task_scope_check["ok"] is True
+    assert task_scope_check["status"] == "skipped"
 
 
 def test_check_report_passes_when_handoff_changed_files_match_git_diff(tmp_path: Path) -> None:
@@ -227,6 +232,9 @@ def test_check_report_passes_when_handoff_changed_files_match_git_diff(tmp_path:
     handoff_check = _check(payload, "handoff-integrity")
     assert handoff_check["ok"] is True
     assert handoff_check["status"] == "pass"
+    task_scope_check = _check(payload, "task-scope-integrity")
+    assert task_scope_check["ok"] is True
+    assert task_scope_check["status"] == "pass"
 
 
 def test_check_report_fails_when_handoff_changed_files_do_not_match_git_diff(tmp_path: Path) -> None:
@@ -249,6 +257,55 @@ def test_check_report_fails_when_handoff_changed_files_do_not_match_git_diff(tmp
         "severity": "error",
         "path": "HANDOFF.md",
         "message": "handoff-integrity: handoff.changed_files lists a file not changed in git diff: checkout/test_checkout_service.py",
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_git_diff_escapes_task_write_scope(tmp_path: Path) -> None:
+    target = _git_repo_from_minimal_example(tmp_path)
+    _replace_handoff_changed_files(target, ["checkout/checkout_service.py", "billing/discounts.py"])
+    _write(target / "checkout" / "checkout_service.py", "def checkout():\n    return 'ok'\n")
+    _write(target / "billing" / "discounts.py", "VALUE = 1\n")
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "handoff-integrity")["status"] == "pass"
+    assert _check(payload, "task-scope-integrity")["status"] == "violation"
+    assert {
+        "code": "task_scope.write_scope_violation",
+        "severity": "error",
+        "path": "billing/discounts.py",
+        "message": (
+            "task-scope-integrity: changed file is outside TASK_CONTRACT.write_scope "
+            "for checkout-negative-total-guard: billing/discounts.py"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_git_diff_hits_forbidden_mutation(tmp_path: Path) -> None:
+    target = _git_repo_from_minimal_example(
+        tmp_path,
+        task_contract_replacements={
+            "write_scope:\n  - checkout/**": "write_scope:\n  - checkout/**\n  - billing/**",
+            "forbidden_mutations:\n  - change CheckoutDecision schema\n  - change pricing rules": "forbidden_mutations:\n  - billing/**",
+        },
+    )
+    _replace_handoff_changed_files(target, ["billing/discounts.py"])
+    _write(target / "billing" / "discounts.py", "VALUE = 1\n")
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "handoff-integrity")["status"] == "pass"
+    assert _check(payload, "task-scope-integrity")["status"] == "violation"
+    assert {
+        "code": "task_scope.forbidden_mutation",
+        "severity": "error",
+        "path": "billing/discounts.py",
+        "message": (
+            "task-scope-integrity: changed file matches TASK_CONTRACT.forbidden_mutations "
+            "for checkout-negative-total-guard: billing/discounts.py matches billing/**"
+        ),
     } in payload["issues"]
 
 
@@ -337,6 +394,7 @@ def test_coad_check_reuses_validation_report_for_internal_sources(monkeypatch: A
         report_sources_module,
         schedule_module,
         status_module,
+        task_scope_integrity_module,
     ):
         monkeypatch.setattr(module, "validate_path", fail_revalidation)
 
@@ -375,9 +433,15 @@ def _check(payload: dict[str, Any], name: str) -> dict[str, Any]:
     return matches[0]
 
 
-def _git_repo_from_minimal_example(tmp_path: Path) -> Path:
+def _git_repo_from_minimal_example(
+    tmp_path: Path,
+    task_contract_replacements: dict[str, str] | None = None,
+) -> Path:
     target = tmp_path / "minimal"
     shutil.copytree(MINIMAL_EXAMPLE, target)
+    if task_contract_replacements is not None:
+        for old, new in task_contract_replacements.items():
+            _replace_text(target / "TASK_CONTRACT.md", old, new)
     _git(target, "init")
     _git(target, "config", "user.email", "coad-test@example.invalid")
     _git(target, "config", "user.name", "COAD Test")
@@ -391,7 +455,24 @@ def _git(root: Path, *args: str) -> None:
 
 
 def _write(path: Path, text: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(text, encoding="utf-8")
+
+
+def _replace_handoff_changed_files(root: Path, changed_files: list[str]) -> None:
+    replacement = "\n".join(f"  - {path}" for path in changed_files)
+    _replace_text(
+        root / "HANDOFF.md",
+        "changed_files:\n  - checkout/checkout_service.py\n  - checkout/test_checkout_service.py",
+        f"changed_files:\n{replacement}",
+    )
+
+
+def _replace_text(path: Path, old: str, new: str) -> None:
+    text = path.read_text(encoding="utf-8")
+    if old not in text:
+        raise AssertionError(f"missing fixture text in {path}: {old!r}")
+    path.write_text(text.replace(old, new), encoding="utf-8")
 
 
 def _assert_matches_report_schema(schema_name: str, payload: dict[str, Any]) -> None:

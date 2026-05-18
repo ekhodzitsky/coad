@@ -19,6 +19,7 @@ import coad_validator.proof_matrix as proof_matrix_module
 import coad_validator.report_sources as report_sources_module
 import coad_validator.schedule as schedule_module
 import coad_validator.status as status_module
+import coad_validator.task_scope_integrity as task_scope_integrity_module
 from coad_validator.artifact_export import export_artifacts
 from coad_validator.validate import validate_path as original_validate_path
 
@@ -45,7 +46,9 @@ def test_export_artifacts_writes_bundle_manifest_and_reports(tmp_path: Path) -> 
         "schedule-report",
         "ledger-report",
         "profile-report",
-        "policy-report", "handoff-integrity",
+        "policy-report",
+        "handoff-integrity",
+        "task-scope-integrity",
         "drift-report",
     }
     assert (output_dir / "manifest.json").is_file()
@@ -104,6 +107,7 @@ def test_export_artifacts_reuses_validation_report_for_internal_sources(
         report_sources_module,
         schedule_module,
         status_module,
+        task_scope_integrity_module,
     ):
         monkeypatch.setattr(module, "validate_path", fail_revalidation)
 
