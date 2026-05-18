@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coad.dev/schema/reports/proof-artifact-integrity-report.schema.json",
+  "title": "COAD Proof Artifact Integrity Report",
+  "type": "object",
+  "required": ["schema_version", "ok", "status", "artifacts", "issues"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "status": {
+      "enum": ["pass", "violation", "skipped"]
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/proof_artifact"
+      }
+    },
+    "skip_reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/issue"
+      }
+    }
+  },
+  "$defs": {
+    "proof_artifact": {
+      "type": "object",
+      "required": ["ledger_path", "event_id", "task_id", "command", "status", "artifact", "ok"],
+      "additionalProperties": false,
+      "properties": {
+        "ledger_path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event_id": {
+          "type": "string"
+        },
+        "task_id": {
+          "type": "string"
+        },
+        "command": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string",
+          "minLength": 1
+        },
+        "artifact": {
+          "type": "string",
+          "minLength": 1
+        },
+        "ok": {
+          "type": "boolean"
+        }
+      }
+    },
+    "issue": {
+      "type": "object",
+      "required": ["code", "severity", "path", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": ["error", "warning", "info"]
+        },
+        "path": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

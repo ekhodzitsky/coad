@@ -1,0 +1,1 @@
+test schemas/checkout-decision.schema.json: pass

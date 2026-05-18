@@ -20,6 +20,7 @@ workcell:
     - schema/reports/graph-report.schema.json
     - schema/reports/handoff-integrity-report.schema.json
     - schema/reports/ledger-report.schema.json
+    - schema/reports/proof-artifact-integrity-report.schema.json
     - schema/reports/proof-matrix.schema.json
     - schema/reports/proof-result-integrity-report.schema.json
     - schema/reports/schedule-report.schema.json
@@ -27,8 +28,8 @@ workcell:
     - schema/reports/task-scope-integrity-report.schema.json
     - schema/reports/validation-report.schema.json
   context_budget:
-    max_files: 12
-    max_source_lines: 1500
+    max_files: 13
+    max_source_lines: 1700
     max_contract_lines: 180
     max_readme_lines: 120
     max_todo_lines: 80

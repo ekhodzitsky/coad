@@ -47,6 +47,11 @@ executable before heavier orchestration tooling exists.
   changed contracts, schemas, and methodology docs must appear in
   `HANDOFF.contract_updates` with a non-empty `reason`; stale entries are
   reported as warnings.
+- Proof artifact integrity when execution ledgers are available: passing
+  `EXECUTION_LEDGER.json` proof results must declare relative artifacts, and
+  declared artifacts must exist, resolve from the ledger directory inside the
+  checked root, and be non-empty. Missing artifacts for non-passing proof
+  results are ignored, but declared paths are still validated.
 - Cross-contract graph references:
   - goal to modules, tasks, proofs, reviews, and integration;
   - task to modules and proof contracts;

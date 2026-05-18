@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.6.6 - 2026-05-18
+
+### Added
+
+- `coad check .` now verifies proof artifact integrity for
+  `EXECUTION_LEDGER.json`: passing proof results must declare a non-empty
+  artifact that resolves from the ledger directory inside the checked root,
+  while declared artifacts on non-passing results are still path-checked.
+
 ## 0.6.5 - 2026-05-18
 
 ### Added

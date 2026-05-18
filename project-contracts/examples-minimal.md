@@ -25,8 +25,10 @@ workcell:
     - examples/minimal/REVIEW.md
     - examples/minimal/TASK_CONTRACT.md
     - examples/minimal/TODO.md
+    - examples/minimal/artifacts/schema-test.txt
+    - examples/minimal/artifacts/unit-test.txt
   context_budget:
-    max_files: 12
+    max_files: 14
     max_source_lines: 1500
     max_contract_lines: 180
     max_readme_lines: 120

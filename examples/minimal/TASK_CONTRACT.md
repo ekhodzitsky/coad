@@ -14,10 +14,13 @@ read_scope:
   - pricing/**
 write_scope:
   - checkout/**
+  - artifacts/**
+  - TASK_CONTRACT.md
 dependencies: []
 allowed_mutations:
   - update CheckoutService validation
   - add checkout tests
+  - write proof artifacts
 forbidden_mutations:
   - change CheckoutDecision schema
   - change pricing rules

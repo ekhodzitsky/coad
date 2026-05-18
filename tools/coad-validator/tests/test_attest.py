@@ -48,6 +48,7 @@ def test_attestation_report_binds_required_reports() -> None:
         "task-scope-integrity",
         "proof-result-integrity",
         "contract-update-integrity",
+        "proof-artifact-integrity",
         "drift-report",
     }
     assert all(len(report["digest"]) == 64 for report in payload["reports"])

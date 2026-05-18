@@ -52,6 +52,7 @@ def test_export_artifacts_writes_bundle_manifest_and_reports(tmp_path: Path) -> 
         "task-scope-integrity",
         "proof-result-integrity",
         "contract-update-integrity",
+        "proof-artifact-integrity",
         "drift-report",
     }
     assert (output_dir / "manifest.json").is_file()

@@ -12,6 +12,7 @@ from .handoff_integrity import build_handoff_integrity_report
 from .ledger import build_ledger_report
 from .policy import build_policy_report
 from .profile import build_profile_report
+from .proof_artifact_integrity import build_proof_artifact_integrity_report
 from .proof_matrix import build_proof_matrix
 from .proof_result_integrity import build_proof_result_integrity_report
 from .report import versioned_report
@@ -103,6 +104,12 @@ CORE_METHODOLOGY_SOURCES = [
         COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_contract_update_integrity_report(root, schema_dir),
+    ),
+    ReportSource(
+        "proof-artifact-integrity",
+        COAD_CHECK_PRODUCER,
+        True,
+        lambda root, schema_dir: build_proof_artifact_integrity_report(root, schema_dir),
     ),
 ]
 
@@ -203,6 +210,11 @@ _CACHED_SOURCE_BUILDERS: dict[str, Callable[[Path, Path, ValidationReport], dict
         report,
     ),
     "contract-update-integrity": lambda root, schema_dir, report: build_contract_update_integrity_report(
+        root,
+        schema_dir,
+        report,
+    ),
+    "proof-artifact-integrity": lambda root, schema_dir, report: build_proof_artifact_integrity_report(
         root,
         schema_dir,
         report,

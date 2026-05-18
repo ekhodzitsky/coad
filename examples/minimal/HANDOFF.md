@@ -4,8 +4,9 @@ kind: handoff_contract
 task_id: checkout-negative-total-guard
 status: complete
 changed_files:
-  - checkout/checkout_service.py
-  - checkout/test_checkout_service.py
+  - TASK_CONTRACT.md
+  - artifacts/schema-test.txt
+  - artifacts/unit-test.txt
 proof_results:
   - command: test checkout.checkout_service.rejects_negative_total
     status: pass
@@ -14,6 +15,8 @@ proof_results:
 contract_updates:
   - path: checkout/MODULE_CONTRACT.md
     reason: Added proof for the no-negative-total invariant.
+  - path: TASK_CONTRACT.md
+    reason: Allowed durable proof artifact output for ledger-backed verification.
 decisions:
   - id: reject-negative-total-at-checkout-boundary
     decision: Reject invalid totals in CheckoutService before producing CheckoutDecision.

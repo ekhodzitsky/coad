@@ -52,6 +52,7 @@ def test_check_report_passes_for_valid_methodology_graph() -> None:
         "task-scope-integrity",
         "proof-result-integrity",
         "contract-update-integrity",
+        "proof-artifact-integrity",
     }
     assert payload["issues"] == []
     _assert_matches_report_schema("check-report.schema.json", payload)
@@ -228,6 +229,9 @@ def test_check_report_skips_handoff_integrity_without_git_context(tmp_path: Path
     contract_update_check = _check(payload, "contract-update-integrity")
     assert contract_update_check["ok"] is True
     assert contract_update_check["status"] == "skipped"
+    proof_artifact_check = _check(payload, "proof-artifact-integrity")
+    assert proof_artifact_check["ok"] is True
+    assert proof_artifact_check["status"] == "pass"
 
 
 def test_check_report_passes_when_handoff_changed_files_match_git_diff(tmp_path: Path) -> None:
@@ -250,6 +254,9 @@ def test_check_report_passes_when_handoff_changed_files_match_git_diff(tmp_path:
     contract_update_check = _check(payload, "contract-update-integrity")
     assert contract_update_check["ok"] is True
     assert contract_update_check["status"] == "warning"
+    proof_artifact_check = _check(payload, "proof-artifact-integrity")
+    assert proof_artifact_check["ok"] is True
+    assert proof_artifact_check["status"] == "pass"
 
 
 def test_check_report_fails_when_handoff_changed_files_do_not_match_git_diff(tmp_path: Path) -> None:
@@ -410,6 +417,124 @@ def test_check_report_fails_when_ledger_proof_result_is_not_passing(tmp_path: Pa
             "EXECUTION_LEDGER.json for checkout-negative-total-guard: "
             "test checkout.checkout_service.rejects_negative_total has status fail"
         ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_passing_proof_result_omits_artifact(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_minimal_artifacts(target)
+    ledger = _read_ledger(target)
+    del ledger["entries"][0]["proof_results"][0]["artifact"]
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.missing",
+        "severity": "error",
+        "path": "EXECUTION_LEDGER.json",
+        "message": (
+            "proof-artifact-integrity: passing proof result must declare an artifact: "
+            "test checkout.checkout_service.rejects_negative_total"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_passing_proof_artifact_file_is_missing(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_minimal_artifacts(target)
+    (target / "artifacts" / "unit-test.txt").unlink()
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.missing",
+        "severity": "error",
+        "path": "artifacts/unit-test.txt",
+        "message": "proof-artifact-integrity: proof artifact does not exist: artifacts/unit-test.txt",
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_passing_proof_artifact_is_empty(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_minimal_artifacts(target, unit_text="")
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.empty",
+        "severity": "error",
+        "path": "artifacts/unit-test.txt",
+        "message": "proof-artifact-integrity: proof artifact is empty: artifacts/unit-test.txt",
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_proof_artifact_path_escapes_root(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_minimal_artifacts(target)
+    ledger = _read_ledger(target)
+    ledger["entries"][0]["proof_results"][0]["artifact"] = "../unit-test.txt"
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.path_escape",
+        "severity": "error",
+        "path": "../unit-test.txt",
+        "message": "proof-artifact-integrity: proof artifact path escapes COAD root: ../unit-test.txt",
+    } in payload["issues"]
+
+
+def test_check_report_ignores_missing_artifact_for_non_passing_extra_result(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_minimal_artifacts(target)
+    ledger = _read_ledger(target)
+    ledger["entries"][0]["proof_results"].append({"command": "test optional.diagnostic", "status": "fail"})
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is True
+    assert _check(payload, "proof-artifact-integrity")["status"] == "pass"
+
+
+def test_check_report_validates_declared_artifact_for_non_passing_result(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_minimal_artifacts(target)
+    ledger = _read_ledger(target)
+    ledger["entries"][0]["proof_results"].append(
+        {
+            "command": "test optional.diagnostic",
+            "status": "fail",
+            "artifact": "artifacts/missing-diagnostic.txt",
+        }
+    )
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.missing",
+        "severity": "error",
+        "path": "artifacts/missing-diagnostic.txt",
+        "message": "proof-artifact-integrity: proof artifact does not exist: artifacts/missing-diagnostic.txt",
     } in payload["issues"]
 
 
@@ -635,6 +760,7 @@ def _git_repo_from_minimal_example(
     _git(target, "config", "user.name", "COAD Test")
     _git(target, "add", ".")
     _git(target, "commit", "-m", "baseline")
+    _replace_handoff_changed_files(target, ["checkout/checkout_service.py", "checkout/test_checkout_service.py"])
     return target
 
 
@@ -649,11 +775,7 @@ def _write(path: Path, text: str) -> None:
 
 def _replace_handoff_changed_files(root: Path, changed_files: list[str]) -> None:
     replacement = "\n".join(f"  - {path}" for path in changed_files)
-    _replace_text(
-        root / "HANDOFF.md",
-        "changed_files:\n  - checkout/checkout_service.py\n  - checkout/test_checkout_service.py",
-        f"changed_files:\n{replacement}",
-    )
+    _replace_frontmatter_block(root / "HANDOFF.md", "changed_files", f"changed_files:\n{replacement}")
 
 
 def _replace_contract_updates(root: Path, updates: list[tuple[str, str]]) -> None:
@@ -664,13 +786,9 @@ def _replace_contract_updates(root: Path, updates: list[tuple[str, str]]) -> Non
         )
     else:
         replacement = "[]"
-    _replace_text(
+    _replace_frontmatter_block(
         root / "HANDOFF.md",
-        (
-            "contract_updates:\n"
-            "  - path: checkout/MODULE_CONTRACT.md\n"
-            "    reason: Added proof for the no-negative-total invariant."
-        ),
+        "contract_updates",
         f"contract_updates: {replacement}" if not updates else f"contract_updates:\n{replacement}",
     )
 
@@ -682,6 +800,21 @@ def _replace_text(path: Path, old: str, new: str) -> None:
     path.write_text(text.replace(old, new), encoding="utf-8")
 
 
+def _replace_frontmatter_block(path: Path, key: str, replacement: str) -> None:
+    text = path.read_text(encoding="utf-8")
+    marker = f"{key}:"
+    start = text.find(marker)
+    if start == -1:
+        raise AssertionError(f"missing fixture key in {path}: {key!r}")
+    search_from = start + len(marker)
+    end = len(text)
+    for candidate in ("\nproof_results:", "\ncontract_updates:", "\ndecisions:", "\nknown_gaps:"):
+        candidate_start = text.find(candidate, search_from)
+        if candidate_start != -1:
+            end = min(end, candidate_start + 1)
+    path.write_text(f"{text[:start]}{replacement}\n{text[end:]}", encoding="utf-8")
+
+
 def _read_ledger(root: Path) -> dict[str, Any]:
     return json.loads((root / "EXECUTION_LEDGER.json").read_text(encoding="utf-8"))
 
@@ -691,6 +824,15 @@ def _write_ledger(root: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
         encoding="utf-8",
     )
+
+
+def _write_minimal_artifacts(
+    root: Path,
+    unit_text: str = "unit proof transcript\n",
+    schema_text: str = "schema proof transcript\n",
+) -> None:
+    _write(root / "artifacts" / "unit-test.txt", unit_text)
+    _write(root / "artifacts" / "schema-test.txt", schema_text)
 
 
 def _assert_matches_report_schema(schema_name: str, payload: dict[str, Any]) -> None:

@@ -1,0 +1,221 @@
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import TYPE_CHECKING, Any
+
+from .report import versioned_report
+from .text_io import read_utf8
+
+if TYPE_CHECKING:
+    from .validate import ValidationReport
+
+
+@dataclass(frozen=True)
+class ProofArtifact:
+    ledger_path: str
+    event_id: str
+    task_id: str
+    command: str
+    status: str
+    artifact: str
+    ok: bool
+
+
+def build_proof_artifact_integrity_report(
+    root: Path,
+    _schema_dir: Path | None = None,
+    _contract_report: ValidationReport | None = None,
+) -> dict[str, Any]:
+    resolved_root = root.resolve()
+    ledger_paths = _ledger_paths(resolved_root)
+    if not ledger_paths:
+        return _skipped("missing_ledger", "EXECUTION_LEDGER.json was not found")
+
+    artifacts: list[ProofArtifact] = []
+    issues: list[dict[str, str]] = []
+    for ledger_path in ledger_paths:
+        payload = _ledger_payload(ledger_path, resolved_root, issues)
+        if payload is None:
+            continue
+        _collect_ledger_artifacts(resolved_root, ledger_path, payload, artifacts, issues)
+
+    has_errors = any(issue["severity"] == "error" for issue in issues)
+    return versioned_report(
+        {
+            "ok": not has_errors,
+            "status": "violation" if has_errors else "pass",
+            "artifacts": [_artifact_payload(artifact) for artifact in artifacts],
+            "issues": issues,
+        }
+    )
+
+
+def _collect_ledger_artifacts(
+    root: Path,
+    ledger_path: Path,
+    payload: dict[str, Any],
+    artifacts: list[ProofArtifact],
+    issues: list[dict[str, str]],
+) -> None:
+    ledger_display = _relative_path(ledger_path, root)
+    for entry in _list_value(payload.get("entries")):
+        if not isinstance(entry, dict):
+            continue
+        event_id = _string_value(entry.get("event_id"))
+        task_id = _string_value(entry.get("task_id"))
+        for proof_result in _list_value(entry.get("proof_results")):
+            if not isinstance(proof_result, dict):
+                continue
+            command = _string_value(proof_result.get("command"))
+            status = _string_value(proof_result.get("status"), "unknown")
+            artifact = _string_value(proof_result.get("artifact"))
+            if not artifact:
+                if status == "pass":
+                    issues.append(
+                        _issue(
+                            "proof_artifact.missing",
+                            ledger_display,
+                            f"passing proof result must declare an artifact: {command}",
+                        )
+                    )
+                continue
+            artifact_ok = _validate_artifact(root, ledger_path.parent, artifact, issues)
+            artifacts.append(
+                ProofArtifact(
+                    ledger_path=ledger_display,
+                    event_id=event_id,
+                    task_id=task_id,
+                    command=command,
+                    status=status,
+                    artifact=artifact,
+                    ok=artifact_ok,
+                )
+            )
+
+
+def _validate_artifact(root: Path, base_dir: Path, artifact: str, issues: list[dict[str, str]]) -> bool:
+    candidate = Path(artifact)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        issues.append(
+            _issue(
+                "proof_artifact.path_escape",
+                artifact,
+                f"proof artifact path escapes COAD root: {artifact}",
+            )
+        )
+        return False
+
+    artifact_path = base_dir / candidate
+    try:
+        artifact_path.resolve(strict=False).relative_to(root)
+    except ValueError:
+        issues.append(
+            _issue(
+                "proof_artifact.path_escape",
+                artifact,
+                f"proof artifact path escapes COAD root: {artifact}",
+            )
+        )
+        return False
+
+    if not artifact_path.is_file():
+        issues.append(
+            _issue(
+                "proof_artifact.missing",
+                artifact,
+                f"proof artifact does not exist: {artifact}",
+            )
+        )
+        return False
+    if artifact_path.stat().st_size == 0:
+        issues.append(
+            _issue(
+                "proof_artifact.empty",
+                artifact,
+                f"proof artifact is empty: {artifact}",
+            )
+        )
+        return False
+    return True
+
+
+def _ledger_payload(path: Path, root: Path, issues: list[dict[str, str]]) -> dict[str, Any] | None:
+    text, read_error = read_utf8(path)
+    display = _relative_path(path, root)
+    if read_error is not None:
+        issues.append(_issue("proof_artifact.ledger_read_failed", display, f"execution ledger {read_error}"))
+        return None
+    try:
+        payload = json.loads(text or "")
+    except json.JSONDecodeError as exc:
+        issues.append(_issue("proof_artifact.ledger_invalid_json", display, f"invalid execution ledger JSON: {exc.msg}"))
+        return None
+    if not isinstance(payload, dict):
+        issues.append(_issue("proof_artifact.ledger_invalid", display, "execution ledger must be a JSON object"))
+        return None
+    return payload
+
+
+def _ledger_paths(root: Path) -> list[Path]:
+    return [
+        path
+        for path in sorted(root.rglob("EXECUTION_LEDGER.json"))
+        if not _should_skip(path)
+    ]
+
+
+def _should_skip(path: Path) -> bool:
+    parts = path.parts
+    if any(part in {".git", ".venv", "__pycache__", "templates"} for part in parts):
+        return True
+    return any(first == "tests" and second == "fixtures" for first, second in zip(parts, parts[1:]))
+
+
+def _artifact_payload(artifact: ProofArtifact) -> dict[str, Any]:
+    return {
+        "ledger_path": artifact.ledger_path,
+        "event_id": artifact.event_id,
+        "task_id": artifact.task_id,
+        "command": artifact.command,
+        "status": artifact.status,
+        "artifact": artifact.artifact,
+        "ok": artifact.ok,
+    }
+
+
+def _list_value(value: Any) -> list[Any]:
+    return value if isinstance(value, list) else []
+
+
+def _string_value(value: object, fallback: str = "") -> str:
+    return value if isinstance(value, str) and value else fallback
+
+
+def _skipped(reason: str, message: str) -> dict[str, Any]:
+    return versioned_report(
+        {
+            "ok": True,
+            "status": "skipped",
+            "artifacts": [],
+            "skip_reason": reason,
+            "issues": [_issue("proof_artifact.skipped", "EXECUTION_LEDGER.json", message, severity="info")],
+        }
+    )
+
+
+def _issue(code: str, path: str, message: str, severity: str = "error") -> dict[str, str]:
+    return {
+        "code": code,
+        "severity": severity,
+        "path": path,
+        "message": message,
+    }
+
+
+def _relative_path(path: Path, root: Path) -> str:
+    try:
+        return str(path.relative_to(root))
+    except ValueError:
+        return str(path)
