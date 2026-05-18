@@ -57,7 +57,8 @@ executable before heavier orchestration tooling exists.
   `artifact_sha256` and `artifact_bytes`. Declared artifacts must exist, resolve
   from the ledger directory inside the checked root, be non-empty, and match
   their declared digest and size. Missing artifacts for non-passing proof
-  results are ignored, but declared paths are still validated.
+  results are ignored, but declared paths are still validated. Missing digest
+  metadata issues include the computed value when the artifact can be read.
 - Cross-contract graph references:
   - goal to modules, tasks, proofs, reviews, and integration;
   - task to modules and proof contracts;

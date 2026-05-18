@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.6.9 - 2026-05-18
+
+### Added
+
+- Proof artifact metadata failures now include the computed expected
+  `artifact_sha256` or `artifact_bytes` when the artifact exists, so agents can
+  repair `EXECUTION_LEDGER.json` without running a separate digest command.
+
 ## 0.6.8 - 2026-05-18
 
 ### Added

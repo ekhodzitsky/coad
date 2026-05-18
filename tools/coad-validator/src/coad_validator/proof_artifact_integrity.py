@@ -26,6 +26,13 @@ class ProofArtifact:
     ok: bool
 
 
+@dataclass(frozen=True)
+class ArtifactValidation:
+    ok: bool
+    actual_sha256: str = ""
+    actual_bytes: int | None = None
+
+
 def build_proof_artifact_integrity_report(
     root: Path,
     _schema_dir: Path | None = None,
@@ -86,12 +93,24 @@ def _collect_ledger_artifacts(
                         )
                     )
                 continue
+            artifact_validation = _validate_artifact(
+                root,
+                ledger_path.parent,
+                artifact,
+                artifact_sha256,
+                artifact_bytes,
+                status == "pass" and not artifact_sha256,
+                issues,
+            )
             if status == "pass" and not artifact_sha256:
                 issues.append(
                     _issue(
                         "proof_artifact.digest_missing",
                         ledger_display,
-                        f"passing proof result must declare artifact_sha256: {command}",
+                        (
+                            f"passing proof result must declare artifact_sha256: {command}"
+                            f"{_expected_suffix(artifact_validation.actual_sha256)}"
+                        ),
                     )
                 )
             if status == "pass" and artifact_bytes is None:
@@ -99,17 +118,12 @@ def _collect_ledger_artifacts(
                     _issue(
                         "proof_artifact.bytes_missing",
                         ledger_display,
-                        f"passing proof result must declare artifact_bytes: {command}",
+                        (
+                            f"passing proof result must declare artifact_bytes: {command}"
+                            f"{_expected_suffix(artifact_validation.actual_bytes)}"
+                        ),
                     )
                 )
-            artifact_ok = _validate_artifact(
-                root,
-                ledger_path.parent,
-                artifact,
-                artifact_sha256,
-                artifact_bytes,
-                issues,
-            )
             artifacts.append(
                 ProofArtifact(
                     ledger_path=ledger_display,
@@ -120,7 +134,7 @@ def _collect_ledger_artifacts(
                     artifact=artifact,
                     artifact_sha256=artifact_sha256,
                     artifact_bytes=artifact_bytes if artifact_bytes is not None else 0,
-                    ok=artifact_ok,
+                    ok=artifact_validation.ok,
                 )
             )
 
@@ -131,8 +145,9 @@ def _validate_artifact(
     artifact: str,
     artifact_sha256: str,
     artifact_bytes: int | None,
+    needs_sha256_hint: bool,
     issues: list[dict[str, str]],
-) -> bool:
+) -> ArtifactValidation:
     candidate = Path(artifact)
     if candidate.is_absolute() or ".." in candidate.parts:
         issues.append(
@@ -142,7 +157,7 @@ def _validate_artifact(
                 f"proof artifact path escapes COAD root: {artifact}",
             )
         )
-        return False
+        return ArtifactValidation(ok=False)
 
     artifact_path = base_dir / candidate
     try:
@@ -155,7 +170,7 @@ def _validate_artifact(
                 f"proof artifact path escapes COAD root: {artifact}",
             )
         )
-        return False
+        return ArtifactValidation(ok=False)
 
     if not artifact_path.is_file():
         issues.append(
@@ -165,8 +180,10 @@ def _validate_artifact(
                 f"proof artifact does not exist: {artifact}",
             )
         )
-        return False
-    if artifact_path.stat().st_size == 0:
+        return ArtifactValidation(ok=False)
+
+    actual_bytes = artifact_path.stat().st_size
+    if actual_bytes == 0:
         issues.append(
             _issue(
                 "proof_artifact.empty",
@@ -174,10 +191,9 @@ def _validate_artifact(
                 f"proof artifact is empty: {artifact}",
             )
         )
-        return False
+        return ArtifactValidation(ok=False, actual_bytes=actual_bytes)
 
     ok = True
-    actual_bytes = artifact_path.stat().st_size
     if artifact_bytes is not None and artifact_bytes != actual_bytes:
         issues.append(
             _issue(
@@ -187,8 +203,10 @@ def _validate_artifact(
             )
         )
         ok = False
-    if artifact_sha256:
+    actual_sha256 = ""
+    if artifact_sha256 or needs_sha256_hint:
         actual_sha256 = _sha256(artifact_path)
+    if artifact_sha256:
         if artifact_sha256 != actual_sha256:
             issues.append(
                 _issue(
@@ -198,7 +216,7 @@ def _validate_artifact(
                 )
             )
             ok = False
-    return ok
+    return ArtifactValidation(ok=ok, actual_sha256=actual_sha256, actual_bytes=actual_bytes)
 
 
 def _ledger_payload(path: Path, root: Path, issues: list[dict[str, str]]) -> dict[str, Any] | None:
@@ -265,6 +283,10 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: handle.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def _expected_suffix(value: str | int | None) -> str:
+    return f" (expected {value})" if value not in ("", None) else ""
 
 
 def _skipped(reason: str, message: str) -> dict[str, Any]:

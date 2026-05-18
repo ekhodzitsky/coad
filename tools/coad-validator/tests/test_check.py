@@ -639,7 +639,8 @@ def test_check_report_fails_when_passing_proof_artifact_digest_is_missing(tmp_pa
         "path": "EXECUTION_LEDGER.json",
         "message": (
             "proof-artifact-integrity: passing proof result must declare "
-            "artifact_sha256: test checkout.checkout_service.rejects_negative_total"
+            "artifact_sha256: test checkout.checkout_service.rejects_negative_total "
+            "(expected d4102b3b69047a96c82dfb2e7ef1075d72e36ec4ca27607b65ff44f09e24dac7)"
         ),
     } in payload["issues"]
 
@@ -662,7 +663,8 @@ def test_check_report_fails_when_passing_proof_artifact_bytes_are_missing(tmp_pa
         "path": "EXECUTION_LEDGER.json",
         "message": (
             "proof-artifact-integrity: passing proof result must declare "
-            "artifact_bytes: test checkout.checkout_service.rejects_negative_total"
+            "artifact_bytes: test checkout.checkout_service.rejects_negative_total "
+            "(expected 22)"
         ),
     } in payload["issues"]
 

@@ -32,7 +32,8 @@ exists, `coad check .` compares its `changed_files` against the real diff and
 checks those changes against the referenced task's write scope.
 When an `EXECUTION_LEDGER.json` is present, passing proof results must also
 point at non-empty artifacts whose SHA-256 digest and byte size match the
-ledger.
+ledger. If a passing result omits that metadata, the JSON issue output includes
+the expected value to record.
 
 ## 60-Second Demo
 
