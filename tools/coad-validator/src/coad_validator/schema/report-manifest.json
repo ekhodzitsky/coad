@@ -58,6 +58,13 @@
       "stability": "stable"
     },
     {
+      "name": "ledger-handoff-integrity",
+      "producer": "coad",
+      "schema": "reports/ledger-handoff-integrity-report.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
       "name": "profile-report",
       "producer": "coad",
       "schema": "reports/profile-report.schema.json",

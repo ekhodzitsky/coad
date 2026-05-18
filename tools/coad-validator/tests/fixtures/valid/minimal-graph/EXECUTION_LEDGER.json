@@ -26,7 +26,8 @@
         }
       ],
       "changed_files": [
-        "checkout/service.py"
+        "checkout/checkout_service.py",
+        "checkout/test_checkout_service.py"
       ],
       "handoff_path": "HANDOFF.md"
     }

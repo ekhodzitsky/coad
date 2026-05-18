@@ -10,6 +10,7 @@ from .drift import build_drift_report
 from .graph_report import build_graph_report
 from .handoff_integrity import build_handoff_integrity_report
 from .ledger import build_ledger_report
+from .ledger_handoff_integrity import build_ledger_handoff_integrity_report
 from .policy import build_policy_report
 from .profile import build_profile_report
 from .proof_artifact_integrity import build_proof_artifact_integrity_report
@@ -74,6 +75,12 @@ CORE_METHODOLOGY_SOURCES = [
         COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_ledger_report(root, schema_dir=schema_dir),
+    ),
+    ReportSource(
+        "ledger-handoff-integrity",
+        COAD_CHECK_PRODUCER,
+        True,
+        lambda root, schema_dir: build_ledger_handoff_integrity_report(root, schema_dir),
     ),
     ReportSource(
         "policy-report",
@@ -188,6 +195,11 @@ _CACHED_SOURCE_BUILDERS: dict[str, Callable[[Path, Path, ValidationReport], dict
         root,
         schema_dir=schema_dir,
         contract_report=report,
+    ),
+    "ledger-handoff-integrity": lambda root, schema_dir, report: build_ledger_handoff_integrity_report(
+        root,
+        schema_dir,
+        report,
     ),
     "policy-report": lambda root, schema_dir, report: build_policy_report(
         root,

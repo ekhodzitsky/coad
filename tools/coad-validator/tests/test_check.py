@@ -47,6 +47,7 @@ def test_check_report_passes_for_valid_methodology_graph() -> None:
         "graph-report",
         "schedule-report",
         "ledger-report",
+        "ledger-handoff-integrity",
         "policy-report",
         "handoff-integrity",
         "task-scope-integrity",
@@ -226,6 +227,9 @@ def test_check_report_skips_handoff_integrity_without_git_context(tmp_path: Path
     proof_result_check = _check(payload, "proof-result-integrity")
     assert proof_result_check["ok"] is True
     assert proof_result_check["status"] == "pass"
+    ledger_handoff_check = _check(payload, "ledger-handoff-integrity")
+    assert ledger_handoff_check["ok"] is True
+    assert ledger_handoff_check["status"] == "pass"
     contract_update_check = _check(payload, "contract-update-integrity")
     assert contract_update_check["ok"] is True
     assert contract_update_check["status"] == "skipped"
@@ -251,6 +255,9 @@ def test_check_report_passes_when_handoff_changed_files_match_git_diff(tmp_path:
     proof_result_check = _check(payload, "proof-result-integrity")
     assert proof_result_check["ok"] is True
     assert proof_result_check["status"] == "pass"
+    ledger_handoff_check = _check(payload, "ledger-handoff-integrity")
+    assert ledger_handoff_check["ok"] is True
+    assert ledger_handoff_check["status"] == "pass"
     contract_update_check = _check(payload, "contract-update-integrity")
     assert contract_update_check["ok"] is True
     assert contract_update_check["status"] == "warning"
@@ -416,6 +423,141 @@ def test_check_report_fails_when_ledger_proof_result_is_not_passing(tmp_path: Pa
             "proof-result-integrity: required proof command is not passing in "
             "EXECUTION_LEDGER.json for checkout-negative-total-guard: "
             "test checkout.checkout_service.rejects_negative_total has status fail"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_ledger_entry_omits_handoff_path(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    ledger = _read_ledger(target)
+    del ledger["entries"][0]["handoff_path"]
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "ledger-handoff-integrity")["status"] == "violation"
+    assert {
+        "code": "ledger_handoff.handoff_missing",
+        "severity": "error",
+        "path": "EXECUTION_LEDGER.json",
+        "message": (
+            "ledger-handoff-integrity: ledger entry must declare handoff_path "
+            "for checkout-negative-total-guard"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_ledger_handoff_path_is_missing(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    ledger = _read_ledger(target)
+    ledger["entries"][0]["handoff_path"] = "MISSING_HANDOFF.md"
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "ledger-handoff-integrity")["status"] == "violation"
+    assert {
+        "code": "ledger_handoff.handoff_not_found",
+        "severity": "error",
+        "path": "MISSING_HANDOFF.md",
+        "message": "ledger-handoff-integrity: ledger handoff_path does not exist: MISSING_HANDOFF.md",
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_ledger_handoff_path_escapes_root(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    ledger = _read_ledger(target)
+    ledger["entries"][0]["handoff_path"] = "../HANDOFF.md"
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "ledger-handoff-integrity")["status"] == "violation"
+    assert {
+        "code": "ledger_handoff.path_escape",
+        "severity": "error",
+        "path": "../HANDOFF.md",
+        "message": "ledger-handoff-integrity: ledger handoff_path escapes COAD root: ../HANDOFF.md",
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_ledger_task_does_not_match_handoff(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _replace_text(
+        target / "HANDOFF.md",
+        "task_id: checkout-negative-total-guard",
+        "task_id: different-task",
+    )
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "ledger-handoff-integrity")["status"] == "violation"
+    assert {
+        "code": "ledger_handoff.task_mismatch",
+        "severity": "error",
+        "path": "HANDOFF.md",
+        "message": (
+            "ledger-handoff-integrity: ledger task_id checkout-negative-total-guard "
+            "does not match HANDOFF.task_id different-task"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_ledger_changed_files_do_not_match_handoff(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    ledger = _read_ledger(target)
+    ledger["entries"][0]["changed_files"] = ["artifacts/unit-test.txt", "checkout/unlisted.py"]
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "ledger-handoff-integrity")["status"] == "violation"
+    assert {
+        "code": "ledger_handoff.changed_files_missing",
+        "severity": "error",
+        "path": "EXECUTION_LEDGER.json",
+        "message": (
+            "ledger-handoff-integrity: handoff.changed_files is missing from "
+            "ledger changed_files: TASK_CONTRACT.md"
+        ),
+    } in payload["issues"]
+    assert {
+        "code": "ledger_handoff.changed_files_extra",
+        "severity": "error",
+        "path": "EXECUTION_LEDGER.json",
+        "message": (
+            "ledger-handoff-integrity: ledger changed_files lists a file not "
+            "in HANDOFF.changed_files: checkout/unlisted.py"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_completed_ledger_handoff_is_not_complete(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _replace_text(target / "HANDOFF.md", "status: complete", "status: pending")
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "ledger-handoff-integrity")["status"] == "violation"
+    assert {
+        "code": "ledger_handoff.status_mismatch",
+        "severity": "error",
+        "path": "HANDOFF.md",
+        "message": (
+            "ledger-handoff-integrity: completed ledger entry requires "
+            "HANDOFF.status complete for checkout-negative-total-guard"
         ),
     } in payload["issues"]
 
@@ -755,12 +897,12 @@ def _git_repo_from_minimal_example(
     if task_contract_replacements is not None:
         for old, new in task_contract_replacements.items():
             _replace_text(target / "TASK_CONTRACT.md", old, new)
+    _replace_handoff_changed_files(target, ["checkout/checkout_service.py", "checkout/test_checkout_service.py"])
     _git(target, "init")
     _git(target, "config", "user.email", "coad-test@example.invalid")
     _git(target, "config", "user.name", "COAD Test")
     _git(target, "add", ".")
     _git(target, "commit", "-m", "baseline")
-    _replace_handoff_changed_files(target, ["checkout/checkout_service.py", "checkout/test_checkout_service.py"])
     return target
 
 
@@ -774,8 +916,12 @@ def _write(path: Path, text: str) -> None:
 
 
 def _replace_handoff_changed_files(root: Path, changed_files: list[str]) -> None:
-    replacement = "\n".join(f"  - {path}" for path in changed_files)
+    ledger_changed_files = list(changed_files)
+    if (root / ".git").exists() and "EXECUTION_LEDGER.json" not in ledger_changed_files:
+        ledger_changed_files.append("EXECUTION_LEDGER.json")
+    replacement = "\n".join(f"  - {path}" for path in ledger_changed_files)
     _replace_frontmatter_block(root / "HANDOFF.md", "changed_files", f"changed_files:\n{replacement}")
+    _replace_ledger_changed_files(root, ledger_changed_files)
 
 
 def _replace_contract_updates(root: Path, updates: list[tuple[str, str]]) -> None:
@@ -824,6 +970,12 @@ def _write_ledger(root: Path, payload: dict[str, Any]) -> None:
         json.dumps(payload, indent=2) + "\n",
         encoding="utf-8",
     )
+
+
+def _replace_ledger_changed_files(root: Path, changed_files: list[str]) -> None:
+    ledger = _read_ledger(root)
+    ledger["entries"][0]["changed_files"] = changed_files
+    _write_ledger(root, ledger)
 
 
 def _write_minimal_artifacts(

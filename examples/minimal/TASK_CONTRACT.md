@@ -15,6 +15,7 @@ read_scope:
 write_scope:
   - checkout/**
   - artifacts/**
+  - EXECUTION_LEDGER.json
   - TASK_CONTRACT.md
 dependencies: []
 allowed_mutations:

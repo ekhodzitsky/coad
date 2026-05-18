@@ -40,6 +40,11 @@ executable before heavier orchestration tooling exists.
 - Task scope integrity when the same Git and handoff context is available:
   `coad check .` loads the referenced `TASK_CONTRACT.md`, then rejects changed
   files outside `write_scope` or inside path-like `forbidden_mutations`.
+- Ledger handoff integrity when execution ledgers are available:
+  `EXECUTION_LEDGER.json` entries must declare a relative `handoff_path` that
+  exists inside the checked root. The referenced handoff must match the ledger
+  `task_id` and `changed_files`; completed ledger entries require
+  `HANDOFF.status: complete`.
 - Proof result integrity when root handoff context is available: required proof
   commands from `TASK_CONTRACT.proof.required` must appear with `status: pass`
   in both `HANDOFF.md` and `EXECUTION_LEDGER.json`.

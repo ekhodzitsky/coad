@@ -46,6 +46,7 @@ def test_export_artifacts_writes_bundle_manifest_and_reports(tmp_path: Path) -> 
         "graph-report",
         "schedule-report",
         "ledger-report",
+        "ledger-handoff-integrity",
         "profile-report",
         "policy-report",
         "handoff-integrity",

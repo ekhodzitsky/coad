@@ -26,7 +26,8 @@
         }
       ],
       "changed_files": [
-        "checkout/service.py"
+        "EXECUTION_LEDGER.json",
+        "TASK_CONTRACT.md"
       ],
       "handoff_path": "HANDOFF.md"
     }

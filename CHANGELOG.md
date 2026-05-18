@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.6.7 - 2026-05-18
+
+### Added
+
+- `coad check .` now verifies ledger-handoff integrity: completed
+  `EXECUTION_LEDGER.json` entries must point at existing handoffs, match
+  `HANDOFF.task_id` and `changed_files`, and require `HANDOFF.status: complete`.
+
 ## 0.6.6 - 2026-05-18
 
 ### Added

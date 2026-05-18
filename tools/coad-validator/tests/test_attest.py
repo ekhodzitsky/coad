@@ -42,6 +42,7 @@ def test_attestation_report_binds_required_reports() -> None:
         "graph-report",
         "schedule-report",
         "ledger-report",
+        "ledger-handoff-integrity",
         "profile-report",
         "policy-report",
         "handoff-integrity",

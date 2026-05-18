@@ -232,8 +232,8 @@ ownership, proof, and safe write scope to any agent.
 ## Status
 
 Public early draft. The stable integration target is intentionally small:
-`coad check .`. Current released package version: `0.6.6`. This release
-hardens proof artifact integrity for passing ledger proof results.
+`coad check .`. Current released package version: `0.6.7`. This release
+hardens ledger-handoff consistency for execution records.
 The released version is recorded in [VERSION](VERSION), with release
 notes in [CHANGELOG.md](CHANGELOG.md).
 

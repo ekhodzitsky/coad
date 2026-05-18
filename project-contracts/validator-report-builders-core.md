@@ -17,13 +17,14 @@ workcell:
     - tools/coad-validator/src/coad_validator/graph.py
     - tools/coad-validator/src/coad_validator/graph_report.py
     - tools/coad-validator/src/coad_validator/ledger.py
+    - tools/coad-validator/src/coad_validator/ledger_handoff_integrity.py
     - tools/coad-validator/src/coad_validator/proof_artifact_integrity.py
     - tools/coad-validator/src/coad_validator/proof_matrix.py
     - tools/coad-validator/src/coad_validator/schedule.py
     - tools/coad-validator/src/coad_validator/status.py
   context_budget:
-    max_files: 13
-    max_source_lines: 1750
+    max_files: 14
+    max_source_lines: 2100
     max_contract_lines: 180
     max_readme_lines: 120
     max_todo_lines: 80
