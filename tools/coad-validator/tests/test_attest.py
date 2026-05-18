@@ -41,7 +41,7 @@ def test_attestation_report_binds_required_reports() -> None:
         "schedule-report",
         "ledger-report",
         "profile-report",
-        "policy-report",
+        "policy-report", "handoff-integrity",
         "drift-report",
     }
     assert all(len(report["digest"]) == 64 for report in payload["reports"])

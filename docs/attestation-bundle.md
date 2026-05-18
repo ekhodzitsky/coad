@@ -23,6 +23,7 @@ The current bundle includes:
 - ledger report;
 - profile report;
 - policy report;
+- handoff integrity report;
 - drift report.
 
 Every included report is required. If any required report has `ok: false`, the

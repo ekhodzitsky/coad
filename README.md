@@ -27,7 +27,8 @@ coad check .
 ```
 
 That command is the gate after a repository has adopted the small COAD file
-shape below.
+shape below. It also uses available Git context: when a root `HANDOFF.md`
+exists, `coad check .` compares its `changed_files` against the real diff.
 
 ## 60-Second Demo
 

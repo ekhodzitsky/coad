@@ -18,6 +18,7 @@ workcell:
     - tools/coad-validator/src/coad_validator/check.py
     - tools/coad-validator/src/coad_validator/cli.py
     - tools/coad-validator/src/coad_validator/coad_cli.py
+    - tools/coad-validator/src/coad_validator/handoff_integrity.py
     - tools/coad-validator/src/coad_validator/report.py
     - tools/coad-validator/src/coad_validator/report_sources.py
   context_budget:

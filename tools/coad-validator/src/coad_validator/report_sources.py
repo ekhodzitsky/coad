@@ -7,6 +7,7 @@ from typing import Any, Callable
 from .agent_guidance import build_agent_guidance_report
 from .drift import build_drift_report
 from .graph_report import build_graph_report
+from .handoff_integrity import build_handoff_integrity_report
 from .ledger import build_ledger_report
 from .policy import build_policy_report
 from .profile import build_profile_report
@@ -75,6 +76,12 @@ CORE_METHODOLOGY_SOURCES = [
         COAD_CHECK_PRODUCER,
         True,
         lambda root, schema_dir: build_policy_report(root, schema_dir=schema_dir),
+    ),
+    ReportSource(
+        "handoff-integrity",
+        COAD_CHECK_PRODUCER,
+        True,
+        lambda root, schema_dir: build_handoff_integrity_report(root, schema_dir),
     ),
 ]
 
@@ -158,6 +165,11 @@ _CACHED_SOURCE_BUILDERS: dict[str, Callable[[Path, Path, ValidationReport], dict
         root,
         schema_dir=schema_dir,
         contract_report=report,
+    ),
+    "handoff-integrity": lambda root, schema_dir, report: build_handoff_integrity_report(
+        root,
+        schema_dir,
+        report,
     ),
     "profile-report": lambda root, schema_dir, report: build_profile_report(
         root,

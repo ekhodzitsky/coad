@@ -32,6 +32,11 @@ executable before heavier orchestration tooling exists.
   `CHANGELOG.md`, or the COAD validator package: `VERSION`,
   `[project].version`, package `__version__`, and a changelog entry for the
   current version must agree.
+- Handoff integrity when context is available: if the checked root contains a
+  `HANDOFF.md` and Git can determine a diff base, `coad check .` compares the
+  real changed files with `handoff.changed_files`. Missing Git context,
+  missing handoff, or an empty diff is reported as a skipped check rather than
+  a failure.
 - Cross-contract graph references:
   - goal to modules, tasks, proofs, reviews, and integration;
   - task to modules and proof contracts;
@@ -77,8 +82,9 @@ A repository can start with only:
 - that module's `TODO.md`.
 
 `coad check .` passes this shape without requiring goal, task, proof, handoff,
-review, integration, or ledger contracts. When those execution contracts appear,
-the command automatically expands to the deeper orchestration checks.
+review, integration, ledger, or Git-diff context. When those execution
+contracts appear, the command automatically expands to the deeper orchestration
+checks.
 
 Workcell budget failures are blocking by default. If a workcell is temporarily
 too large, document the exception in `workcell.budget_exceptions` with a clear

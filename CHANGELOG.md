@@ -4,6 +4,9 @@
 
 ### Added
 
+- `coad check .` now includes a context-aware handoff integrity check that
+  compares root `HANDOFF.md` `changed_files` with the Git diff when that context
+  is available.
 - Added report builder, CLI, required-source, and negative-path JSON Schema
   compatibility coverage for manifest-backed report payloads.
 

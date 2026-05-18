@@ -46,6 +46,7 @@ def test_check_report_passes_for_valid_methodology_graph() -> None:
         "schedule-report",
         "ledger-report",
         "policy-report",
+        "handoff-integrity",
     }
     assert payload["issues"] == []
     _assert_matches_report_schema("check-report.schema.json", payload)
@@ -203,6 +204,54 @@ def test_check_report_fails_for_invalid_methodology_graph() -> None:
     _assert_matches_report_schema("check-report.schema.json", payload)
 
 
+def test_check_report_skips_handoff_integrity_without_git_context(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is True
+    handoff_check = _check(payload, "handoff-integrity")
+    assert handoff_check["ok"] is True
+    assert handoff_check["status"] == "skipped"
+
+
+def test_check_report_passes_when_handoff_changed_files_match_git_diff(tmp_path: Path) -> None:
+    target = _git_repo_from_minimal_example(tmp_path)
+    _write(target / "checkout" / "checkout_service.py", "def checkout():\n    return 'ok'\n")
+    _write(target / "checkout" / "test_checkout_service.py", "def test_checkout():\n    assert True\n")
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is True
+    handoff_check = _check(payload, "handoff-integrity")
+    assert handoff_check["ok"] is True
+    assert handoff_check["status"] == "pass"
+
+
+def test_check_report_fails_when_handoff_changed_files_do_not_match_git_diff(tmp_path: Path) -> None:
+    target = _git_repo_from_minimal_example(tmp_path)
+    _write(target / "checkout" / "checkout_service.py", "def checkout():\n    return 'ok'\n")
+    _write(target / "checkout" / "unlisted.py", "VALUE = 1\n")
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "handoff-integrity")["status"] == "mismatch"
+    assert {
+        "code": "handoff.changed_files_missing",
+        "severity": "error",
+        "path": "HANDOFF.md",
+        "message": "handoff-integrity: changed file is not listed in handoff.changed_files: checkout/unlisted.py",
+    } in payload["issues"]
+    assert {
+        "code": "handoff.changed_files_extra",
+        "severity": "error",
+        "path": "HANDOFF.md",
+        "message": "handoff-integrity: handoff.changed_files lists a file not changed in git diff: checkout/test_checkout_service.py",
+    } in payload["issues"]
+
+
 def test_coad_check_text_output_is_one_line() -> None:
     result = subprocess.run(
         [
@@ -318,6 +367,31 @@ def test_coad_check_json_output_matches_schema() -> None:
     assert result.returncode == 0
     payload = json.loads(result.stdout)
     _assert_matches_report_schema("check-report.schema.json", payload)
+
+
+def _check(payload: dict[str, Any], name: str) -> dict[str, Any]:
+    matches = [check for check in payload["checks"] if check["name"] == name]
+    assert len(matches) == 1
+    return matches[0]
+
+
+def _git_repo_from_minimal_example(tmp_path: Path) -> Path:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _git(target, "init")
+    _git(target, "config", "user.email", "coad-test@example.invalid")
+    _git(target, "config", "user.name", "COAD Test")
+    _git(target, "add", ".")
+    _git(target, "commit", "-m", "baseline")
+    return target
+
+
+def _git(root: Path, *args: str) -> None:
+    subprocess.run(["git", "-C", str(root), *args], check=True, capture_output=True, text=True)
+
+
+def _write(path: Path, text: str) -> None:
+    path.write_text(text, encoding="utf-8")
 
 
 def _assert_matches_report_schema(schema_name: str, payload: dict[str, Any]) -> None:
