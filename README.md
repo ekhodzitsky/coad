@@ -30,6 +30,9 @@ That command is the gate after a repository has adopted the small COAD file
 shape below. It also uses available Git context: when a root `HANDOFF.md`
 exists, `coad check .` compares its `changed_files` against the real diff and
 checks those changes against the referenced task's write scope.
+When an `EXECUTION_LEDGER.json` is present, passing proof results must also
+point at non-empty artifacts whose SHA-256 digest and byte size match the
+ledger.
 
 ## 60-Second Demo
 

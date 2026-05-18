@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import subprocess
@@ -620,6 +621,95 @@ def test_check_report_fails_when_passing_proof_artifact_is_empty(tmp_path: Path)
     } in payload["issues"]
 
 
+def test_check_report_fails_when_passing_proof_artifact_digest_is_missing(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_minimal_artifacts(target)
+    ledger = _read_ledger(target)
+    del ledger["entries"][0]["proof_results"][0]["artifact_sha256"]
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.digest_missing",
+        "severity": "error",
+        "path": "EXECUTION_LEDGER.json",
+        "message": (
+            "proof-artifact-integrity: passing proof result must declare "
+            "artifact_sha256: test checkout.checkout_service.rejects_negative_total"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_passing_proof_artifact_bytes_are_missing(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_minimal_artifacts(target)
+    ledger = _read_ledger(target)
+    del ledger["entries"][0]["proof_results"][0]["artifact_bytes"]
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.bytes_missing",
+        "severity": "error",
+        "path": "EXECUTION_LEDGER.json",
+        "message": (
+            "proof-artifact-integrity: passing proof result must declare "
+            "artifact_bytes: test checkout.checkout_service.rejects_negative_total"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_passing_proof_artifact_bytes_do_not_match(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_minimal_artifacts(target)
+    ledger = _read_ledger(target)
+    ledger["entries"][0]["proof_results"][0]["artifact_bytes"] = 999
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.bytes_mismatch",
+        "severity": "error",
+        "path": "artifacts/unit-test.txt",
+        "message": "proof-artifact-integrity: proof artifact size mismatch for artifacts/unit-test.txt: expected 999, got 22",
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_passing_proof_artifact_digest_does_not_match(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_minimal_artifacts(target)
+    ledger = _read_ledger(target)
+    ledger["entries"][0]["proof_results"][0]["artifact_sha256"] = "0" * 64
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert any(
+        issue["code"] == "proof_artifact.digest_mismatch"
+        and issue["path"] == "artifacts/unit-test.txt"
+        and issue["message"].startswith(
+            "proof-artifact-integrity: proof artifact sha256 mismatch for "
+            "artifacts/unit-test.txt: expected 0000000000000000000000000000000000000000000000000000000000000000, got "
+        )
+        for issue in payload["issues"]
+    )
+
+
 def test_check_report_fails_when_proof_artifact_path_escapes_root(tmp_path: Path) -> None:
     target = tmp_path / "minimal"
     shutil.copytree(MINIMAL_EXAMPLE, target)
@@ -985,6 +1075,17 @@ def _write_minimal_artifacts(
 ) -> None:
     _write(root / "artifacts" / "unit-test.txt", unit_text)
     _write(root / "artifacts" / "schema-test.txt", schema_text)
+    ledger = _read_ledger(root)
+    proof_results = ledger["entries"][0]["proof_results"]
+    _set_artifact_metadata(proof_results[0], unit_text)
+    _set_artifact_metadata(proof_results[1], schema_text)
+    _write_ledger(root, ledger)
+
+
+def _set_artifact_metadata(proof_result: dict[str, Any], content: str) -> None:
+    payload = content.encode("utf-8")
+    proof_result["artifact_sha256"] = hashlib.sha256(payload).hexdigest()
+    proof_result["artifact_bytes"] = len(payload)
 
 
 def _assert_matches_report_schema(schema_name: str, payload: dict[str, Any]) -> None:

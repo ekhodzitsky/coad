@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 import subprocess
@@ -132,7 +133,14 @@ def _copy_minimal_graph(tmp_path: Path) -> Path:
     return target
 
 
-def _write_ledger(path: Path, proof_results: list[dict[str, str]]) -> None:
+def _write_ledger(path: Path, proof_results: list[dict[str, Any]]) -> None:
+    for proof_result in proof_results:
+        if proof_result.get("status") != "pass" or "artifact" not in proof_result:
+            continue
+        artifact = path.parent / str(proof_result["artifact"])
+        payload = artifact.read_bytes()
+        proof_result["artifact_sha256"] = hashlib.sha256(payload).hexdigest()
+        proof_result["artifact_bytes"] = len(payload)
     path.write_text(
         json.dumps(
             {

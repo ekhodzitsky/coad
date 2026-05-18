@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -20,6 +21,8 @@ class ProofArtifact:
     command: str
     status: str
     artifact: str
+    artifact_sha256: str
+    artifact_bytes: int
     ok: bool
 
 
@@ -71,6 +74,8 @@ def _collect_ledger_artifacts(
             command = _string_value(proof_result.get("command"))
             status = _string_value(proof_result.get("status"), "unknown")
             artifact = _string_value(proof_result.get("artifact"))
+            artifact_sha256 = _string_value(proof_result.get("artifact_sha256"))
+            artifact_bytes = _int_value(proof_result.get("artifact_bytes"))
             if not artifact:
                 if status == "pass":
                     issues.append(
@@ -81,7 +86,30 @@ def _collect_ledger_artifacts(
                         )
                     )
                 continue
-            artifact_ok = _validate_artifact(root, ledger_path.parent, artifact, issues)
+            if status == "pass" and not artifact_sha256:
+                issues.append(
+                    _issue(
+                        "proof_artifact.digest_missing",
+                        ledger_display,
+                        f"passing proof result must declare artifact_sha256: {command}",
+                    )
+                )
+            if status == "pass" and artifact_bytes is None:
+                issues.append(
+                    _issue(
+                        "proof_artifact.bytes_missing",
+                        ledger_display,
+                        f"passing proof result must declare artifact_bytes: {command}",
+                    )
+                )
+            artifact_ok = _validate_artifact(
+                root,
+                ledger_path.parent,
+                artifact,
+                artifact_sha256,
+                artifact_bytes,
+                issues,
+            )
             artifacts.append(
                 ProofArtifact(
                     ledger_path=ledger_display,
@@ -90,12 +118,21 @@ def _collect_ledger_artifacts(
                     command=command,
                     status=status,
                     artifact=artifact,
+                    artifact_sha256=artifact_sha256,
+                    artifact_bytes=artifact_bytes if artifact_bytes is not None else 0,
                     ok=artifact_ok,
                 )
             )
 
 
-def _validate_artifact(root: Path, base_dir: Path, artifact: str, issues: list[dict[str, str]]) -> bool:
+def _validate_artifact(
+    root: Path,
+    base_dir: Path,
+    artifact: str,
+    artifact_sha256: str,
+    artifact_bytes: int | None,
+    issues: list[dict[str, str]],
+) -> bool:
     candidate = Path(artifact)
     if candidate.is_absolute() or ".." in candidate.parts:
         issues.append(
@@ -138,7 +175,30 @@ def _validate_artifact(root: Path, base_dir: Path, artifact: str, issues: list[d
             )
         )
         return False
-    return True
+
+    ok = True
+    actual_bytes = artifact_path.stat().st_size
+    if artifact_bytes is not None and artifact_bytes != actual_bytes:
+        issues.append(
+            _issue(
+                "proof_artifact.bytes_mismatch",
+                artifact,
+                f"proof artifact size mismatch for {artifact}: expected {artifact_bytes}, got {actual_bytes}",
+            )
+        )
+        ok = False
+    if artifact_sha256:
+        actual_sha256 = _sha256(artifact_path)
+        if artifact_sha256 != actual_sha256:
+            issues.append(
+                _issue(
+                    "proof_artifact.digest_mismatch",
+                    artifact,
+                    f"proof artifact sha256 mismatch for {artifact}: expected {artifact_sha256}, got {actual_sha256}",
+                )
+            )
+            ok = False
+    return ok
 
 
 def _ledger_payload(path: Path, root: Path, issues: list[dict[str, str]]) -> dict[str, Any] | None:
@@ -181,6 +241,8 @@ def _artifact_payload(artifact: ProofArtifact) -> dict[str, Any]:
         "command": artifact.command,
         "status": artifact.status,
         "artifact": artifact.artifact,
+        "artifact_sha256": artifact.artifact_sha256,
+        "artifact_bytes": artifact.artifact_bytes,
         "ok": artifact.ok,
     }
 
@@ -191,6 +253,18 @@ def _list_value(value: Any) -> list[Any]:
 
 def _string_value(value: object, fallback: str = "") -> str:
     return value if isinstance(value, str) and value else fallback
+
+
+def _int_value(value: object) -> int | None:
+    return value if type(value) is int and value >= 0 else None
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def _skipped(reason: str, message: str) -> dict[str, Any]:

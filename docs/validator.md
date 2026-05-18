@@ -53,9 +53,10 @@ executable before heavier orchestration tooling exists.
   `HANDOFF.contract_updates` with a non-empty `reason`; stale entries are
   reported as warnings.
 - Proof artifact integrity when execution ledgers are available: passing
-  `EXECUTION_LEDGER.json` proof results must declare relative artifacts, and
-  declared artifacts must exist, resolve from the ledger directory inside the
-  checked root, and be non-empty. Missing artifacts for non-passing proof
+  `EXECUTION_LEDGER.json` proof results must declare relative artifacts plus
+  `artifact_sha256` and `artifact_bytes`. Declared artifacts must exist, resolve
+  from the ledger directory inside the checked root, be non-empty, and match
+  their declared digest and size. Missing artifacts for non-passing proof
   results are ignored, but declared paths are still validated.
 - Cross-contract graph references:
   - goal to modules, tasks, proofs, reviews, and integration;

@@ -22,6 +22,7 @@ allowed_mutations:
   - update CheckoutService validation
   - add checkout tests
   - write proof artifacts
+  - record proof artifact digest metadata
 forbidden_mutations:
   - change CheckoutDecision schema
   - change pricing rules

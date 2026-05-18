@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.6.8 - 2026-05-18
+
+### Added
+
+- `coad check .` now binds passing ledger proof artifacts to their declared
+  SHA-256 digest and byte size, so a ledger cannot pass by pointing at a
+  swapped or stale proof file.
+
 ## 0.6.7 - 2026-05-18
 
 ### Added

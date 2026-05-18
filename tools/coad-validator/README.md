@@ -2,7 +2,7 @@
 
 Reference validator for COAD contract files.
 
-Current released package version: `0.6.7`.
+Current released package version: `0.6.8`.
 
 ## Usage
 
@@ -27,7 +27,7 @@ integrity across handoffs and ledgers. Ledger entries must also point at
 matching handoffs with the same task and changed files. Methodology file changes
 must be declared in `HANDOFF.contract_updates` with non-empty reasons. Passing
 ledger proof results must point at non-empty relative proof artifacts that stay
-inside the checked root.
+inside the checked root and match their declared SHA-256 digest plus byte size.
 
 Internal report builders remain available to this package's tests, but they are
 not user-facing CLI commands.

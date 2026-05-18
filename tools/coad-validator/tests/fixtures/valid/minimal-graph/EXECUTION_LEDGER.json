@@ -17,12 +17,16 @@
         {
           "command": "test checkout.checkout_service.rejects_negative_total",
           "status": "pass",
-          "artifact": "artifacts/unit-test.txt"
+          "artifact": "artifacts/unit-test.txt",
+          "artifact_sha256": "d4102b3b69047a96c82dfb2e7ef1075d72e36ec4ca27607b65ff44f09e24dac7",
+          "artifact_bytes": 22
         },
         {
           "command": "test schemas/checkout-decision.schema.json",
           "status": "pass",
-          "artifact": "artifacts/schema-test.txt"
+          "artifact": "artifacts/schema-test.txt",
+          "artifact_sha256": "8381ae355daad4957a1803af2445d3dfdbf95312ebf600b248c5b0a9547cf1a3",
+          "artifact_bytes": 24
         }
       ],
       "changed_files": [

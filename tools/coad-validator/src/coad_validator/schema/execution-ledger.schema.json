@@ -105,6 +105,21 @@
       "type": "object",
       "required": ["command", "status"],
       "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "status": {
+                "const": "pass"
+              }
+            },
+            "required": ["status"]
+          },
+          "then": {
+            "required": ["artifact", "artifact_sha256", "artifact_bytes"]
+          }
+        }
+      ],
       "properties": {
         "command": {
           "type": "string",
@@ -116,6 +131,14 @@
         "artifact": {
           "type": "string",
           "minLength": 1
+        },
+        "artifact_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "artifact_bytes": {
+          "type": "integer",
+          "minimum": 0
         }
       }
     }

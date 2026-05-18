@@ -35,7 +35,17 @@
   "$defs": {
     "proof_artifact": {
       "type": "object",
-      "required": ["ledger_path", "event_id", "task_id", "command", "status", "artifact", "ok"],
+      "required": [
+        "ledger_path",
+        "event_id",
+        "task_id",
+        "command",
+        "status",
+        "artifact",
+        "artifact_sha256",
+        "artifact_bytes",
+        "ok"
+      ],
       "additionalProperties": false,
       "properties": {
         "ledger_path": {
@@ -58,6 +68,13 @@
         "artifact": {
           "type": "string",
           "minLength": 1
+        },
+        "artifact_sha256": {
+          "type": "string"
+        },
+        "artifact_bytes": {
+          "type": "integer",
+          "minimum": 0
         },
         "ok": {
           "type": "boolean"
