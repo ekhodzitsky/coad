@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "kind": "proof_artifact",
+  "command": "test checkout.checkout_service.rejects_negative_total",
+  "status": "pass",
+  "exit_code": 0,
+  "tool": "pytest",
+  "cwd": ".",
+  "started_at": "2026-05-16T11:04:00Z",
+  "completed_at": "2026-05-16T11:04:30Z",
+  "stdout_excerpt": "test checkout.checkout_service.rejects_negative_total: pass"
+}

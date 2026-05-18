@@ -529,7 +529,7 @@ def test_check_report_fails_when_ledger_changed_files_do_not_match_handoff(tmp_p
         "path": "EXECUTION_LEDGER.json",
         "message": (
             "ledger-handoff-integrity: handoff.changed_files is missing from "
-            "ledger changed_files: TASK_CONTRACT.md"
+            "ledger changed_files: artifacts/schema-test.json"
         ),
     } in payload["issues"]
     assert {
@@ -710,6 +710,67 @@ def test_check_report_fails_when_passing_proof_artifact_digest_does_not_match(tm
         )
         for issue in payload["issues"]
     )
+
+
+def test_check_report_fails_when_json_proof_artifact_command_does_not_match_ledger(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_structured_minimal_artifacts(
+        target,
+        unit_overrides={"command": "test checkout.checkout_service.accepts_negative_total"},
+    )
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.payload_command_mismatch",
+        "severity": "error",
+        "path": "artifacts/unit-test.json",
+        "message": (
+            "proof-artifact-integrity: proof artifact command does not match ledger for "
+            "artifacts/unit-test.json: expected test checkout.checkout_service.rejects_negative_total, "
+            "got test checkout.checkout_service.accepts_negative_total"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_json_proof_artifact_status_does_not_match_ledger(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_structured_minimal_artifacts(target, unit_overrides={"status": "fail"})
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.payload_status_mismatch",
+        "severity": "error",
+        "path": "artifacts/unit-test.json",
+        "message": (
+            "proof-artifact-integrity: proof artifact status does not match ledger for "
+            "artifacts/unit-test.json: expected pass, got fail"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_json_proof_artifact_schema_is_invalid(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_structured_minimal_artifacts(target, unit_omit={"exit_code"})
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.payload_schema_invalid",
+        "severity": "error",
+        "path": "artifacts/unit-test.json",
+        "message": "proof-artifact-integrity: proof artifact schema violation at .: 'exit_code' is a required property",
+    } in payload["issues"]
 
 
 def test_check_report_fails_when_proof_artifact_path_escapes_root(tmp_path: Path) -> None:
@@ -1079,9 +1140,66 @@ def _write_minimal_artifacts(
     _write(root / "artifacts" / "schema-test.txt", schema_text)
     ledger = _read_ledger(root)
     proof_results = ledger["entries"][0]["proof_results"]
+    proof_results[0]["artifact"] = "artifacts/unit-test.txt"
+    proof_results[1]["artifact"] = "artifacts/schema-test.txt"
     _set_artifact_metadata(proof_results[0], unit_text)
     _set_artifact_metadata(proof_results[1], schema_text)
     _write_ledger(root, ledger)
+
+
+def _write_structured_minimal_artifacts(
+    root: Path,
+    unit_overrides: dict[str, Any] | None = None,
+    schema_overrides: dict[str, Any] | None = None,
+    unit_omit: set[str] | None = None,
+    schema_omit: set[str] | None = None,
+) -> None:
+    unit_artifact = _proof_artifact_payload(
+        command="test checkout.checkout_service.rejects_negative_total",
+        stdout_excerpt="test checkout.checkout_service.rejects_negative_total: pass",
+    )
+    schema_artifact = _proof_artifact_payload(
+        command="test schemas/checkout-decision.schema.json",
+        stdout_excerpt="test schemas/checkout-decision.schema.json: pass",
+    )
+    unit_artifact.update(unit_overrides or {})
+    schema_artifact.update(schema_overrides or {})
+    for key in unit_omit or set():
+        unit_artifact.pop(key, None)
+    for key in schema_omit or set():
+        schema_artifact.pop(key, None)
+
+    unit_content = _artifact_json(unit_artifact)
+    schema_content = _artifact_json(schema_artifact)
+    _write(root / "artifacts" / "unit-test.json", unit_content)
+    _write(root / "artifacts" / "schema-test.json", schema_content)
+
+    ledger = _read_ledger(root)
+    proof_results = ledger["entries"][0]["proof_results"]
+    proof_results[0]["artifact"] = "artifacts/unit-test.json"
+    proof_results[1]["artifact"] = "artifacts/schema-test.json"
+    _set_artifact_metadata(proof_results[0], unit_content)
+    _set_artifact_metadata(proof_results[1], schema_content)
+    _write_ledger(root, ledger)
+
+
+def _proof_artifact_payload(command: str, stdout_excerpt: str) -> dict[str, Any]:
+    return {
+        "schema_version": 1,
+        "kind": "proof_artifact",
+        "command": command,
+        "status": "pass",
+        "exit_code": 0,
+        "tool": "pytest",
+        "cwd": ".",
+        "started_at": "2026-05-18T20:00:00Z",
+        "completed_at": "2026-05-18T20:00:01Z",
+        "stdout_excerpt": stdout_excerpt,
+    }
+
+
+def _artifact_json(payload: dict[str, Any]) -> str:
+    return json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
 
 def _set_artifact_metadata(proof_result: dict[str, Any], content: str) -> None:

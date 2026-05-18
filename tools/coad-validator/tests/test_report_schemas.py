@@ -338,6 +338,17 @@ def test_example_execution_ledger_matches_ledger_schema() -> None:
     Draft202012Validator(ledger_schema).validate(ledger)
 
 
+def test_example_proof_artifacts_match_artifact_schema() -> None:
+    artifact_schema_path = SCHEMA_DIR / "proof-artifact.schema.json"
+    artifact_schema = json.loads(artifact_schema_path.read_text(encoding="utf-8"))
+
+    Draft202012Validator.check_schema(artifact_schema)
+    validator = Draft202012Validator(artifact_schema)
+    for artifact_path in sorted((ROOT / "examples" / "minimal" / "artifacts").glob("*.json")):
+        artifact = json.loads(artifact_path.read_text(encoding="utf-8"))
+        validator.validate(artifact)
+
+
 def test_conformance_profile_matches_profile_schema() -> None:
     profile_path = ROOT / "COAD_PROFILE.json"
     profile_schema_path = SCHEMA_DIR / "conformance-profile.schema.json"

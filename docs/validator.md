@@ -59,6 +59,8 @@ executable before heavier orchestration tooling exists.
   their declared digest and size. Missing artifacts for non-passing proof
   results are ignored, but declared paths are still validated. Missing digest
   metadata issues include the computed value when the artifact can be read.
+  Artifacts ending in `.json` must also match `proof-artifact.schema.json`, and
+  their `command` and `status` must match the ledger proof result.
 - Cross-contract graph references:
   - goal to modules, tasks, proofs, reviews, and integration;
   - task to modules and proof contracts;

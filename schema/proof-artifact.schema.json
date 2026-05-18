@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coad.dev/schema/proof-artifact.schema.json",
+  "title": "COAD Proof Artifact",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "kind",
+    "command",
+    "status",
+    "exit_code",
+    "tool",
+    "cwd",
+    "started_at",
+    "completed_at"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "kind": {
+      "const": "proof_artifact"
+    },
+    "command": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": ["pass", "fail", "skipped", "blocked"]
+    },
+    "exit_code": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "tool": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cwd": {
+      "type": "string",
+      "minLength": 1
+    },
+    "started_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "completed_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "stdout_excerpt": {
+      "type": "string"
+    },
+    "stderr_excerpt": {
+      "type": "string"
+    },
+    "output_path": {
+      "type": "string",
+      "minLength": 1
+    },
+    "assertions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": ["pass", "fail", "skipped", "blocked"]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

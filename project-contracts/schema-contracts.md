@@ -19,6 +19,7 @@ workcell:
     - schema/handoff-contract.schema.json
     - schema/integration-contract.schema.json
     - schema/module-contract.schema.json
+    - schema/proof-artifact.schema.json
     - schema/proof-contract.schema.json
     - schema/review-contract.schema.json
     - schema/task-contract.schema.json

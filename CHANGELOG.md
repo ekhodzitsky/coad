@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.7.0 - 2026-05-18
+
+### Added
+
+- Added `proof-artifact.schema.json` for machine-readable proof artifacts.
+- `coad check .` now validates `.json` proof artifacts against that schema and
+  requires their `command` and `status` to match the linked ledger proof result.
+
 ## 0.6.9 - 2026-05-18
 
 ### Added

@@ -6,6 +6,7 @@ fields, reports, and manifests.
 Public API:
 
 - contract schemas at `schema/*.schema.json`
+- proof artifact schema at `schema/proof-artifact.schema.json`
 - report schemas at `schema/reports/*.schema.json`
 - release, report, and lease manifests
 

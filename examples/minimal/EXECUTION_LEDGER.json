@@ -17,21 +17,24 @@
         {
           "command": "test checkout.checkout_service.rejects_negative_total",
           "status": "pass",
-          "artifact": "artifacts/unit-test.txt",
-          "artifact_sha256": "6c7fa0177b468f5d7014580be2c31a581def53cc02ac41c74cfd50d1f62f029d",
-          "artifact_bytes": 60
+          "artifact": "artifacts/unit-test.json",
+          "artifact_sha256": "6973b2c7345b9397f271d01bbfed9a204aea86707132dd0a4880fd5a7d547a6b",
+          "artifact_bytes": 361
         },
         {
           "command": "test schemas/checkout-decision.schema.json",
           "status": "pass",
-          "artifact": "artifacts/schema-test.txt",
-          "artifact_sha256": "2f550c85846455dc84031a078960e1643e92b859947d19e9e3e95233826a86fe",
-          "artifact_bytes": 49
+          "artifact": "artifacts/schema-test.json",
+          "artifact_sha256": "8724c9dc6dd7732ef71cc537385be56278f2e1c8983536ca648d157b26abd31c",
+          "artifact_bytes": 343
         }
       ],
       "changed_files": [
         "EXECUTION_LEDGER.json",
-        "TASK_CONTRACT.md"
+        "artifacts/schema-test.json",
+        "artifacts/schema-test.txt",
+        "artifacts/unit-test.json",
+        "artifacts/unit-test.txt"
       ],
       "handoff_path": "HANDOFF.md"
     }

@@ -19,6 +19,7 @@ workcell:
     - tools/coad-validator/src/coad_validator/schema/handoff-contract.schema.json
     - tools/coad-validator/src/coad_validator/schema/integration-contract.schema.json
     - tools/coad-validator/src/coad_validator/schema/module-contract.schema.json
+    - tools/coad-validator/src/coad_validator/schema/proof-artifact.schema.json
     - tools/coad-validator/src/coad_validator/schema/proof-contract.schema.json
     - tools/coad-validator/src/coad_validator/schema/review-contract.schema.json
     - tools/coad-validator/src/coad_validator/schema/task-contract.schema.json

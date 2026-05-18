@@ -19,6 +19,12 @@ Each ledger names:
 Each entry records task id, wave, agent id, role, status, timestamps, changed
 files, optional handoff path, and proof command results.
 
+Passing proof results must point at durable proof artifacts with declared
+`artifact_sha256` and `artifact_bytes`. Text artifacts remain valid when they
+are non-empty and digest-bound. JSON artifacts are additionally validated
+against `schema/proof-artifact.schema.json`, and their `command` and `status`
+must match the ledger proof result they support.
+
 ## Completion Rule
 
 A ledger entry with `status: completed` must include a passing proof result for

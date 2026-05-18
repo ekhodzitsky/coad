@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "kind": "proof_artifact",
+  "command": "test schemas/checkout-decision.schema.json",
+  "status": "pass",
+  "exit_code": 0,
+  "tool": "jsonschema",
+  "cwd": ".",
+  "started_at": "2026-05-16T11:04:31Z",
+  "completed_at": "2026-05-16T11:05:00Z",
+  "stdout_excerpt": "test schemas/checkout-decision.schema.json: pass"
+}

@@ -5,7 +5,10 @@ task_id: checkout-negative-total-guard
 status: complete
 changed_files:
   - EXECUTION_LEDGER.json
-  - TASK_CONTRACT.md
+  - artifacts/schema-test.json
+  - artifacts/schema-test.txt
+  - artifacts/unit-test.json
+  - artifacts/unit-test.txt
 proof_results:
   - command: test checkout.checkout_service.rejects_negative_total
     status: pass

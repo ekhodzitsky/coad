@@ -25,8 +25,8 @@ workcell:
     - examples/minimal/REVIEW.md
     - examples/minimal/TASK_CONTRACT.md
     - examples/minimal/TODO.md
-    - examples/minimal/artifacts/schema-test.txt
-    - examples/minimal/artifacts/unit-test.txt
+    - examples/minimal/artifacts/schema-test.json
+    - examples/minimal/artifacts/unit-test.json
   context_budget:
     max_files: 14
     max_source_lines: 1500

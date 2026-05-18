@@ -6,8 +6,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+from jsonschema import Draft202012Validator
+
 from .report import versioned_report
 from .text_io import read_utf8
+from .validate import find_schema_dir
 
 if TYPE_CHECKING:
     from .validate import ValidationReport
@@ -35,10 +38,11 @@ class ArtifactValidation:
 
 def build_proof_artifact_integrity_report(
     root: Path,
-    _schema_dir: Path | None = None,
+    schema_dir: Path | None = None,
     _contract_report: ValidationReport | None = None,
 ) -> dict[str, Any]:
     resolved_root = root.resolve()
+    resolved_schema_dir = (schema_dir or find_schema_dir(resolved_root)).resolve()
     ledger_paths = _ledger_paths(resolved_root)
     if not ledger_paths:
         return _skipped("missing_ledger", "EXECUTION_LEDGER.json was not found")
@@ -49,7 +53,7 @@ def build_proof_artifact_integrity_report(
         payload = _ledger_payload(ledger_path, resolved_root, issues)
         if payload is None:
             continue
-        _collect_ledger_artifacts(resolved_root, ledger_path, payload, artifacts, issues)
+        _collect_ledger_artifacts(resolved_root, ledger_path, payload, resolved_schema_dir, artifacts, issues)
 
     has_errors = any(issue["severity"] == "error" for issue in issues)
     return versioned_report(
@@ -66,6 +70,7 @@ def _collect_ledger_artifacts(
     root: Path,
     ledger_path: Path,
     payload: dict[str, Any],
+    schema_dir: Path,
     artifacts: list[ProofArtifact],
     issues: list[dict[str, str]],
 ) -> None:
@@ -100,6 +105,9 @@ def _collect_ledger_artifacts(
                 artifact_sha256,
                 artifact_bytes,
                 status == "pass" and not artifact_sha256,
+                command,
+                status,
+                schema_dir,
                 issues,
             )
             if status == "pass" and not artifact_sha256:
@@ -146,6 +154,9 @@ def _validate_artifact(
     artifact_sha256: str,
     artifact_bytes: int | None,
     needs_sha256_hint: bool,
+    command: str,
+    status: str,
+    schema_dir: Path,
     issues: list[dict[str, str]],
 ) -> ArtifactValidation:
     candidate = Path(artifact)
@@ -216,7 +227,84 @@ def _validate_artifact(
                 )
             )
             ok = False
+    if artifact_path.suffix == ".json":
+        ok = _validate_structured_artifact(artifact_path, artifact, command, status, schema_dir, issues) and ok
     return ArtifactValidation(ok=ok, actual_sha256=actual_sha256, actual_bytes=actual_bytes)
+
+
+def _validate_structured_artifact(
+    artifact_path: Path,
+    artifact: str,
+    command: str,
+    status: str,
+    schema_dir: Path,
+    issues: list[dict[str, str]],
+) -> bool:
+    text, read_error = read_utf8(artifact_path)
+    if read_error is not None:
+        issues.append(_issue("proof_artifact.payload_read_failed", artifact, f"proof artifact {read_error}"))
+        return False
+    try:
+        payload = json.loads(text or "")
+    except json.JSONDecodeError as exc:
+        issues.append(_issue("proof_artifact.payload_invalid_json", artifact, f"invalid proof artifact JSON: {exc.msg}"))
+        return False
+    if not isinstance(payload, dict):
+        issues.append(_issue("proof_artifact.payload_invalid", artifact, "proof artifact must be a JSON object"))
+        return False
+
+    ok = _validate_artifact_schema(payload, artifact, schema_dir, issues)
+    artifact_command = _string_value(payload.get("command"))
+    if artifact_command and artifact_command != command:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_command_mismatch",
+                artifact,
+                f"proof artifact command does not match ledger for {artifact}: expected {command}, got {artifact_command}",
+            )
+        )
+        ok = False
+    artifact_status = _string_value(payload.get("status"))
+    if artifact_status and artifact_status != status:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_status_mismatch",
+                artifact,
+                f"proof artifact status does not match ledger for {artifact}: expected {status}, got {artifact_status}",
+            )
+        )
+        ok = False
+    return ok
+
+
+def _validate_artifact_schema(
+    payload: dict[str, Any],
+    artifact: str,
+    schema_dir: Path,
+    issues: list[dict[str, str]],
+) -> bool:
+    schema_path = schema_dir / "proof-artifact.schema.json"
+    text, read_error = read_utf8(schema_path)
+    if read_error is not None:
+        issues.append(_issue("proof_artifact.schema_read_failed", "proof-artifact.schema.json", f"proof artifact schema {read_error}"))
+        return False
+    try:
+        schema = json.loads(text or "")
+    except json.JSONDecodeError as exc:
+        issues.append(_issue("proof_artifact.schema_invalid_json", "proof-artifact.schema.json", f"invalid proof artifact schema JSON: {exc.msg}"))
+        return False
+
+    validator = Draft202012Validator(schema)
+    errors = sorted(validator.iter_errors(payload), key=lambda error: list(error.path))
+    for error in errors:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_schema_invalid",
+                artifact,
+                f"proof artifact schema violation at {_json_path(error.path)}: {error.message}",
+            )
+        )
+    return not errors
 
 
 def _ledger_payload(path: Path, root: Path, issues: list[dict[str, str]]) -> dict[str, Any] | None:
@@ -287,6 +375,13 @@ def _sha256(path: Path) -> str:
 
 def _expected_suffix(value: str | int | None) -> str:
     return f" (expected {value})" if value not in ("", None) else ""
+
+
+def _json_path(path: Any) -> str:
+    parts = list(path)
+    if not parts:
+        return "."
+    return "." + ".".join(str(part) for part in parts)
 
 
 def _skipped(reason: str, message: str) -> dict[str, Any]:
