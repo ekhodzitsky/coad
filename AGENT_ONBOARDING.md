@@ -17,8 +17,9 @@ coad check .
 2. Inspect the target repository and choose one real module/workcell that is
    worth documenting first.
 3. Add or update the target repository `AGENTS.md` with COAD guidance.
-4. Add one `MODULE_CONTRACT.md` for that real workcell.
-5. Ensure the workcell has `README.md` and `TODO.md`.
+4. Add one root `MODULE_CONTRACT.md` for that real workcell.
+5. Set `workcell.context_path` to the workcell directory and ensure that
+   directory has `README.md` and `TODO.md`.
 6. Run the workcell verification commands listed in `MODULE_CONTRACT.md`.
 7. Run `coad check .`.
 8. Fix any reported COAD adoption issues.
@@ -89,7 +90,7 @@ Use COAD for agent development coordination.
 COAD repository: https://github.com/ekhodzitsky/coad
 
 Before editing, identify the relevant workcell and read its
-`MODULE_CONTRACT.md`, `README.md`, and `TODO.md`.
+root `MODULE_CONTRACT.md`, plus the workcell `README.md` and `TODO.md`.
 
 Before claiming completion:
 
@@ -104,8 +105,9 @@ child work but do not directly edit child implementation files.
 If the repository has `.coad/leases.yml`, declare your active write lease there
 before editing so `coad check .` can catch ownership conflicts.
 
-Keep at least one `MODULE_CONTRACT.md` for the module being changed. The module
-is a workcell: one bounded agent workspace with ownership, surfaces, consumers,
+Keep at least one root `MODULE_CONTRACT.md` for the module being changed. Point
+it at the module directory with `workcell.context_path`. The module is a
+workcell: one bounded agent workspace with ownership, surfaces, consumers,
 invariants, verification, and write authority. The module directory must include
 `README.md` and `TODO.md` for future agents.
 ````
@@ -144,8 +146,9 @@ The workcell `TODO.md` should stay current:
 COAD onboarding is done when:
 
 - the target repository has COAD guidance in `AGENTS.md`;
-- at least one real workcell has `MODULE_CONTRACT.md`, `README.md`, and
-  `TODO.md`;
+- the target repository has a root `MODULE_CONTRACT.md` that points to one real
+  workcell with `workcell.context_path`;
+- that workcell directory has `README.md` and `TODO.md`;
 - the selected workcell verification commands have been run or explicitly
   reported as blocked;
 - `coad check .` passes;

@@ -62,7 +62,7 @@ Use COAD for agent development coordination.
 COAD repository: https://github.com/ekhodzitsky/coad
 
 Before editing, identify the relevant workcell and read its
-`MODULE_CONTRACT.md`, `README.md`, and `TODO.md`.
+root `MODULE_CONTRACT.md`, plus the workcell `README.md` and `TODO.md`.
 
 Before claiming completion, run:
 
@@ -70,8 +70,9 @@ Before claiming completion, run:
 coad check .
 ```
 
-Keep at least one `MODULE_CONTRACT.md` for the module being changed. The module
-is a workcell: one bounded agent workspace with ownership, surfaces, consumers,
+Keep at least one root `MODULE_CONTRACT.md` for the module being changed. Point
+it at the module directory with `workcell.context_path`. The module is a
+workcell: one bounded agent workspace with ownership, surfaces, consumers,
 invariants, verification, and write authority. The module directory must include
 `README.md` and `TODO.md` so the next agent has local context.
 
@@ -86,8 +87,8 @@ when structured output is needed.
 2. Inspect the target repository.
 3. Choose one real module/workcell.
 4. Add or update `AGENTS.md` with COAD guidance.
-5. Add one `MODULE_CONTRACT.md`.
-6. Add module `README.md` and `TODO.md`.
+5. Add one root `MODULE_CONTRACT.md`.
+6. Set `workcell.context_path` and add module `README.md` and `TODO.md`.
 7. Run `coad check .`.
 
 ## What It Checks

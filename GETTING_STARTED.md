@@ -43,8 +43,9 @@ The agent should:
 2. Inspect the target repository.
 3. Choose one real module/workcell.
 4. Add or update `AGENTS.md` with COAD guidance.
-5. Add one `MODULE_CONTRACT.md` for that real workcell.
-6. Add or update that workcell's `README.md` and `TODO.md`.
+5. Add one root `MODULE_CONTRACT.md` for that real workcell.
+6. Set `workcell.context_path` to the workcell directory and add or update that
+   directory's `README.md` and `TODO.md`.
 7. Run:
 
    ```bash
@@ -69,8 +70,11 @@ Start from `templates/onboarding/`:
 
 - `AGENTS.md`;
 - `MODULE_CONTRACT.md`;
-- `module/README.md`;
-- `module/TODO.md`.
+- `<workcell>/README.md`;
+- `<workcell>/TODO.md`.
+
+For first adoption, keep `MODULE_CONTRACT.md` at the repository root and point
+it at the chosen workcell with `workcell.context_path`.
 
 See `examples/onboarding/` for the smallest complete repository shape that
 passes `coad check .`.

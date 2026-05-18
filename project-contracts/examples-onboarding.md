@@ -34,7 +34,7 @@ surface:
   - name: OnboardingReferenceExample
     kind: example
     visibility: public
-    contract: Shows the minimum repository shape that can pass `coad check .`.
+    contract: Shows the minimum root-contract and workcell-context shape that can pass `coad check .`.
     proof:
       kind: smoke
       target: examples/onboarding

@@ -10,7 +10,7 @@ owners:
   - replace-with-owner
 workcell:
   type: leaf
-  parent: replace-with-parent-or-empty
+  context_path: replace-with-module-path
   children: []
   owns_paths:
     - replace-with-module-path/

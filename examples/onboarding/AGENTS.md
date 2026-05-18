@@ -8,5 +8,6 @@ Before claiming completion:
 coad check .
 ```
 
-Keep at least one `MODULE_CONTRACT.md` for the module being changed. The module
-directory must include `README.md` and `TODO.md` for future agents.
+Keep a root `MODULE_CONTRACT.md` for the module being changed. Point it at the
+module directory with `workcell.context_path`. The module directory must include
+`README.md` and `TODO.md` for future agents.

@@ -31,7 +31,7 @@ surface:
   - name: OnboardingTemplates
     kind: template-set
     visibility: public
-    contract: Gives agents the smallest COAD files needed to start adoption.
+    contract: Gives agents a root COAD contract template plus workcell context files for first adoption.
     proof:
       kind: static-check
       target: templates/onboarding

@@ -10,6 +10,7 @@ owners:
   - product-platform
 workcell:
   type: leaf
+  context_path: onboarding-checkout
   children: []
   owns_paths:
     - onboarding-checkout/
