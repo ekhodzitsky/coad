@@ -63,14 +63,18 @@ The smallest useful adoption looks like this:
 
 ```text
 AGENTS.md
+MODULE_CONTRACT.md
 <workcell>/
-  MODULE_CONTRACT.md
   README.md
   TODO.md
 ```
 
 Choose a real workcell. Good first choices have clear ownership, real consumers,
 fragile invariants, public surfaces, side effects, or frequent edits.
+
+For first adoption, keep `MODULE_CONTRACT.md` at the repository root and point
+it at the chosen module with `workcell.context_path`. Contracts may move inside
+modules later when the repository has a deeper workcell tree.
 
 Avoid creating a fake `example` module only to satisfy the checker.
 

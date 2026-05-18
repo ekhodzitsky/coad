@@ -64,7 +64,7 @@ def test_repository_validation_skips_templates_and_test_fixtures() -> None:
     report = validate_path(ROOT, schema_dir=SCHEMA_DIR)
 
     assert report.ok, [issue.format(report.root) for issue in report.issues]
-    assert len(report.documents) == 44
+    assert len(report.documents) == 45
 
 
 def test_repository_declares_real_project_module_contracts() -> None:
@@ -1008,6 +1008,19 @@ def test_contract_discovery_skips_generated_dependency_directories(tmp_path: Pat
     report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
 
     assert report.ok, [issue.format(report.root) for issue in report.issues]
+
+
+def test_repository_validation_skips_public_invalid_examples() -> None:
+    report = validate_path(ROOT, schema_dir=SCHEMA_DIR)
+
+    assert report.ok, [issue.format(report.root) for issue in report.issues]
+
+
+def test_public_invalid_example_still_fails_when_checked_directly() -> None:
+    report = validate_path(ROOT / "examples" / "invalid" / "missing-consumer", schema_dir=SCHEMA_DIR)
+
+    assert not report.ok
+    assert any(issue.code == "semantic.public_surface_without_consumer" for issue in report.issues)
 
 
 def test_module_context_rejects_symlink_escape_without_crashing(tmp_path: Path) -> None:

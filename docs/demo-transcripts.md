@@ -27,11 +27,11 @@ coad check: pass
 
 ## Quality Gate
 
-The `missing-consumer` fixture has COAD guidance and module context files, but
+The `missing-consumer` example has COAD guidance and module context files, but
 its public `BillingTotals` surface does not declare any consumer.
 
 ```bash
-$ uv run --project tools/coad-validator coad check tools/coad-validator/tests/fixtures/invalid/missing-consumer --schema-dir schema --format json
+$ uv run --project tools/coad-validator coad check examples/invalid/missing-consumer --schema-dir schema --format json
 {
   "checks": [
     {

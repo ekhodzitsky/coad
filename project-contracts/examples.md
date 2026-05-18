@@ -13,6 +13,7 @@ workcell:
   parent: project
   children:
     - examples/before-after-reference
+    - examples/invalid-reference
     - examples/onboarding-reference
     - examples/minimal-reference
     - examples/parallel-work-reference
@@ -59,6 +60,14 @@ surface:
       kind: smoke
       target: examples/minimal
       command: coad check examples/minimal
+  - name: InvalidSemanticQualityExample
+    kind: example
+    visibility: public
+    contract: Shows a public-surface-without-consumer failure without pointing readers at test fixtures.
+    proof:
+      kind: unit-test
+      target: tools/coad-validator/tests/test_validator.py
+      command: uv run --locked pytest tests/test_validator.py
   - name: ParallelWorkLeaseExample
     kind: example
     visibility: public
@@ -86,11 +95,12 @@ consumers:
   - path: README.md
     uses:
       - BeforeAfterAdoptionDemo
+      - InvalidSemanticQualityExample
       - MinimalOrchestrationExample
       - ParallelWorkLeaseExample
 invariants:
   - id: examples-stay-runnable
-    rule: Every positive committed example must pass `coad check` from the repository root; the before half of the before/after demo is intentionally failing and test-covered.
+    rule: Every positive committed example must pass `coad check` from the repository root; intentional failing examples live only under before-after/before or examples/invalid and stay test-covered.
     proof:
       kind: smoke
       target: examples
@@ -104,9 +114,9 @@ verification:
 agent_policy:
   allowed_mutations:
     - Add examples that demonstrate real adoption or orchestration flows.
-    - Add documented before/after demos when the failing half is covered by validator tests.
+    - Add documented invalid demos when the failing case is covered by validator tests.
   forbidden_mutations:
-    - Add intentionally invalid examples outside tests/fixtures or documented before/after demos.
+    - Add intentionally invalid examples outside tests/fixtures, examples/invalid, or documented before/after demos.
   escalation:
     - Example that requires a new contract type
 ---

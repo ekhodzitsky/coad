@@ -58,8 +58,13 @@ def discover_contracts(root: Path) -> tuple[list[ContractDocument], list[Validat
     documents: list[ContractDocument] = []
     issues: list[ValidationIssue] = []
     skip_test_fixtures = not _inside_test_fixtures(root)
+    skip_invalid_examples = not _inside_invalid_examples(root)
     for path in sorted(root.rglob("*.md")):
-        if _should_skip(path, skip_test_fixtures=skip_test_fixtures):
+        if _should_skip(
+            path,
+            skip_test_fixtures=skip_test_fixtures,
+            skip_invalid_examples=skip_invalid_examples,
+        ):
             continue
         document, issue = read_contract(path)
         if issue is not None:
@@ -69,16 +74,23 @@ def discover_contracts(root: Path) -> tuple[list[ContractDocument], list[Validat
     return documents, issues
 
 
-def _should_skip(path: Path, skip_test_fixtures: bool) -> bool:
+def _should_skip(path: Path, skip_test_fixtures: bool, skip_invalid_examples: bool) -> bool:
     parts = path.parts
     if any(part in _SKIP_DIRS for part in parts):
         return True
-    return skip_test_fixtures and _inside_test_fixtures(path)
+    return (skip_test_fixtures and _inside_test_fixtures(path)) or (
+        skip_invalid_examples and _inside_invalid_examples(path)
+    )
 
 
 def _inside_test_fixtures(path: Path) -> bool:
     parts = path.parts
     return any(first == "tests" and second == "fixtures" for first, second in zip(parts, parts[1:]))
+
+
+def _inside_invalid_examples(path: Path) -> bool:
+    parts = path.parts
+    return any(first == "examples" and second == "invalid" for first, second in zip(parts, parts[1:]))
 
 
 def _normalize_mapping(value: dict[Any, Any]) -> dict[str, Any]:

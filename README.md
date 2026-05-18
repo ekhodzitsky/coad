@@ -26,6 +26,9 @@ COAD does not run agents. COAD makes repositories understandable to agents.
 coad check .
 ```
 
+That command is the gate after a repository has adopted the small COAD file
+shape below.
+
 ## 60-Second Demo
 
 Before COAD, the agent has to infer the boundary from source files and chat:
@@ -80,12 +83,12 @@ The `after/` contract names `BillingTotals`, its checkout consumer, the owned
 files, and the proof command. The next agent gets a durable map instead of a
 chat summary.
 
-COAD also rejects documentation theater. This fixture has `AGENTS.md`,
+COAD also rejects documentation theater. This example has `AGENTS.md`,
 `MODULE_CONTRACT.md`, `README.md`, and `TODO.md`, but its public
 `BillingTotals` surface names no consumer:
 
 ```bash
-$ uv run --project tools/coad-validator coad check tools/coad-validator/tests/fixtures/invalid/missing-consumer --schema-dir schema --format json
+$ uv run --project tools/coad-validator coad check examples/invalid/missing-consumer --schema-dir schema --format json
 ```
 
 It fails with `semantic.public_surface_without_consumer`. See
@@ -112,12 +115,17 @@ Start with one real module:
 
 ```text
 AGENTS.md
+MODULE_CONTRACT.md
 src/
   checkout/
-    MODULE_CONTRACT.md
     README.md
     TODO.md
 ```
+
+The root `MODULE_CONTRACT.md` should point at the module directory with
+`workcell.context_path: src/checkout` and list owned paths under that boundary.
+Contracts can also live inside modules later, but the root-contract shape is the
+fastest path for first adoption.
 
 The first adoption bar is intentionally small. Add task, proof, handoff,
 review, integration, and ledger contracts only when the workflow needs more
@@ -210,14 +218,10 @@ Adjacent projects worth knowing:
 
 - [GitHub Spec Kit](https://github.com/github/spec-kit)
 - [BMAD Method](https://github.com/bmad-code-org/BMAD-METHOD)
-- [Superpowers](https://github.com/obra/superpowers)
-- [GSD / Get Shit Done](https://github.com/gsd-build/get-shit-done)
 - [Agent OS](https://github.com/buildermethods/agent-os)
 - [Repomix](https://github.com/yamadashy/repomix)
-- [OpenHands](https://github.com/OpenHands/OpenHands)
-- [Cline](https://github.com/cline/cline)
-- [Roo Code](https://github.com/RooCodeInc/Roo-Code)
-- [Aider](https://github.com/Aider-AI/aider)
+
+See [docs/landscape.md](docs/landscape.md) for the longer comparison.
 
 Those projects mostly define agent workflows, agent runtimes, or context
 packaging. COAD defines how the repository itself exposes boundaries,
@@ -226,10 +230,10 @@ ownership, proof, and safe write scope to any agent.
 ## Status
 
 Public early draft. The stable integration target is intentionally small:
-`coad check .`. Current release: `0.6.1`. This release hardens validator
-path and file-read handling so unsafe inputs become structured issues instead
-of process crashes. The current version is recorded in [VERSION](VERSION),
-with release notes in [CHANGELOG.md](CHANGELOG.md).
+`coad check .`. Current version on `main`: `0.6.1`. This version hardens
+validator path and file-read handling so unsafe inputs become structured issues
+instead of process crashes. The current version is recorded in
+[VERSION](VERSION), with release notes in [CHANGELOG.md](CHANGELOG.md).
 
 Keywords: AI agents, agentic development, multi-agent software engineering,
 codebase standards, contracts, workcells, orchestration, validation.

@@ -39,10 +39,11 @@ executable before heavier orchestration tooling exists.
   - integration to task contracts.
 
 The validator skips `templates/` because templates contain placeholders. It also
-skips `tests/fixtures/` during repository-wide validation so intentional invalid
-fixtures do not fail CI. Invalid UTF-8 in project-controlled Markdown,
-metadata, lease, ledger, profile, or drift-check inputs is reported as a
-structured issue instead of a process traceback.
+skips `tests/fixtures/` and `examples/invalid/` during repository-wide
+validation so intentional failures do not fail CI. Those paths are still checked
+normally when passed directly to `coad check`. Invalid UTF-8 in
+project-controlled Markdown, metadata, lease, ledger, profile, or drift-check
+inputs is reported as a structured issue instead of a process traceback.
 
 ## Local Usage
 
@@ -148,8 +149,8 @@ Semantic quality failures use codes such as `semantic.placeholder`,
 are intentionally conservative: they catch contracts that are structurally
 valid but not useful enough for a fresh agent to edit safely.
 
-The fixture
-`tools/coad-validator/tests/fixtures/invalid/missing-consumer` demonstrates the
+The example
+`examples/invalid/missing-consumer` demonstrates the
 quality gate: it has COAD guidance and module context files, but fails because
 the public `BillingTotals` surface has no declared consumer.
 
