@@ -77,10 +77,49 @@ def validate_semantic_quality(documents: list[ContractDocument], root: Path) -> 
     for document in documents:
         if document.kind != "module_contract":
             continue
+        issues.extend(_validate_workcell_shape(document))
         issues.extend(_validate_contract_text(document))
         issues.extend(_validate_surfaces(document))
         issues.extend(_validate_context_files(root, document))
         issues.extend(_validate_owned_paths(root, document))
+    return issues
+
+
+def _validate_workcell_shape(document: ContractDocument) -> list[ValidationIssue]:
+    workcell = document.data.get("workcell")
+    if not isinstance(workcell, dict):
+        return [
+            _issue(
+                document,
+                "module contract must declare a workcell",
+                "semantic.workcell_missing",
+            ),
+            _issue(
+                document,
+                "module contract must declare at least one workcell owns_path",
+                "semantic.owns_path_missing",
+            ),
+        ]
+
+    issues: list[ValidationIssue] = []
+    if _string(workcell.get("type")) is None:
+        issues.append(
+            _issue(
+                document,
+                "module contract workcell must declare a type",
+                "semantic.workcell_type_missing",
+            )
+        )
+
+    owns_paths = workcell.get("owns_paths")
+    if not isinstance(owns_paths, list) or not any(isinstance(path, str) and path for path in owns_paths):
+        issues.append(
+            _issue(
+                document,
+                "module contract must declare at least one workcell owns_path",
+                "semantic.owns_path_missing",
+            )
+        )
     return issues
 
 

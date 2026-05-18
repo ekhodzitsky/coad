@@ -29,7 +29,7 @@ workcell:
     - tools/coad-validator/src/coad_validator/workcell_graph.py
   context_budget:
     max_files: 13
-    max_source_lines: 1600
+    max_source_lines: 1700
     max_contract_lines: 180
     max_readme_lines: 120
     max_todo_lines: 80

@@ -455,6 +455,92 @@ verification:
     assert report.ok, [issue.format(report.root) for issue in report.issues]
 
 
+def test_semantic_quality_reports_missing_workcell_and_owns_paths(tmp_path: Path) -> None:
+    context_dir = tmp_path / "checkout"
+    context_dir.mkdir()
+    (context_dir / "README.md").write_text(
+        "# checkout\n\nOwns checkout context for missing-workcell validation.\n",
+        encoding="utf-8",
+    )
+    (context_dir / "TODO.md").write_text(
+        "# checkout TODO\n\n- Keep workcell metadata explicit.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "missing-workcell.md").write_text(
+        """---
+schema_version: 1
+kind: module_contract
+module: checkout
+level: subsystem
+purpose: Test missing workcell metadata.
+status: pilot
+surface:
+  - name: Checkout
+    kind: module
+    visibility: internal
+    contract: Test surface.
+    proof:
+      kind: static-check
+      target: checkout
+      command: test checkout
+dependencies:
+  internal: []
+  external: []
+consumers: []
+invariants: []
+verification:
+  pre_change:
+    - test checkout
+  full:
+    - test all
+---
+# checkout
+""",
+        encoding="utf-8",
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+    codes = {issue.code for issue in report.issues}
+
+    assert not report.ok
+    assert "semantic.workcell_missing" in codes
+    assert "semantic.owns_path_missing" in codes
+
+
+def test_semantic_quality_reports_empty_workcell_owns_paths(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "checkout", owns_paths=[])
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "semantic.owns_path_missing"
+        and "module contract must declare at least one workcell owns_path" in issue.message
+        for issue in report.issues
+    )
+
+
+def test_workcell_graph_reports_duplicate_module_identifier(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "checkout")
+    duplicate = tmp_path / "checkout-copy.md"
+    duplicate.write_text(
+        (tmp_path / "checkout.md").read_text(encoding="utf-8").replace(
+            "# checkout",
+            "# checkout-copy",
+        ),
+        encoding="utf-8",
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "workcell.duplicate_module"
+        and "duplicate module contract identifier: checkout" in issue.message
+        for issue in report.issues
+    )
+
+
 def test_workcell_graph_reports_missing_parent(tmp_path: Path) -> None:
     _write_workcell_contract(tmp_path, "checkout", parent="commerce")
 
@@ -530,7 +616,58 @@ def test_workcell_graph_reports_composite_owning_child_implementation(tmp_path: 
     assert not report.ok
     assert any(
         issue.code == "workcell.composite_owns_child_path"
-        and "composite workcell owns child implementation path" in issue.message
+        and "non-leaf workcell owns descendant implementation path" in issue.message
+        for issue in report.issues
+    )
+
+
+def test_workcell_graph_reports_project_owning_descendant_implementation(tmp_path: Path) -> None:
+    checkout_impl = tmp_path / "src" / "checkout" / "logic.py"
+    checkout_impl.parent.mkdir(parents=True)
+    checkout_impl.write_text("total = 1\n", encoding="utf-8")
+    (tmp_path / "README.md").write_text(
+        "# project\n\nOwns project-level orchestration for workcell tests.\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "TODO.md").write_text(
+        "# project TODO\n\n- Keep project ownership out of child implementation.\n",
+        encoding="utf-8",
+    )
+    _write_workcell_contract(
+        tmp_path,
+        "project",
+        workcell_type="project",
+        children=["commerce"],
+        owns_paths=["src/"],
+    )
+    project_contract = tmp_path / "project.md"
+    project_contract.write_text(
+        project_contract.read_text(encoding="utf-8").replace(
+            "  type: project",
+            "  type: project\n  context_path: .",
+        ),
+        encoding="utf-8",
+    )
+    _write_workcell_contract(
+        tmp_path,
+        "commerce",
+        workcell_type="composite",
+        parent="project",
+        children=["checkout"],
+    )
+    _write_workcell_contract(
+        tmp_path,
+        "checkout",
+        parent="commerce",
+        owns_paths=["src/checkout/logic.py"],
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "workcell.composite_owns_child_path"
+        and "project owns src used by checkout" in issue.message
         for issue in report.issues
     )
 
@@ -688,6 +825,29 @@ def test_lease_manifest_rejects_composite_write_lease(tmp_path: Path) -> None:
     assert any(
         issue.code == "lease.composite_write_forbidden"
         and "composite workcell cannot hold a write lease: commerce" in issue.message
+        for issue in report.issues
+    )
+
+
+def test_lease_manifest_rejects_project_write_lease(tmp_path: Path) -> None:
+    _write_workcell_contract(tmp_path, "project", workcell_type="project")
+    _write_lease_manifest(
+        tmp_path,
+        """
+        version: 1
+        leases:
+          - workcell: project
+            owner: root-agent
+            mode: write
+        """,
+    )
+
+    report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
+
+    assert not report.ok
+    assert any(
+        issue.code == "lease.project_write_forbidden"
+        and "project workcell cannot hold a write lease: project" in issue.message
         for issue in report.issues
     )
 
@@ -1061,10 +1221,11 @@ def _write_workcell_contract(
         encoding="utf-8",
     )
     children = children or []
-    owns_paths = owns_paths or [f"{module}/README.md", f"{module}/TODO.md"]
+    if owns_paths is None:
+        owns_paths = [f"{module}/README.md", f"{module}/TODO.md"]
     parent_block = f"  parent: {parent}\n" if parent is not None else ""
     children_block = "\n".join(f"    - {child}" for child in children) if children else "    []"
-    owns_block = "\n".join(f"    - {owned_path}" for owned_path in owns_paths)
+    owns_block = "    []" if not owns_paths else "\n".join(f"    - {owned_path}" for owned_path in owns_paths)
     safe_name = module.replace("/", "-")
     (root / f"{safe_name}.md").write_text(
         f"""---

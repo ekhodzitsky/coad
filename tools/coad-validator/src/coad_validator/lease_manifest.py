@@ -56,7 +56,17 @@ def validate_lease_manifest(
         if lease["mode"] != "write":
             continue
 
-        if _workcell_type(_workcell(document) or {}) == "composite":
+        workcell_type = _workcell_type(_workcell(document) or {})
+        if workcell_type == "project":
+            issues.append(
+                ValidationIssue(
+                    manifest_path,
+                    f"project workcell cannot hold a write lease: {workcell}",
+                    code="lease.project_write_forbidden",
+                )
+            )
+            continue
+        if workcell_type == "composite":
             issues.append(
                 ValidationIssue(
                     manifest_path,

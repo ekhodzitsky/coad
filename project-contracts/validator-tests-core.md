@@ -20,7 +20,7 @@ workcell:
     - tools/coad-validator/tests/test_validator.py
   context_budget:
     max_files: 12
-    max_source_lines: 1900
+    max_source_lines: 2100
     max_contract_lines: 180
     max_readme_lines: 120
     max_todo_lines: 80

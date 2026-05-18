@@ -12,13 +12,14 @@ executable before heavier orchestration tooling exists.
 - Module contracts point to real module directories with `README.md` and
   `TODO.md` agent context files. Context paths must stay inside the repository
   after symlink resolution.
-- Module contract semantic quality: obvious placeholders, too-generic module
-  purpose, public surfaces without declared consumers, placeholder proof
-  targets or commands, empty local context files, and missing `owns_paths`.
+- Module contract semantic quality: missing workcell metadata, obvious
+  placeholders, too-generic module purpose, public surfaces without declared
+  consumers, placeholder proof targets or commands, empty local context files,
+  and missing `owns_paths`.
 - Workcell tree integrity: parents exist, declared children exist and point
   back to the parent, parent cycles are rejected, leaf workcells cannot declare
-  children, and composite workcells cannot directly own child implementation
-  paths.
+  children, module identifiers are unique, and non-leaf workcells cannot
+  directly own descendant implementation paths.
 - Leaf workcell ownership: `owns_paths` cannot overlap between leaf workcells.
 - Optional active lease manifest at `.coad/leases.yml`: write leases must point
   to known leaf workcells, must be unique per workcell, and must stay inside
@@ -138,16 +139,17 @@ Issue `code` values are stable machine keys. Agents should branch on `code`
 instead of parsing English messages.
 
 Lease-related failures use codes such as `lease.workcell_unknown`,
-`lease.composite_write_forbidden`, `lease.scope_invalid`,
-`lease.scope_outside_repository`, `lease.scope_outside_ownership`, and
-`lease.write_conflict`.
+`lease.project_write_forbidden`, `lease.composite_write_forbidden`,
+`lease.scope_invalid`, `lease.scope_outside_repository`,
+`lease.scope_outside_ownership`, and `lease.write_conflict`.
 
 Semantic quality failures use codes such as `semantic.placeholder`,
 `semantic.purpose_too_generic`, `semantic.proof_placeholder`,
 `semantic.surface_missing`, `semantic.public_surface_without_consumer`,
-`semantic.context_file_empty`, and `semantic.owns_path_missing`. These checks
-are intentionally conservative: they catch contracts that are structurally
-valid but not useful enough for a fresh agent to edit safely.
+`semantic.context_file_empty`, `semantic.workcell_missing`,
+`semantic.workcell_type_missing`, and `semantic.owns_path_missing`. These
+checks are intentionally conservative: they catch contracts that are
+structurally valid but not useful enough for a fresh agent to edit safely.
 
 The example
 `examples/invalid/missing-consumer` demonstrates the

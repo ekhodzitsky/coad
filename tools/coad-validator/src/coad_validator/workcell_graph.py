@@ -6,14 +6,16 @@ from typing import Any
 from .model import ContractDocument, ValidationIssue
 from .ownership import owned_paths
 
+NON_LEAF_WORKCELL_TYPES = {"project", "composite"}
+
 
 def validate_workcell_graph(documents: list[ContractDocument], root: Path) -> list[ValidationIssue]:
+    issues = _validate_duplicate_modules(documents, root)
     module_documents = {
         document.identifier: document
         for document in documents
         if document.kind == "module_contract" and document.identifier
     }
-    issues: list[ValidationIssue] = []
 
     for module, document in module_documents.items():
         workcell = _workcell(document)
@@ -62,11 +64,35 @@ def validate_workcell_graph(documents: list[ContractDocument], root: Path) -> li
                     )
                 )
 
-        if _workcell_type(workcell) == "composite":
-            issues.extend(_validate_composite_owned_paths(root, document, module_documents, module, children))
+        if _workcell_type(workcell) in NON_LEAF_WORKCELL_TYPES:
+            issues.extend(_validate_non_leaf_owned_paths(root, document, module_documents, module, children))
 
     issues.extend(_validate_leaf_owned_path_overlaps(root, module_documents))
     issues.extend(_validate_parent_cycles(module_documents))
+    return issues
+
+
+def _validate_duplicate_modules(documents: list[ContractDocument], root: Path) -> list[ValidationIssue]:
+    issues: list[ValidationIssue] = []
+    seen: dict[str, ContractDocument] = {}
+    for document in documents:
+        if document.kind != "module_contract":
+            continue
+        module = document.data.get("module")
+        if not isinstance(module, str) or not module:
+            continue
+        first_document = seen.get(module)
+        if first_document is not None:
+            issues.append(
+                ValidationIssue(
+                    document.path,
+                    "duplicate module contract identifier: "
+                    f"{module} also declared in {_relative_path(first_document.path, root)}",
+                    code="workcell.duplicate_module",
+                )
+            )
+            continue
+        seen[module] = document
     return issues
 
 
@@ -99,7 +125,7 @@ def _validate_parent_cycles(module_documents: dict[str, ContractDocument]) -> li
     return issues
 
 
-def _validate_composite_owned_paths(
+def _validate_non_leaf_owned_paths(
     root: Path,
     document: ContractDocument,
     module_documents: dict[str, ContractDocument],
@@ -111,7 +137,7 @@ def _validate_composite_owned_paths(
     if not parent_paths:
         return issues
 
-    for child in children:
+    for child in _descendants(module_documents, children):
         child_document = module_documents.get(child)
         if child_document is None:
             continue
@@ -121,13 +147,33 @@ def _validate_composite_owned_paths(
                     issues.append(
                         ValidationIssue(
                             document.path,
-                            "composite workcell owns child implementation path: "
+                            "non-leaf workcell owns descendant implementation path: "
                             f"{module} owns {_relative_path(parent_path, root)} used by {child}",
                             code="workcell.composite_owns_child_path",
                         )
                     )
                     return issues
     return issues
+
+
+def _descendants(module_documents: dict[str, ContractDocument], children: list[str]) -> list[str]:
+    descendants: list[str] = []
+    seen: set[str] = set()
+    queue = list(children)
+    while queue:
+        child = queue.pop(0)
+        if child in seen:
+            continue
+        seen.add(child)
+        descendants.append(child)
+        child_document = module_documents.get(child)
+        if child_document is None:
+            continue
+        child_workcell = _workcell(child_document)
+        if child_workcell is None:
+            continue
+        queue.extend(_children(child_workcell))
+    return descendants
 
 
 def _validate_leaf_owned_path_overlaps(

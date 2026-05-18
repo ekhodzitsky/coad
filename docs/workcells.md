@@ -10,11 +10,12 @@ comprehension and ownership, not by implementation naming alone.
 `MODULE_CONTRACT.md` remains the compatibility filename for a workcell contract.
 Conceptually, a module contract is a workcell contract.
 
-`coad check .` validates the declared workcell tree: parents and children must
-exist, child contracts must point back to declared parents, parent cycles are
-invalid, leaf workcells cannot declare children, and composite workcells cannot
-directly own child implementation paths. It also rejects overlapping
-`owns_paths` between leaf workcells.
+`coad check .` validates the declared workcell tree: module identifiers must be
+unique, parents and children must exist, child contracts must point back to
+declared parents, parent cycles are invalid, leaf workcells cannot declare
+children, and project/composite workcells cannot directly own descendant
+implementation paths. It also rejects overlapping `owns_paths` between leaf
+workcells.
 
 ## Workcell Types
 
@@ -76,6 +77,7 @@ A write lease is the temporary right to mutate a workcell.
 Rules:
 
 - A leaf workcell has at most one active write lease.
+- Project and composite workcells orchestrate; they do not hold write leases.
 - A write lease names at least the workcell, owner, mode, and write scope. It
   may also name the task, proof, expiry, or completion condition.
 - Read-only agents may work in parallel without a write lease.

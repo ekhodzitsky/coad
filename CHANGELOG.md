@@ -13,6 +13,9 @@
 
 - Validator static analysis now passes with explicit type narrowing for release
   gate metadata, lease manifest reads, and optional graph-index lookups.
+- `coad check` now rejects duplicate module contract identifiers, missing
+  workcell metadata, non-leaf ownership of descendant implementation paths, and
+  project workcell write leases.
 
 ## 0.6.1 - 2026-05-18
 
