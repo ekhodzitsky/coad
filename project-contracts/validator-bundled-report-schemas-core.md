@@ -14,6 +14,7 @@ workcell:
   context_path: tools/coad-validator
   children: []
   owns_paths:
+    - tools/coad-validator/src/coad_validator/schema/reports/agent-guidance-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/check-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/graph-report.schema.json
     - tools/coad-validator/src/coad_validator/schema/reports/ledger-report.schema.json

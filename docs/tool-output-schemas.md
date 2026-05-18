@@ -5,6 +5,8 @@ output is part of the methodology contract, not incidental CLI formatting.
 
 Report schemas live under `schema/reports/`:
 
+- `agent-guidance-report.schema.json` covers the required AGENTS.md onboarding
+  guidance report used by `coad check`, attestation, and export.
 - `check-report.schema.json` covers the public `coad check --format json`
   payload.
 - The remaining report schemas cover internal report payloads used by

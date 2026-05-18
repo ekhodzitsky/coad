@@ -14,6 +14,7 @@ workcell:
   context_path: schema
   children: []
   owns_paths:
+    - schema/reports/agent-guidance-report.schema.json
     - schema/reports/check-report.schema.json
     - schema/reports/graph-report.schema.json
     - schema/reports/ledger-report.schema.json

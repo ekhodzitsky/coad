@@ -2,6 +2,13 @@
   "schema_version": 1,
   "reports": [
     {
+      "name": "agent-guidance",
+      "producer": "coad",
+      "schema": "reports/agent-guidance-report.schema.json",
+      "report_schema_version": 1,
+      "stability": "stable"
+    },
+    {
       "name": "check-report",
       "producer": "coad",
       "schema": "reports/check-report.schema.json",

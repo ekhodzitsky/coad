@@ -8,6 +8,8 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
+from coad_validator.report_sources import ATTESTATION_SOURCES
+
 ROOT = Path(__file__).resolve().parents[3]
 SCHEMA_DIR = ROOT / "schema"
 REPORT_SCHEMA_DIR = SCHEMA_DIR / "reports"
@@ -222,6 +224,7 @@ def test_report_manifest_matches_manifest_schema() -> None:
     Draft202012Validator(manifest_schema).validate(manifest)
     for report in manifest["reports"]:
         assert (SCHEMA_DIR / report["schema"]).is_file()
+    assert {source.name for source in ATTESTATION_SOURCES} <= {report["name"] for report in manifest["reports"]}
 
 
 def test_release_manifest_matches_manifest_schema() -> None:

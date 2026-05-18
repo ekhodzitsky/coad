@@ -37,8 +37,7 @@ def test_export_artifacts_writes_bundle_manifest_and_reports(tmp_path: Path) -> 
     assert len(payload["bundle_digest"]) == 64
     assert payload["artifact_count"] == len(payload["artifacts"])
     assert {artifact["name"] for artifact in payload["artifacts"]} == {
-        "attestation-report",
-        "agent-guidance",
+        "attestation-report", "agent-guidance",
         "validation-report",
         "status-report",
         "proof-matrix",
@@ -56,6 +55,7 @@ def test_export_artifacts_writes_bundle_manifest_and_reports(tmp_path: Path) -> 
         assert artifact_path.is_file()
         assert len(artifact["digest"]) == 64
         assert artifact["bytes"] == artifact_path.stat().st_size
+    _assert_exported_artifacts_match_declared_schemas(output_dir, payload)
     _assert_matches_report_schema("export-report.schema.json", payload)
 
 
@@ -154,3 +154,11 @@ def _assert_matches_report_schema(schema_name: str, payload: dict[str, Any]) -> 
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema).validate(payload)
+
+
+def _assert_exported_artifacts_match_declared_schemas(output_dir: Path, payload: dict[str, Any]) -> None:
+    manifest = json.loads((SCHEMA_DIR / "report-manifest.json").read_text(encoding="utf-8"))
+    schema_by_report = {report["name"]: Path(report["schema"]).name for report in manifest["reports"]}
+    for artifact in payload["artifacts"]:
+        report = json.loads((output_dir / artifact["path"]).read_text(encoding="utf-8"))
+        _assert_matches_report_schema(schema_by_report[artifact["name"]], report)

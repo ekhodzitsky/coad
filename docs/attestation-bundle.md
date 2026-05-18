@@ -14,6 +14,7 @@ to disk as PR or release artifacts. See `docs/artifact-export.md`.
 
 The current bundle includes:
 
+- agent guidance report;
 - validation report;
 - status report;
 - proof matrix;

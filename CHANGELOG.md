@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Fixed
+
+- Registered the required `agent-guidance` report in the report manifest and
+  added its JSON Schema so exported artifacts are schema-covered end to end.
+
 ## 0.6.2 - 2026-05-18
 
 ### Changed

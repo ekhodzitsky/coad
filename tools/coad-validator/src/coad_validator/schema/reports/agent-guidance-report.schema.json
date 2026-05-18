@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coad.dev/schema/reports/agent-guidance-report.schema.json",
+  "title": "COAD Agent Guidance Report",
+  "type": "object",
+  "required": ["schema_version", "ok", "status", "issues"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "status": {
+      "enum": ["pass", "guidance_issues"]
+    },
+    "issues": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/issue"
+      }
+    }
+  },
+  "$defs": {
+    "issue": {
+      "type": "object",
+      "required": ["severity", "path", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "minLength": 1
+        },
+        "severity": {
+          "enum": ["error", "warning", "info"]
+        },
+        "path": {
+          "type": "string"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}
