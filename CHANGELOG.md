@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.7.6 - 2026-05-19
+
+### Added
+
+- `coad check --format json` repair actions now include typed `action`,
+  `action_code`, `target_field`, `expected_kind`, and `rerun` fields so agents
+  can branch on stable repair protocol keys instead of parsing `minimal_fix`.
+
 ## 0.7.5 - 2026-05-19
 
 ### Added

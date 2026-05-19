@@ -367,9 +367,13 @@ def test_check_report_fails_when_handoff_changed_files_do_not_match_git_diff(tmp
         "severity": "error",
         "source_check": "handoff-integrity",
         "target_path": "HANDOFF.md",
-        "action": "repair_check_issue",
+        "target_field": "HANDOFF.changed_files",
+        "expected_kind": "field",
+        "action": "update_handoff_changed_files",
+        "action_code": "coad.repair.handoff.changed_files",
         "minimal_fix": "changed file is not listed in handoff.changed_files: checkout/unlisted.py",
         "blocks_completion": True,
+        "rerun": "coad check . --format json",
     }
     assert _check(payload, "handoff-integrity")["status"] == "mismatch"
     assert _check(payload, "methodology-loop")["status"] == "missing"
@@ -678,12 +682,16 @@ def test_check_report_fails_when_passing_proof_result_omits_artifact(tmp_path: P
         "severity": "error",
         "source_check": "proof-artifact-integrity",
         "target_path": "EXECUTION_LEDGER.json",
-        "action": "repair_check_issue",
+        "target_field": "EXECUTION_LEDGER.proof_results[].artifact",
+        "expected_kind": "proof_artifact",
+        "action": "attach_proof_artifact",
+        "action_code": "coad.repair.proof.attach_artifact",
         "minimal_fix": (
             "passing proof result must declare an artifact: "
             "test checkout.checkout_service.rejects_negative_total"
         ),
         "blocks_completion": True,
+        "rerun": "coad check . --format json",
     }
     assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
     assert {
@@ -743,6 +751,23 @@ def test_check_report_fails_when_passing_proof_artifact_digest_is_missing(tmp_pa
     payload = build_check_report(target, schema_dir=SCHEMA_DIR)
 
     assert payload["ok"] is False
+    assert _action(payload, "proof-artifact-integrity", "EXECUTION_LEDGER.json") == {
+        "phase": "prove",
+        "severity": "error",
+        "source_check": "proof-artifact-integrity",
+        "target_path": "EXECUTION_LEDGER.json",
+        "target_field": "EXECUTION_LEDGER.proof_results[].artifact_sha256",
+        "expected_kind": "digest",
+        "action": "fix_artifact_digest",
+        "action_code": "coad.repair.proof.artifact_sha256",
+        "minimal_fix": (
+            "passing proof result must declare "
+            "artifact_sha256: test checkout.checkout_service.rejects_negative_total "
+            "(expected d4102b3b69047a96c82dfb2e7ef1075d72e36ec4ca27607b65ff44f09e24dac7)"
+        ),
+        "blocks_completion": True,
+        "rerun": "coad check . --format json",
+    }
     assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
     assert {
         "code": "proof_artifact.digest_missing",
@@ -1271,6 +1296,11 @@ def test_check_report_warns_when_contract_update_entry_is_not_changed(tmp_path: 
     assert action["phase"] == "update_knowledge"
     assert action["severity"] == "warning"
     assert action["blocks_completion"] is False
+    assert action["target_field"] == "HANDOFF.contract_updates"
+    assert action["expected_kind"] == "contract_update"
+    assert action["action"] == "record_contract_update"
+    assert action["action_code"] == "coad.repair.knowledge.contract_update"
+    assert action["rerun"] == "coad check . --format json"
     contract_update_check = _check(payload, "contract-update-integrity")
     assert contract_update_check["ok"] is True
     assert contract_update_check["status"] == "warning"
@@ -1294,12 +1324,16 @@ def test_check_report_methodology_loop_flags_missing_task_contract(tmp_path: Pat
         "severity": "error",
         "source_check": "methodology-loop",
         "target_path": "TASK_CONTRACT.md",
-        "action": "repair_check_issue",
+        "target_field": "TASK_CONTRACT",
+        "expected_kind": "file",
+        "action": "create_task_contract",
+        "action_code": "coad.repair.scope.task_contract_missing",
         "minimal_fix": (
             "Add or fix TASK_CONTRACT.md with target modules, write_scope, "
             "forbidden_mutations, and required proof commands."
         ),
         "blocks_completion": True,
+        "rerun": "coad check . --format json",
     }
     assert _check(payload, "methodology-loop")["status"] == "missing"
     assert {

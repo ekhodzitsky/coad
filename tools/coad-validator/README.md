@@ -47,9 +47,9 @@ The package bundles the COAD schemas, so installed usage does not require
 `--schema-dir`.
 
 JSON output is the agent-facing control plane. Agents should inspect
-`agent_status`, apply `next_actions`, and rerun `coad check --format json`
-until completion is unblocked. JSON outputs are covered by report schemas in
-`../../schema/reports/`.
+`agent_status`, apply typed `next_actions` by `action_code` and `target_field`,
+and rerun `coad check --format json` until completion is unblocked. JSON
+outputs are covered by report schemas in `../../schema/reports/`.
 
 ## Tests
 

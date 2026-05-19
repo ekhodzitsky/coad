@@ -247,8 +247,8 @@ ownership, proof, and safe write scope to any agent.
 ## Status
 
 Public early draft. The stable integration target is intentionally small:
-`coad check .`. Current released package version: `0.7.5`. This release adds
-agent-facing `agent_status`, `blocking_checks`, and `next_actions` to JSON.
+`coad check .`. Current released package version: `0.7.6`. This release makes
+`next_actions` a typed repair protocol with stable action codes.
 The released version is recorded in [VERSION](VERSION), with release
 notes in [CHANGELOG.md](CHANGELOG.md).
 

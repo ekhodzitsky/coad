@@ -191,9 +191,13 @@ Failed output includes structured issues plus repair actions:
       "severity": "error",
       "source_check": "agent-guidance",
       "target_path": "AGENTS.md",
+      "target_field": "AGENTS.md",
+      "expected_kind": "file",
       "action": "repair_check_issue",
+      "action_code": "coad.repair.generic",
       "minimal_fix": "missing AGENTS.md with COAD onboarding guidance",
-      "blocks_completion": true
+      "blocks_completion": true,
+      "rerun": "coad check . --format json"
     }
   ],
   "ok": false,
@@ -206,8 +210,10 @@ Failed output includes structured issues plus repair actions:
 `continue` means the run is non-blocking but has weak/unknown/skipped evidence,
 `repair_required` means the agent must apply `next_actions` and rerun, and
 `blocked` means the validator could not provide a safe automatic repair route.
-Issue `code` values remain stable machine keys. Agents should branch on `code`
-or `next_actions[].source_check`, not on English prose.
+Each action includes stable `action_code`, typed `action`, `target_field`,
+`expected_kind`, and the exact `rerun` command. Issue `code` values remain
+stable machine keys. Agents should branch on `action_code`, issue `code`, or
+`next_actions[].source_check`, not on English prose.
 
 Lease-related failures use codes such as `lease.workcell_unknown`,
 `lease.project_write_forbidden`, `lease.composite_write_forbidden`,

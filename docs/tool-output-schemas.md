@@ -3,7 +3,8 @@
 `coad check . --format json` emits JSON for orchestration control planes. That
 output is part of the methodology contract, not incidental CLI formatting.
 Agents should treat `agent_status`, `blocking_checks`, and `next_actions` as
-the primary repair loop: inspect, patch evidence, rerun.
+the primary repair loop: inspect typed `action_code` and `target_field`, patch
+evidence, rerun.
 
 Report schemas live under `schema/reports/`:
 
@@ -34,6 +35,13 @@ Structured issues SHOULD include a stable `code` field such as
 `semantic.owns_path_missing`, or
 `graph.proof_missing`. Agents should use `code` for automated repair routing
 and treat `message` as human-facing context.
+
+Repair actions SHOULD include stable `action_code` values such as
+`coad.repair.handoff.changed_files`,
+`coad.repair.proof.artifact_sha256`,
+`coad.repair.knowledge.contract_update`, or
+`coad.repair.scope.task_contract_missing`. Agents should prefer those codes
+over `minimal_fix` prose.
 
 Changing a report schema should be treated as a compatibility event:
 

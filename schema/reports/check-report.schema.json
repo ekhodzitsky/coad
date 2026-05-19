@@ -106,9 +106,13 @@
         "severity",
         "source_check",
         "target_path",
+        "target_field",
+        "expected_kind",
         "action",
+        "action_code",
         "minimal_fix",
-        "blocks_completion"
+        "blocks_completion",
+        "rerun"
       ],
       "additionalProperties": false,
       "properties": {
@@ -125,9 +129,21 @@
         "target_path": {
           "type": "string"
         },
+        "target_field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "expected_kind": {
+          "type": "string",
+          "minLength": 1
+        },
         "action": {
           "type": "string",
           "minLength": 1
+        },
+        "action_code": {
+          "type": "string",
+          "pattern": "^coad\\.repair\\."
         },
         "minimal_fix": {
           "type": "string",
@@ -135,6 +151,9 @@
         },
         "blocks_completion": {
           "type": "boolean"
+        },
+        "rerun": {
+          "const": "coad check . --format json"
         }
       }
     }

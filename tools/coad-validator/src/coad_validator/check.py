@@ -149,6 +149,8 @@ def _dedupe_actions(actions: list[dict[str, Any]]) -> list[dict[str, Any]]:
             action["severity"],
             action["source_check"],
             action["target_path"],
+            action["target_field"],
+            action["action_code"],
             action["minimal_fix"],
             action["blocks_completion"],
         )
@@ -172,18 +174,139 @@ def _issue_actions(
         target_path = _string_value(issue.get("path"), ".")
         message = _string_value(issue.get("message"), f"{source_check} issue")
         phase = _issue_phase(source_check, issue)
+        protocol = _repair_protocol(source_check, issue)
         actions.append(
             {
                 "phase": phase,
                 "severity": severity,
                 "source_check": source_check,
                 "target_path": target_path,
-                "action": "repair_check_issue",
+                "target_field": protocol["target_field"],
+                "expected_kind": protocol["expected_kind"],
+                "action": protocol["action"],
+                "action_code": protocol["action_code"],
                 "minimal_fix": _minimal_fix(source_check, payload, phase, message),
                 "blocks_completion": severity == "error",
+                "rerun": "coad check . --format json",
             }
         )
     return actions
+
+
+def _repair_protocol(source_check: str, issue: dict[str, Any]) -> dict[str, str]:
+    code = _string_value(issue.get("code"))
+    path = _string_value(issue.get("path"))
+    message = _string_value(issue.get("message"))
+    if source_check == "methodology-loop" and code == "methodology_loop.scope_missing" and path == "TASK_CONTRACT.md":
+        return _protocol("create_task_contract", "coad.repair.scope.task_contract_missing", "TASK_CONTRACT", "file")
+    if code.startswith("handoff.changed_files_"):
+        return _protocol(
+            "update_handoff_changed_files",
+            "coad.repair.handoff.changed_files",
+            "HANDOFF.changed_files",
+            "field",
+        )
+    if code.startswith("ledger_handoff.changed_files_"):
+        return _protocol(
+            "update_ledger_changed_files",
+            "coad.repair.ledger.changed_files",
+            "EXECUTION_LEDGER.entries[].changed_files",
+            "field",
+        )
+    if code.startswith("proof_result.handoff_"):
+        return _protocol(
+            "record_proof_result",
+            "coad.repair.proof.handoff_result",
+            "HANDOFF.proof_results",
+            "proof_result",
+        )
+    if code.startswith("proof_result.ledger_"):
+        return _protocol(
+            "record_proof_result",
+            "coad.repair.proof.ledger_result",
+            "EXECUTION_LEDGER.proof_results",
+            "proof_result",
+        )
+    if code == "proof_artifact.missing" and path == "EXECUTION_LEDGER.json":
+        return _protocol(
+            "attach_proof_artifact",
+            "coad.repair.proof.attach_artifact",
+            "EXECUTION_LEDGER.proof_results[].artifact",
+            "proof_artifact",
+        )
+    if code.startswith("proof_artifact.digest_"):
+        return _protocol(
+            "fix_artifact_digest",
+            "coad.repair.proof.artifact_sha256",
+            "EXECUTION_LEDGER.proof_results[].artifact_sha256",
+            "digest",
+        )
+    if code.startswith("proof_artifact.bytes_"):
+        return _protocol(
+            "fix_artifact_bytes",
+            "coad.repair.proof.artifact_bytes",
+            "EXECUTION_LEDGER.proof_results[].artifact_bytes",
+            "bytes",
+        )
+    if code.startswith("proof_artifact.payload_output_digest_"):
+        return _protocol(
+            "fix_output_digest",
+            "coad.repair.proof.output_sha256",
+            "proof-artifact.output_sha256",
+            "digest",
+        )
+    if code.startswith("proof_artifact.payload_output_bytes_"):
+        return _protocol(
+            "fix_output_bytes",
+            "coad.repair.proof.output_bytes",
+            "proof-artifact.output_bytes",
+            "bytes",
+        )
+    if code.startswith("contract_update."):
+        return _protocol(
+            "record_contract_update",
+            "coad.repair.knowledge.contract_update",
+            "HANDOFF.contract_updates",
+            "contract_update",
+        )
+    if code == "task_scope.write_scope_violation":
+        return _protocol(
+            "update_task_write_scope",
+            "coad.repair.scope.write_scope",
+            "TASK_CONTRACT.write_scope",
+            "field",
+        )
+    if code == "task_scope.forbidden_mutation":
+        return _protocol(
+            "respect_forbidden_mutation",
+            "coad.repair.scope.forbidden_mutation",
+            "TASK_CONTRACT.forbidden_mutations",
+            "field",
+        )
+    if code == "methodology_loop.handoff_missing" and "known_gaps" in message:
+        return _protocol(
+            "add_known_gap",
+            "coad.repair.handoff.known_gaps",
+            "HANDOFF.known_gaps",
+            "field",
+        )
+    if code == "methodology_loop.handoff_missing" and "follow_up_tasks" in message:
+        return _protocol(
+            "add_follow_up_task",
+            "coad.repair.handoff.follow_up_tasks",
+            "HANDOFF.follow_up_tasks",
+            "field",
+        )
+    return _protocol("repair_check_issue", "coad.repair.generic", path or ".", "evidence")
+
+
+def _protocol(action: str, action_code: str, target_field: str, expected_kind: str) -> dict[str, str]:
+    return {
+        "action": action,
+        "action_code": action_code,
+        "target_field": target_field,
+        "expected_kind": expected_kind,
+    }
 
 
 def _issue_phase(source_check: str, issue: dict[str, Any]) -> str:
