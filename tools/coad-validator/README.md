@@ -2,7 +2,7 @@
 
 Reference validator for COAD contract files.
 
-Current released package version: `0.7.2`.
+Current released package version: `0.7.3`.
 
 ## Usage
 
@@ -35,7 +35,9 @@ their command/status must match the ledger proof result. The validator also
 checks JSON artifact exit-code, timestamp, cwd, tool, and output-path
 provenance. When a JSON artifact declares `output_path`, that linked output
 must be non-empty and match declared `output_sha256` plus `output_bytes`
-metadata.
+metadata. The check also emits a required `methodology-loop` report that
+summarizes orient, scope, execute, prove, update-knowledge, and handoff phases
+without adding public CLI flags.
 
 Internal report builders remain available to this package's tests, but they are
 not user-facing CLI commands.

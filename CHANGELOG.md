@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.7.3 - 2026-05-19
+
+### Added
+
+- `coad check .` now emits a required `methodology-loop` report that aggregates
+  orientation, scope, execution, proof, knowledge-update, and handoff evidence
+  into phase statuses (`pass`, `weak`, `missing`, `unknown`, `skipped`).
+- The minimal execution example now includes full proof output transcripts
+  bound from JSON proof artifacts with `output_sha256` and `output_bytes`.
+
 ## 0.7.2 - 2026-05-19
 
 ### Added

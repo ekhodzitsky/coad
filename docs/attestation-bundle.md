@@ -27,6 +27,8 @@ The current bundle includes:
 - task scope integrity report;
 - proof result integrity report;
 - contract update integrity report;
+- proof artifact integrity report;
+- methodology loop report;
 - drift report.
 
 Every included report is required. If any required report has `ok: false`, the

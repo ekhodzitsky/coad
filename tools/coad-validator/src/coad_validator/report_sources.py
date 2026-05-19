@@ -11,6 +11,7 @@ from .graph_report import build_graph_report
 from .handoff_integrity import build_handoff_integrity_report
 from .ledger import build_ledger_report
 from .ledger_handoff_integrity import build_ledger_handoff_integrity_report
+from .methodology_loop import build_methodology_loop_report
 from .policy import build_policy_report
 from .profile import build_profile_report
 from .proof_artifact_integrity import build_proof_artifact_integrity_report
@@ -32,6 +33,13 @@ class ReportSource:
     required: bool
     build: Callable[[Path, Path], dict[str, Any]]
 
+
+METHODOLOGY_LOOP_SOURCE = ReportSource(
+    "methodology-loop",
+    COAD_CHECK_PRODUCER,
+    True,
+    lambda root, schema_dir: build_methodology_loop_report(root, schema_dir),
+)
 
 CORE_METHODOLOGY_SOURCES = [
     ReportSource(
@@ -118,9 +126,13 @@ CORE_METHODOLOGY_SOURCES = [
         True,
         lambda root, schema_dir: build_proof_artifact_integrity_report(root, schema_dir),
     ),
+    METHODOLOGY_LOOP_SOURCE,
 ]
 
-ONBOARDING_METHODOLOGY_SOURCES = CORE_METHODOLOGY_SOURCES[:2]
+ONBOARDING_METHODOLOGY_SOURCES = [
+    *CORE_METHODOLOGY_SOURCES[:2],
+    METHODOLOGY_LOOP_SOURCE,
+]
 
 ATTESTATION_SOURCES = [
     *CORE_METHODOLOGY_SOURCES,
@@ -227,6 +239,11 @@ _CACHED_SOURCE_BUILDERS: dict[str, Callable[[Path, Path, ValidationReport], dict
         report,
     ),
     "proof-artifact-integrity": lambda root, schema_dir, report: build_proof_artifact_integrity_report(
+        root,
+        schema_dir,
+        report,
+    ),
+    "methodology-loop": lambda root, schema_dir, report: build_methodology_loop_report(
         root,
         schema_dir,
         report,

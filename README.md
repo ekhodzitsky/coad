@@ -38,7 +38,9 @@ proof payloads and must agree with the ledger command and status. Their exit
 code, timestamps, working directory, tool, and output path are checked for basic
 execution provenance. When a JSON proof artifact links a full output transcript
 with `output_path`, that output file must also be non-empty and match declared
-`output_sha256` and `output_bytes` metadata.
+`output_sha256` and `output_bytes` metadata. The JSON check output also includes
+a `methodology-loop` report that summarizes the agent cycle as orient, scope,
+execute, prove, update knowledge, and handoff phases.
 
 ## 60-Second Demo
 
@@ -241,8 +243,8 @@ ownership, proof, and safe write scope to any agent.
 ## Status
 
 Public early draft. The stable integration target is intentionally small:
-`coad check .`. Current released package version: `0.6.7`. This release
-hardens ledger-handoff consistency for execution records.
+`coad check .`. Current released package version: `0.7.3`. This release adds
+the `methodology-loop` report for end-to-end agent process evidence.
 The released version is recorded in [VERSION](VERSION), with release
 notes in [CHANGELOG.md](CHANGELOG.md).
 

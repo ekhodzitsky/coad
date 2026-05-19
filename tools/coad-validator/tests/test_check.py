@@ -13,6 +13,7 @@ from jsonschema import Draft202012Validator
 
 import coad_validator.graph_report as graph_report_module
 import coad_validator.ledger as ledger_module
+import coad_validator.methodology_loop as methodology_loop_module
 import coad_validator.policy as policy_module
 import coad_validator.proof_matrix as proof_matrix_module
 import coad_validator.proof_result_integrity as proof_result_integrity_module
@@ -55,7 +56,11 @@ def test_check_report_passes_for_valid_methodology_graph() -> None:
         "proof-result-integrity",
         "contract-update-integrity",
         "proof-artifact-integrity",
+        "methodology-loop",
     }
+    methodology_loop_check = _check(payload, "methodology-loop")
+    assert methodology_loop_check["ok"] is True
+    assert methodology_loop_check["status"] in {"unknown", "partial"}
     assert payload["issues"] == []
     _assert_matches_report_schema("check-report.schema.json", payload)
 
@@ -66,7 +71,8 @@ def test_check_report_passes_for_two_minute_onboarding_shape() -> None:
     assert payload["ok"] is True
     assert payload["status"] == "pass"
     check_names = {check["name"] for check in payload["checks"]}
-    assert {"agent-guidance", "validation-report"}.issubset(check_names)
+    assert {"agent-guidance", "validation-report", "methodology-loop"}.issubset(check_names)
+    assert _check(payload, "methodology-loop")["status"] == "skipped"
     assert "ledger-report" not in check_names
     assert payload["issues"] == []
     _assert_matches_report_schema("check-report.schema.json", payload)
@@ -80,7 +86,9 @@ def test_check_report_passes_for_public_onboarding_example() -> None:
     assert {check["name"] for check in payload["checks"]} == {
         "agent-guidance",
         "validation-report",
+        "methodology-loop",
     }
+    assert _check(payload, "methodology-loop")["status"] == "skipped"
     assert payload["issues"] == []
     _assert_matches_report_schema("check-report.schema.json", payload)
 
@@ -262,9 +270,44 @@ def test_check_report_passes_when_handoff_changed_files_match_git_diff(tmp_path:
     contract_update_check = _check(payload, "contract-update-integrity")
     assert contract_update_check["ok"] is True
     assert contract_update_check["status"] == "warning"
+    methodology_loop_check = _check(payload, "methodology-loop")
+    assert methodology_loop_check["ok"] is True
+    assert methodology_loop_check["status"] == "partial"
     proof_artifact_check = _check(payload, "proof-artifact-integrity")
     assert proof_artifact_check["ok"] is True
     assert proof_artifact_check["status"] == "pass"
+
+
+def test_check_report_methodology_loop_passes_for_complete_git_backed_loop(tmp_path: Path) -> None:
+    target = _git_repo_from_minimal_example(
+        tmp_path,
+        task_contract_replacements={
+            "write_scope:\n  - checkout/**": "write_scope:\n  - checkout/**\n  - TASK_CONTRACT.md",
+        },
+    )
+    _replace_handoff_changed_files(
+        target,
+        ["checkout/checkout_service.py", "checkout/test_checkout_service.py", "TASK_CONTRACT.md"],
+    )
+    _replace_contract_updates(target, [("TASK_CONTRACT.md", "Documented the agent loop proof expectation.")])
+    _write(target / "checkout" / "checkout_service.py", "def checkout():\n    return 'ok'\n")
+    _write(target / "checkout" / "test_checkout_service.py", "def test_checkout():\n    assert True\n")
+    _replace_text(
+        target / "TASK_CONTRACT.md",
+        "acceptance:\n  - CheckoutService rejects negative totals before producing CheckoutDecision.",
+        (
+            "acceptance:\n"
+            "  - CheckoutService rejects negative totals before producing CheckoutDecision.\n"
+            "  - Methodology loop evidence remains complete."
+        ),
+    )
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is True
+    methodology_loop_check = _check(payload, "methodology-loop")
+    assert methodology_loop_check["ok"] is True
+    assert methodology_loop_check["status"] == "pass"
 
 
 def test_check_report_fails_when_handoff_changed_files_do_not_match_git_diff(tmp_path: Path) -> None:
@@ -276,6 +319,7 @@ def test_check_report_fails_when_handoff_changed_files_do_not_match_git_diff(tmp
 
     assert payload["ok"] is False
     assert _check(payload, "handoff-integrity")["status"] == "mismatch"
+    assert _check(payload, "methodology-loop")["status"] == "missing"
     assert {
         "code": "handoff.changed_files_missing",
         "severity": "error",
@@ -362,6 +406,7 @@ def test_check_report_fails_when_handoff_omits_required_proof_result(tmp_path: P
 
     assert payload["ok"] is False
     assert _check(payload, "proof-result-integrity")["status"] == "violation"
+    assert _check(payload, "methodology-loop")["status"] == "missing"
     assert {
         "code": "proof_result.handoff_missing",
         "severity": "error",
@@ -681,6 +726,7 @@ def test_check_report_fails_when_passing_proof_artifact_bytes_do_not_match(tmp_p
 
     assert payload["ok"] is False
     assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert _check(payload, "methodology-loop")["status"] == "missing"
     assert {
         "code": "proof_artifact.bytes_mismatch",
         "severity": "error",
@@ -1099,6 +1145,7 @@ def test_check_report_fails_when_contract_change_is_not_declared(tmp_path: Path)
     assert _check(payload, "handoff-integrity")["status"] == "pass"
     assert _check(payload, "task-scope-integrity")["status"] == "pass"
     assert _check(payload, "contract-update-integrity")["status"] == "violation"
+    assert _check(payload, "methodology-loop")["status"] == "missing"
     assert {
         "code": "contract_update.missing",
         "severity": "error",
@@ -1155,6 +1202,50 @@ def test_check_report_warns_when_contract_update_entry_is_not_changed(tmp_path: 
     contract_update_check = _check(payload, "contract-update-integrity")
     assert contract_update_check["ok"] is True
     assert contract_update_check["status"] == "warning"
+    methodology_loop_check = _check(payload, "methodology-loop")
+    assert methodology_loop_check["ok"] is True
+    assert methodology_loop_check["status"] == "partial"
+
+
+def test_check_report_methodology_loop_flags_missing_task_contract(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    (target / "TASK_CONTRACT.md").unlink()
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "methodology-loop")["status"] == "missing"
+    assert {
+        "code": "methodology_loop.scope_missing",
+        "severity": "error",
+        "path": "TASK_CONTRACT.md",
+        "message": "methodology-loop: scope phase is missing: no task contracts found",
+    } in payload["issues"]
+
+
+def test_check_report_methodology_loop_flags_incomplete_handoff_without_next_steps(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _replace_text(target / "HANDOFF.md", "status: complete", "status: not_ready")
+    _replace_text(target / "EXECUTION_LEDGER.json", '"status": "completed"', '"status": "blocked"')
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "methodology-loop")["status"] == "missing"
+    assert {
+        "code": "methodology_loop.handoff_missing",
+        "severity": "error",
+        "path": "HANDOFF.md",
+        "message": "methodology-loop: handoff phase is missing: incomplete handoff must declare known_gaps",
+    } in payload["issues"]
+    assert {
+        "code": "methodology_loop.handoff_missing",
+        "severity": "error",
+        "path": "HANDOFF.md",
+        "message": "methodology-loop: handoff phase is missing: incomplete handoff must declare follow_up_tasks",
+    } in payload["issues"]
 
 
 def test_coad_check_text_output_is_one_line() -> None:
@@ -1237,6 +1328,7 @@ def test_coad_check_reuses_validation_report_for_internal_sources(monkeypatch: A
     for module in (
         graph_report_module,
         ledger_module,
+        methodology_loop_module,
         policy_module,
         proof_matrix_module,
         proof_result_integrity_module,

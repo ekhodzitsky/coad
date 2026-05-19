@@ -18,15 +18,15 @@
           "command": "test checkout.checkout_service.rejects_negative_total",
           "status": "pass",
           "artifact": "artifacts/unit-test.json",
-          "artifact_sha256": "6973b2c7345b9397f271d01bbfed9a204aea86707132dd0a4880fd5a7d547a6b",
-          "artifact_bytes": 361
+          "artifact_sha256": "fa6ba65e8a3a73e91e114680b64cd33251dd6904f9b8e46a90fe713eb5ae93ab",
+          "artifact_bytes": 514
         },
         {
           "command": "test schemas/checkout-decision.schema.json",
           "status": "pass",
           "artifact": "artifacts/schema-test.json",
-          "artifact_sha256": "8724c9dc6dd7732ef71cc537385be56278f2e1c8983536ca648d157b26abd31c",
-          "artifact_bytes": 343
+          "artifact_sha256": "8a2700dfa526fd370b7f557a290b0abec25b1a56b63b2e5a992a12c3c217aa38",
+          "artifact_bytes": 498
         }
       ],
       "changed_files": [

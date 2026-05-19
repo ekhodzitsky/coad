@@ -4,7 +4,7 @@ kind: module_contract
 module: validator/report-builders-core
 level: subsystem
 layer: tooling
-purpose: Own core graph, status, proof, schedule, and ledger report builders.
+purpose: Own core graph, status, proof, schedule, ledger, and methodology loop report builders.
 status: pilot
 owners:
   - validator-maintainers
@@ -18,13 +18,14 @@ workcell:
     - tools/coad-validator/src/coad_validator/graph_report.py
     - tools/coad-validator/src/coad_validator/ledger.py
     - tools/coad-validator/src/coad_validator/ledger_handoff_integrity.py
+    - tools/coad-validator/src/coad_validator/methodology_loop.py
     - tools/coad-validator/src/coad_validator/proof_artifact_integrity.py
     - tools/coad-validator/src/coad_validator/proof_matrix.py
     - tools/coad-validator/src/coad_validator/schedule.py
     - tools/coad-validator/src/coad_validator/status.py
   context_budget:
-    max_files: 14
-    max_source_lines: 2200
+    max_files: 15
+    max_source_lines: 2700
     max_contract_lines: 180
     max_readme_lines: 120
     max_todo_lines: 80

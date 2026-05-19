@@ -18,8 +18,8 @@ The output directory contains:
   `validation-report.json`, `handoff-integrity.json`,
   `task-scope-integrity.json`, `ledger-handoff-integrity.json`,
   `proof-result-integrity.json`, `contract-update-integrity.json`,
-  `proof-artifact-integrity.json`, `ledger-report.json`, and
-  `drift-report.json`.
+  `proof-artifact-integrity.json`, `methodology-loop.json`,
+  `ledger-report.json`, and `drift-report.json`.
 
 The payload is covered by `schema/reports/export-report.schema.json`.
 

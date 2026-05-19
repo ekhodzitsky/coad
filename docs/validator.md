@@ -67,6 +67,12 @@ executable before heavier orchestration tooling exists.
   is present, the linked output must be non-empty and match declared
   `output_sha256` and `output_bytes`; missing output metadata issues include
   the computed value when the output can be read.
+- Methodology loop evidence: `coad check .` aggregates orientation, scope,
+  execution, proof, knowledge-update, and handoff signals into a
+  `methodology-loop` report. Active execution roots with root `HANDOFF.md` or
+  `EXECUTION_LEDGER.json` get phase statuses of `pass`, `weak`, `missing`, or
+  `unknown`; adoption-only roots without execution context are reported as
+  `skipped` rather than failed.
 - Cross-contract graph references:
   - goal to modules, tasks, proofs, reviews, and integration;
   - task to modules and proof contracts;

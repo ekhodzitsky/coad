@@ -12,6 +12,7 @@ from jsonschema import Draft202012Validator
 import coad_validator.attest as attest_module
 import coad_validator.graph_report as graph_report_module
 import coad_validator.ledger as ledger_module
+import coad_validator.methodology_loop as methodology_loop_module
 import coad_validator.policy as policy_module
 import coad_validator.profile as profile_module
 import coad_validator.proof_matrix as proof_matrix_module
@@ -50,6 +51,7 @@ def test_attestation_report_binds_required_reports() -> None:
         "proof-result-integrity",
         "contract-update-integrity",
         "proof-artifact-integrity",
+        "methodology-loop",
         "drift-report",
     }
     assert all(len(report["digest"]) == 64 for report in payload["reports"])
@@ -96,6 +98,7 @@ def test_attestation_report_reuses_validation_report_for_internal_sources(monkey
     for module in (
         graph_report_module,
         ledger_module,
+        methodology_loop_module,
         policy_module,
         profile_module,
         proof_matrix_module,
