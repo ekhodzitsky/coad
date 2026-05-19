@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+## 0.7.4 - 2026-05-19
+
+### Added
+
+- `methodology-loop` reports now declare `claim: methodology_evidence`, list
+  explicit limitations, and include per-phase source reports, blocking issues,
+  and recommended repairs.
+
+### Changed
+
+- README and validator docs now describe COAD as checking the workflow evidence
+  trail, not agent intent or semantic correctness by itself.
+
 ## 0.7.3 - 2026-05-19
 
 ### Added

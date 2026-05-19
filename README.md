@@ -27,7 +27,9 @@ coad check .
 ```
 
 That command is the gate after a repository has adopted the small COAD file
-shape below. It also uses available Git context: when a root `HANDOFF.md`
+shape below. It does not prove agent intent or semantic correctness by itself;
+it checks the evidence trail left by the work. It also uses available Git
+context: when a root `HANDOFF.md`
 exists, `coad check .` compares its `changed_files` against the real diff and
 checks those changes against the referenced task's write scope.
 When an `EXECUTION_LEDGER.json` is present, passing proof results must also
@@ -39,8 +41,13 @@ code, timestamps, working directory, tool, and output path are checked for basic
 execution provenance. When a JSON proof artifact links a full output transcript
 with `output_path`, that output file must also be non-empty and match declared
 `output_sha256` and `output_bytes` metadata. The JSON check output also includes
-a `methodology-loop` report that summarizes the agent cycle as orient, scope,
-execute, prove, update knowledge, and handoff phases.
+a `methodology-loop` report that frames the result as methodology evidence:
+which source reports support orient, scope, execute, prove, update knowledge,
+and handoff phases; which issues block a phase; and what to fix next.
+
+COAD cannot guarantee the best engineering choice or meaningful tests. It can
+make the claim reviewable: what was scoped, what changed, what proof ran, what
+knowledge was updated, and what handoff state remains.
 
 ## 60-Second Demo
 
@@ -243,8 +250,9 @@ ownership, proof, and safe write scope to any agent.
 ## Status
 
 Public early draft. The stable integration target is intentionally small:
-`coad check .`. Current released package version: `0.7.3`. This release adds
-the `methodology-loop` report for end-to-end agent process evidence.
+`coad check .`. Current released package version: `0.7.4`. This release makes
+the `methodology-loop` report explicit about evidence boundaries, source
+reports, blocking issues, and recommended repairs.
 The released version is recorded in [VERSION](VERSION), with release
 notes in [CHANGELOG.md](CHANGELOG.md).
 

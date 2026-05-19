@@ -2,7 +2,7 @@
 
 Reference validator for COAD contract files.
 
-Current released package version: `0.7.3`.
+Current released package version: `0.7.4`.
 
 ## Usage
 
@@ -37,7 +37,9 @@ provenance. When a JSON artifact declares `output_path`, that linked output
 must be non-empty and match declared `output_sha256` plus `output_bytes`
 metadata. The check also emits a required `methodology-loop` report that
 summarizes orient, scope, execute, prove, update-knowledge, and handoff phases
-without adding public CLI flags.
+without adding public CLI flags. That report is explicit about its boundary:
+it checks workflow evidence, not agent intent, and each phase includes source
+reports, blocking issues, and a recommended repair.
 
 Internal report builders remain available to this package's tests, but they are
 not user-facing CLI commands.

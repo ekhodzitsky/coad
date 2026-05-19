@@ -310,6 +310,43 @@ def test_check_report_methodology_loop_passes_for_complete_git_backed_loop(tmp_p
     assert methodology_loop_check["status"] == "pass"
 
 
+def test_methodology_loop_report_explains_evidence_boundaries(tmp_path: Path) -> None:
+    target = _git_repo_from_minimal_example(tmp_path)
+    report = methodology_loop_module.build_methodology_loop_report(target, schema_dir=SCHEMA_DIR)
+
+    assert report["claim"] == "methodology_evidence"
+    assert "Checks workflow evidence, not agent intent." in report["limitations"]
+    assert "Does not prove semantic code correctness beyond declared proof." in report["limitations"]
+    assert [phase["name"] for phase in report["phases"]] == [
+        "orient",
+        "scope",
+        "execute",
+        "prove",
+        "update_knowledge",
+        "handoff",
+    ]
+    for phase in report["phases"]:
+        assert phase["source_reports"]
+        assert isinstance(phase["blocking_issues"], list)
+        assert phase["recommended_fix"]
+
+
+def test_methodology_loop_report_recommends_fix_for_blocking_phase(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    (target / "TASK_CONTRACT.md").unlink()
+
+    report = methodology_loop_module.build_methodology_loop_report(target, schema_dir=SCHEMA_DIR)
+    scope_phase = next(phase for phase in report["phases"] if phase["name"] == "scope")
+
+    assert scope_phase["status"] == "missing"
+    assert scope_phase["blocking_issues"] == ["no task contracts found"]
+    assert scope_phase["recommended_fix"] == (
+        "Add or fix TASK_CONTRACT.md with target modules, write_scope, "
+        "forbidden_mutations, and required proof commands."
+    )
+
+
 def test_check_report_fails_when_handoff_changed_files_do_not_match_git_diff(tmp_path: Path) -> None:
     target = _git_repo_from_minimal_example(tmp_path)
     _write(target / "checkout" / "checkout_service.py", "def checkout():\n    return 'ok'\n")

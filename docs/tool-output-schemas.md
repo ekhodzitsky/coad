@@ -42,6 +42,12 @@ Changing a report schema should be treated as a compatibility event:
 
 See `docs/report-versioning.md` for compatibility rules.
 
+The `methodology-loop` report is the canonical process evidence payload. Its
+top-level `claim` is `methodology_evidence`, and its `limitations` spell out
+that the validator checks recorded artifacts, not the agent's hidden reasoning.
+Each phase includes source reports, blocking issues, and a recommended repair
+so automation can route fixes without parsing prose.
+
 ## Local Verification
 
 ```bash

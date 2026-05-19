@@ -72,7 +72,10 @@ executable before heavier orchestration tooling exists.
   `methodology-loop` report. Active execution roots with root `HANDOFF.md` or
   `EXECUTION_LEDGER.json` get phase statuses of `pass`, `weak`, `missing`, or
   `unknown`; adoption-only roots without execution context are reported as
-  `skipped` rather than failed.
+  `skipped` rather than failed. The report is intentionally an evidence
+  report, not a claim that the agent reasoned correctly: each phase lists its
+  source reports, blocking issues, and a recommended repair when the evidence
+  trail is incomplete.
 - Cross-contract graph references:
   - goal to modules, tasks, proofs, reviews, and integration;
   - task to modules and proof contracts;
@@ -103,6 +106,12 @@ coad check: pass
 
 Use `--format json` when an orchestrator needs structured issues and check
 statuses.
+
+The `methodology-loop` JSON payload names this boundary with
+`claim: methodology_evidence` and `limitations`. Consumers should treat it as a
+reviewable process trace: it can prove that required artifacts agree, but it
+cannot prove agent intent or semantic code correctness beyond the declared
+proof.
 
 The validator bundles the COAD schemas. `--schema-dir` remains useful for this
 repository's own tests and schema development, but integrated repositories can

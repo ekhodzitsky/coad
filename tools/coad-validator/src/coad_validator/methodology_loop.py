@@ -44,6 +44,7 @@ class Phase:
     summary: str
     evidence: list[str]
     issues: list[dict[str, str]]
+    source_reports: list[str]
 
 
 def build_methodology_loop_report(
@@ -74,6 +75,12 @@ def build_methodology_loop_report(
     status = _overall_status(phases, active_context)
     return versioned_report(
         {
+            "claim": "methodology_evidence",
+            "limitations": [
+                "Checks workflow evidence, not agent intent.",
+                "Does not prove semantic code correctness beyond declared proof.",
+                "Reports weak or unknown when obligations cannot be inferred mechanically.",
+            ],
             "ok": status != "missing",
             "status": status,
             "phases": [_phase_payload(phase) for phase in phases],
@@ -117,6 +124,7 @@ def _orient_phase(root: Path, schema_dir: Path | None, report: ValidationReport)
         "COAD navigation is available" if status == "pass" else "COAD navigation has gaps",
         [f"module_contracts={len(modules)}", f"validation_ok={report.ok}"],
         issues,
+        ["agent-guidance", "validation-report"],
     )
 
 
@@ -129,6 +137,7 @@ def _scope_phase(root: Path, index: ContractIndex) -> Phase:
             "No task contract defines the work scope",
             [],
             [_phase_issue("scope", "missing", "TASK_CONTRACT.md", "no task contracts found")],
+            ["task-contracts", "module-contracts"],
         )
 
     issues: list[dict[str, str]] = []
@@ -167,6 +176,7 @@ def _scope_phase(root: Path, index: ContractIndex) -> Phase:
         "Task scope is bound to modules and proof" if status == "pass" else "Task scope has gaps",
         [f"task_contracts={len(tasks)}"],
         issues,
+        ["task-contracts", "module-contracts"],
     )
 
 
@@ -203,6 +213,7 @@ def _update_knowledge_phase(source_payloads: dict[str, dict[str, Any]]) -> Phase
         "Knowledge updates are declared" if status == "pass" else "Knowledge update evidence is incomplete",
         [_source_evidence("contract-update-integrity", payload)],
         issues,
+        ["contract-update-integrity"],
     )
 
 
@@ -215,6 +226,7 @@ def _handoff_phase(root: Path, index: ContractIndex) -> Phase:
             "No handoff contract closes the work",
             [],
             [_phase_issue("handoff", "missing", "HANDOFF.md", "no handoff contracts found")],
+            ["handoff-contracts"],
         )
 
     issues: list[dict[str, str]] = []
@@ -256,6 +268,7 @@ def _handoff_phase(root: Path, index: ContractIndex) -> Phase:
         "Handoff is complete and reviewable" if phase_status == "pass" else "Handoff closure has gaps",
         [f"handoffs={len(handoffs)}"],
         issues,
+        ["handoff-contracts"],
     )
 
 
@@ -275,6 +288,7 @@ def _aggregate_phase(name: str, sources: list[tuple[str, dict[str, Any]]], pass_
         pass_summary if status == "pass" else f"{name.replace('_', ' ')} phase is incomplete",
         evidence,
         issues,
+        [source_name for source_name, _payload in sources],
     )
 
 
@@ -307,7 +321,7 @@ def _source_phase_issues(phase: str, payload: dict[str, Any], status: str) -> li
 
 def _skipped_execution_phases() -> list[Phase]:
     return [
-        Phase(name, "skipped", "No active execution context in this root", [], [])
+        Phase(name, "skipped", "No active execution context in this root", ["execution-context"], [], ["execution-context"])
         for name in PHASE_NAMES
         if name != "orient"
     ]
@@ -339,8 +353,59 @@ def _phase_payload(phase: Phase) -> dict[str, Any]:
         "status": phase.status,
         "summary": phase.summary,
         "evidence": phase.evidence,
+        "source_reports": phase.source_reports,
+        "blocking_issues": _blocking_issues(phase),
+        "recommended_fix": _recommended_fix(phase),
         "issues": phase.issues,
     }
+
+
+def _blocking_issues(phase: Phase) -> list[str]:
+    return [
+        _strip_phase_prefix(issue["message"])
+        for issue in phase.issues
+        if issue.get("severity") == "error"
+    ]
+
+
+def _strip_phase_prefix(message: str) -> str:
+    marker = ": "
+    if marker in message:
+        return message.split(marker, 1)[1]
+    return message
+
+
+def _recommended_fix(phase: Phase) -> str:
+    if phase.status == "pass":
+        return "No action needed."
+    if phase.status == "skipped":
+        return "Start an execution context with HANDOFF.md or EXECUTION_LEDGER.json when full loop validation is needed."
+    return {
+        "orient": (
+            "Fix AGENTS.md, module contracts, README/TODO context files, "
+            "workcell ownership, and context budgets until validation passes."
+        ),
+        "scope": (
+            "Add or fix TASK_CONTRACT.md with target modules, write_scope, "
+            "forbidden_mutations, and required proof commands."
+        ),
+        "execute": (
+            "Align HANDOFF.changed_files, EXECUTION_LEDGER changed_files/task_id, "
+            "and task write_scope with the real Git diff."
+        ),
+        "prove": (
+            "Record every required proof command as pass in HANDOFF and ledger, "
+            "then attach non-empty digest-checked proof artifacts."
+        ),
+        "update_knowledge": (
+            "Record changed contracts, schemas, methodology docs, public surfaces, "
+            "ownership, and known gaps in contract_updates or module docs."
+        ),
+        "handoff": (
+            "Close HANDOFF.md with status, changed_files, proof_results, and "
+            "known_gaps plus follow_up_tasks when the work is incomplete."
+        ),
+    }[phase.name]
 
 
 def _phase_issue(
