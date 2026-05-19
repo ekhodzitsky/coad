@@ -9,10 +9,10 @@ from .report import versioned_report
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(prog="coad", description="COAD methodology toolkit")
+    parser = argparse.ArgumentParser(prog="coad", description="COAD agent boundary and evidence toolkit")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    check_parser = subparsers.add_parser("check", help="Check COAD methodology compliance")
+    check_parser = subparsers.add_parser("check", help="Check COAD boundaries and evidence")
     check_parser.add_argument("path", nargs="?", default=".", help="Path containing COAD contracts")
     check_parser.add_argument("--schema-dir", help="Directory containing COAD JSON schemas")
     check_parser.add_argument("--format", choices=["text", "json"], default="text", help="Output format")

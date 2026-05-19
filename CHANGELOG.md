@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+## 0.7.7 - 2026-05-19
+
+### Changed
+
+- Reframed public docs around COAD Core for minimal adoption and COAD Evidence
+  for optional agent/CI audit trails, keeping JSON details out of the normal
+  human onboarding path.
+- Renamed visible validator and CI wording from compliance language to boundary
+  and evidence checks.
+
 ## 0.7.6 - 2026-05-19
 
 ### Added

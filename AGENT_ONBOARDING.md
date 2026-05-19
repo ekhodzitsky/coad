@@ -4,7 +4,7 @@ If a user sent you this repository link, they should not need to paste snippets,
 copy templates, or wire COAD by hand.
 
 Your job as the agent is to adopt COAD in the target repository, make the
-minimal useful changes, and prove the result with:
+minimal useful Core changes, and prove the result with:
 
 ```bash
 coad check .
@@ -28,6 +28,11 @@ coad check .
 
 Do not ask the user to paste files manually. Ask only when repository access,
 network access, package installation, or write authority is blocked.
+
+Do not add task, handoff, ledger, proof-artifact, or other Evidence files during
+first adoption unless the target repository already needs an audited agent task
+loop. Core adoption is intentionally just guidance, one module contract, and
+local module context.
 
 ## Validator
 
@@ -78,6 +83,8 @@ it at the chosen module with `workcell.context_path`. Contracts may move inside
 modules later when the repository has a deeper workcell tree.
 
 Avoid creating a fake `example` module only to satisfy the checker.
+JSON schemas, execution ledgers, and proof artifacts are not part of this
+minimal target shape; they are for agent/CI evidence loops after Core adoption.
 
 ## AGENTS.md Guidance
 

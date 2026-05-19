@@ -10,7 +10,7 @@
     },
     {
       "id": "coad-check",
-      "name": "Check COAD methodology compliance",
+      "name": "Check COAD boundaries and evidence",
       "command": "uv run --locked coad check ../.. --schema-dir ../../schema",
       "working_directory": "tools/coad-validator",
       "required": true

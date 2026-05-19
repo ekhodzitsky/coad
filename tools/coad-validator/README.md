@@ -12,7 +12,7 @@ uv run coad check ../../examples/minimal --schema-dir ../../schema --format json
 ```
 
 `coad check` is the only public command. It prints one line in text mode and
-returns a non-zero exit code when methodology compliance fails.
+returns a non-zero exit code when required boundary or evidence checks fail.
 
 The validator checks root `AGENTS.md` onboarding guidance, Markdown YAML
 frontmatter against JSON schemas, module `README.md`/`TODO.md` context,
@@ -20,8 +20,8 @@ semantic contract quality, workcell context budgets, optional `.coad/leases.yml`
 write ownership, release metadata consistency when present, and contract graph
 references. Invalid UTF-8 in project-controlled inputs is reported as a
 validation issue instead of terminating the process. When execution contracts
-are present, the same command also
-evaluates readiness, proof evidence, scheduling, ledger evidence, goal policy
+are present, the same command also evaluates readiness, proof evidence,
+scheduling, ledger evidence, goal policy
 constraints, handoff diff honesty, task write-scope integrity, and proof result
 integrity across handoffs and ledgers. Ledger entries must also point at
 matching handoffs with the same task and changed files. Methodology file changes
@@ -50,6 +50,8 @@ JSON output is the agent-facing control plane. Agents should inspect
 `agent_status`, apply typed `next_actions` by `action_code` and `target_field`,
 and rerun `coad check --format json` until completion is unblocked. JSON
 outputs are covered by report schemas in `../../schema/reports/`.
+Humans normally adopt COAD through Markdown Core files. The JSON layer is for
+agents and CI, not a hand-authored project-management surface.
 
 ## Tests
 

@@ -65,7 +65,7 @@ COAD should own the repo shape that makes agentic development safer:
 - write scope and forbidden mutations are visible before work starts;
 - verification is attached to the module and task, not remembered in chat;
 - handoffs carry evidence instead of vague summaries;
-- `coad check .` verifies that the project is following the methodology.
+- `coad check .` verifies declared boundaries and evidence trail consistency.
 
 ## Differentiation
 

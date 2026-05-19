@@ -47,7 +47,7 @@ surface:
   - name: coad check
     kind: cli
     visibility: public
-    contract: Runs the progressive COAD methodology compliance check.
+    contract: Runs the progressive COAD boundary and evidence check.
     proof:
       kind: unit-test
       target: tools/coad-validator/tests/test_check.py
@@ -91,7 +91,7 @@ agent_policy:
   allowed_mutations:
     - Improve checker behavior while preserving one-line text output.
   forbidden_mutations:
-    - Add new public console scripts without changing the methodology contract.
+    - Add new public console scripts without changing the public command contract.
   escalation:
     - New public CLI command
     - Check semantics that block the two-minute onboarding path

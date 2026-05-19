@@ -1,13 +1,14 @@
 # COAD Project Standard
 
-COAD is a methodology for building an agent-navigable codebase.
+COAD is a repository standard for making agent-edited codebases navigable.
 
 The goal is not to make agents write more lines per minute. The goal is to make
 correct, verified changes cheaper by reducing orientation, hidden coupling,
 handoff loss, and review ambiguity.
 
-`coad check .` is only the validator. It tells you whether the repository
-follows the standard. The speedup comes from the project shape.
+`coad check .` is only the validator. It checks whether the repository exposes
+the declared boundaries and evidence. The speedup comes from the project shape,
+not from the command itself.
 
 ## Target Outcome
 
@@ -155,8 +156,9 @@ Every non-trivial change must declare:
 - contract or local context updates required by the change.
 
 For small one-agent changes, this can live in the agent's working notes or PR
-description. For coordinated work, use task, proof, handoff, review, and
-integration contracts.
+description. For coordinated or CI-audited agent work, use the optional
+evidence layer: task, proof, handoff, review, integration, ledger, and proof
+artifact records.
 
 ## Multi-Agent Standard
 
@@ -227,13 +229,13 @@ the sender's chat history.
   concrete proof commands.
 - **Level 2: Workcell authority discipline.** Work uses explicit read scopes,
   write leases, and parent-orchestrator escalation for cross-workcell changes.
-- **Level 3: Task handoff discipline.** Coordinated work uses task, proof,
-  handoff, review, and integration contracts.
+- **Level 3: Task handoff discipline.** Coordinated agent work uses task,
+  proof, handoff, review, and integration contracts.
 - **Level 4: Ledger-audited orchestration.** Completed agent work is recorded in
   execution ledgers with proof evidence.
 
-Move up only when the workflow needs it. COAD should reduce rework, not create
-ceremony.
+Move up only when the workflow needs it. COAD Core is enough for first
+adoption; Evidence is for agent work that needs a reviewable audit trail.
 
 ## Anti-Patterns
 
@@ -248,6 +250,7 @@ ceremony.
   contract.
 - `coad check .` treated as the source of speed instead of the validator of the
   project shape.
+- Evidence contracts added before the team has agent handoff or CI audit pain.
 - Parent orchestrators editing child implementation directly instead of
   assigning child write leases.
 - Multiple write agents working inside the same leaf workcell at the same time.

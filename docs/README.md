@@ -1,6 +1,7 @@
 # docs
 
-Purpose: explain COAD adoption, orchestration, reports, and operating rules.
+Purpose: explain COAD Core adoption, optional Evidence workflows,
+orchestration, reports, and operating rules.
 
 Public API:
 
@@ -21,4 +22,5 @@ Public API:
 
 Consumers: humans, agents, README, AGENTS.md, and future orchestrators.
 
-Invariants: public docs keep `coad check .` as the normal integration command.
+Invariants: public docs keep `coad check .` as the normal integration command
+and keep the human adoption path focused on Core before Evidence.

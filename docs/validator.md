@@ -5,6 +5,15 @@ COAD includes a Python reference validator under `tools/coad-validator`.
 The validator is intentionally small. It exists to make the contract standard
 executable before heavier orchestration tooling exists.
 
+It has two layers:
+
+- **Core:** Markdown guidance, one module contract, module `README.md`/`TODO.md`,
+  ownership, surfaces, invariants, and budgets.
+- **Evidence:** task, handoff, ledger, proof-artifact, and JSON report checks
+  that activate only when an agent/CI workflow adds those files.
+
+Humans normally adopt Core. Agents and CI consume the Evidence JSON.
+
 ## What It Checks
 
 - Markdown files with YAML frontmatter and `kind: *_contract`.

@@ -74,7 +74,7 @@ def test_drift_report_detects_missing_release_gate_ci_step(tmp_path: Path) -> No
     workflow = target / ".github" / "workflows" / "ci.yml"
     workflow.write_text(
         workflow.read_text(encoding="utf-8").replace(
-            "      - name: Check COAD methodology compliance\n"
+            "      - name: Check COAD boundaries and evidence\n"
             "        working-directory: tools/coad-validator\n"
             "        run: uv run --locked coad check ../.. --schema-dir ../../schema\n\n",
             "",
@@ -97,10 +97,10 @@ def test_drift_report_detects_release_gate_working_directory_drift(tmp_path: Pat
     workflow = target / ".github" / "workflows" / "ci.yml"
     workflow.write_text(
         workflow.read_text(encoding="utf-8").replace(
-            "      - name: Check COAD methodology compliance\n"
+            "      - name: Check COAD boundaries and evidence\n"
             "        working-directory: tools/coad-validator\n"
             "        run: uv run --locked coad check ../.. --schema-dir ../../schema\n",
-            "      - name: Check COAD methodology compliance\n"
+            "      - name: Check COAD boundaries and evidence\n"
             "        working-directory: .\n"
             "        run: uv run --locked coad check ../.. --schema-dir ../../schema\n",
         ),
@@ -122,7 +122,7 @@ def test_drift_cli_reports_structured_issues(tmp_path: Path) -> None:
     workflow = target / ".github" / "workflows" / "ci.yml"
     workflow.write_text(
         workflow.read_text(encoding="utf-8").replace(
-            "      - name: Check COAD methodology compliance\n"
+            "      - name: Check COAD boundaries and evidence\n"
             "        working-directory: tools/coad-validator\n"
             "        run: uv run --locked coad check ../.. --schema-dir ../../schema\n\n",
             "",

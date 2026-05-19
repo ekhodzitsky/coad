@@ -26,28 +26,28 @@ COAD does not run agents. COAD makes repositories understandable to agents.
 coad check .
 ```
 
-That command is the gate after a repository has adopted the small COAD file
-shape below. It does not prove agent intent or semantic correctness by itself;
-it checks the evidence trail left by the work. It also uses available Git
-context: when a root `HANDOFF.md`
-exists, `coad check .` compares its `changed_files` against the real diff and
-checks those changes against the referenced task's write scope.
-When an `EXECUTION_LEDGER.json` is present, passing proof results must also
-point at non-empty artifacts whose SHA-256 digest and byte size match the
-ledger. If a passing result omits that metadata, the JSON issue output includes
-the expected value to record. JSON proof artifacts are validated as structured
-proof payloads and must agree with the ledger command and status. Their exit
-code, timestamps, working directory, tool, and output path are checked for basic
-execution provenance. When a JSON proof artifact links a full output transcript
-with `output_path`, that output file must also be non-empty and match declared
-`output_sha256` and `output_bytes` metadata. The JSON check output also includes
-a `methodology-loop` report that frames the result as methodology evidence:
-which source reports support orient, scope, execute, prove, update knowledge,
-and handoff phases; which issues block a phase; and what to fix next.
+That command is the gate after a repository has adopted the small COAD Core
+shape below. It does not prove agent intent, semantic correctness, or that a
+team needs COAD. It checks whether the repository exposes enough boundaries and
+evidence for agent-made changes to be reviewed instead of trusted from chat.
 
-COAD cannot guarantee the best engineering choice or meaningful tests. It can
-make the claim reviewable: what was scoped, what changed, what proof ran, what
-knowledge was updated, and what handoff state remains.
+## Do You Need COAD?
+
+Use COAD when coding agents edit a non-trivial repository, ownership boundaries
+matter, handoffs lose context, or CI must reject vague "done" claims.
+
+Skip COAD when the project is small, human-only, already has strong ownership
+and proof discipline, or the team does not feel pain from agent handoff risk.
+COAD is a guardrail for agent-made changes, not a universal engineering law.
+
+## COAD Core Vs Evidence
+
+**COAD Core** is the adoption path: `AGENTS.md`, one `MODULE_CONTRACT.md`, and
+the module `README.md`/`TODO.md`. Start here.
+
+**COAD Evidence** is the advanced agent/CI layer: task contracts, handoffs,
+execution ledgers, proof artifacts, and JSON report payloads. Add it only when
+agents are performing task work that needs a durable audit trail.
 
 ## 60-Second Demo
 
@@ -148,8 +148,8 @@ Contracts can also live inside modules later, but the root-contract shape is the
 fastest path for first adoption.
 
 The first adoption bar is intentionally small. Add task, proof, handoff,
-review, integration, and ledger contracts only when the workflow needs more
-orchestration.
+review, integration, ledger, and proof-artifact JSON only when agents need a
+machine-checkable evidence trail for real task work.
 
 The commands below require Python 3.11 or newer and `uv`.
 
@@ -166,8 +166,8 @@ If `coad` is already installed, the command is simply:
 coad check .
 ```
 
-Agent control-plane JSON is `coad check . --format json`. Agents read
-`agent_status`, `blocking_checks`, and `next_actions`, repair evidence, rerun.
+Agent/CI control-plane JSON is `coad check . --format json`; humans normally
+do not read or write that JSON.
 
 See [GETTING_STARTED.md](GETTING_STARTED.md) and
 [examples/onboarding/](examples/onboarding/) for the smallest passing setup.
@@ -203,7 +203,7 @@ write scope outside the workcell's declared ownership.
 ```text
 contracts/          Human-readable contract semantics.
 templates/          Copyable starter contracts.
-schema/             JSON schemas for contracts and reports.
+schema/             Machine schemas for agent/CI contracts and reports.
 docs/               Methodology details and operating rules.
 playbooks/          Repeatable orchestration flows.
 examples/           Reference COAD project shapes.
@@ -247,8 +247,9 @@ ownership, proof, and safe write scope to any agent.
 ## Status
 
 Public early draft. The stable integration target is intentionally small:
-`coad check .`. Current released package version: `0.7.6`. This release makes
-`next_actions` a typed repair protocol with stable action codes.
+`coad check .`. Current released package version: `0.7.7`. This release
+clarifies COAD Core as the minimal adoption path and Evidence as the optional
+agent/CI audit trail.
 The released version is recorded in [VERSION](VERSION), with release
 notes in [CHANGELOG.md](CHANGELOG.md).
 

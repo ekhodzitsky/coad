@@ -25,7 +25,7 @@ uvx --from 'git+https://github.com/ekhodzitsky/coad.git#subdirectory=tools/coad-
 
 Run it before claiming a task, handoff, review, or PR is complete. A passing
 result means the repository's COAD contracts are structurally valid and the
-methodology evidence is consistent.
+agent evidence trail is internally consistent.
 
 `coad check .` does not execute arbitrary proof commands from module contracts.
 Agents must also run the relevant workcell verification commands before
@@ -44,8 +44,8 @@ coad check . --format json
 ```
 
 The installed validator bundles the COAD schemas. Adopting repositories need
-contract files and the command above; they do not need to vendor this repo's
-`schema/` directory.
+Core files and the command above; they do not need to vendor this repo's
+`schema/` directory or write JSON by hand.
 
 For agent-led onboarding, use `AGENT_ONBOARDING.md`. For templates and a
 complete minimal example, see `templates/onboarding/` and
@@ -76,9 +76,9 @@ workcell: one bounded agent workspace with ownership, surfaces, consumers,
 invariants, verification, and write authority. The module directory must include
 `README.md` and `TODO.md` so the next agent has local context.
 
-If it fails, fix the contract, module context, proof, handoff, ledger, or policy
-issue before claiming the work is complete. Use `coad check . --format json`
-when structured output is needed.
+If it fails, fix the contract or module context before claiming Core adoption.
+For task execution loops, use `coad check . --format json` so agents can follow
+typed `next_actions`.
 ````
 
 ## Agent-Led Onboarding
@@ -93,7 +93,8 @@ when structured output is needed.
 
 ## What It Checks
 
-`coad check` verifies the core methodology surface progressively:
+`coad check` verifies the Core surface first and expands only when Evidence
+contracts are present:
 
 - root `AGENTS.md` contains COAD onboarding guidance;
 - contract schemas and graph references;
@@ -104,5 +105,5 @@ when structured output is needed.
   task write-scope, proof-result, and contract-update integrity.
 
 It does not do cryptographic provenance, runtime sandboxing, or supply-chain
-certification. COAD is a methodology and compliance checker for orchestrated
-agent development.
+certification. COAD is a boundary and evidence guardrail for agent-made
+changes, not a universal project-management layer.

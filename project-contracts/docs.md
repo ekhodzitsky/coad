@@ -4,7 +4,7 @@ kind: module_contract
 module: docs
 level: root
 layer: methodology
-purpose: Explain COAD adoption, positioning, workcell authority, orchestration rules, reports, and operating model.
+purpose: Explain COAD Core adoption, optional Evidence workflows, positioning, workcell authority, orchestration rules, reports, and operating model.
 status: pilot
 owners:
   - methodology-maintainers
@@ -37,7 +37,7 @@ surface:
   - name: MethodologyDocs
     kind: documentation-api
     visibility: public
-    contract: Gives agents and humans the current COAD workflow, positioning, workcell authority model, semantic quality bar, and rationale.
+    contract: Gives agents and humans the current COAD Core/Evidence split, positioning, workcell authority model, semantic quality bar, and rationale.
     proof:
       kind: static-check
       target: docs
