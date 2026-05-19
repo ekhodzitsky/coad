@@ -422,7 +422,66 @@ def _validate_output_path(
             )
         )
         return False
-    return True
+
+    actual_bytes = resolved.stat().st_size
+    if actual_bytes == 0:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_output_empty",
+                output_path,
+                f"proof artifact output_path is empty: {output_path}",
+            )
+        )
+        return False
+
+    actual_sha256 = _sha256(resolved)
+    ok = True
+    output_sha256 = _string_value(payload.get("output_sha256"))
+    output_bytes = _int_value(payload.get("output_bytes"))
+    if not output_sha256:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_output_digest_missing",
+                artifact,
+                (
+                    f"proof artifact output_path must declare output_sha256 for {output_path}"
+                    f"{_expected_suffix(actual_sha256)}"
+                ),
+            )
+        )
+        ok = False
+    if output_bytes is None:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_output_bytes_missing",
+                artifact,
+                (
+                    f"proof artifact output_path must declare output_bytes for {output_path}"
+                    f"{_expected_suffix(actual_bytes)}"
+                ),
+            )
+        )
+        ok = False
+    if output_bytes is not None and output_bytes != actual_bytes:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_output_bytes_mismatch",
+                output_path,
+                f"proof artifact output_path size mismatch for {output_path}: expected {output_bytes}, got {actual_bytes}",
+            )
+        )
+        ok = False
+    if output_sha256:
+        if output_sha256 != actual_sha256:
+            issues.append(
+                _issue(
+                    "proof_artifact.payload_output_digest_mismatch",
+                    output_path,
+                    f"proof artifact output_path sha256 mismatch for {output_path}: expected {output_sha256}, got {actual_sha256}",
+                )
+            )
+            ok = False
+    return ok
 
 
 def _validate_payload_path(

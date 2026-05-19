@@ -36,7 +36,9 @@ ledger. If a passing result omits that metadata, the JSON issue output includes
 the expected value to record. JSON proof artifacts are validated as structured
 proof payloads and must agree with the ledger command and status. Their exit
 code, timestamps, working directory, tool, and output path are checked for basic
-execution provenance.
+execution provenance. When a JSON proof artifact links a full output transcript
+with `output_path`, that output file must also be non-empty and match declared
+`output_sha256` and `output_bytes` metadata.
 
 ## 60-Second Demo
 

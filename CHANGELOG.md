@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.7.2 - 2026-05-19
+
+### Added
+
+- `coad check .` now binds JSON proof artifact `output_path` attachments with
+  `output_sha256` and `output_bytes`, validates non-empty output, and reports
+  computed expected values for missing output metadata.
+
 ## 0.7.1 - 2026-05-19
 
 ### Added

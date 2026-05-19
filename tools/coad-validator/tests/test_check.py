@@ -899,6 +899,121 @@ def test_check_report_fails_when_json_proof_artifact_output_path_is_missing(tmp_
     } in payload["issues"]
 
 
+def test_check_report_fails_when_json_proof_artifact_output_digest_is_missing(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    output_text = "full unit proof transcript\n"
+    _write_structured_minimal_artifacts(
+        target,
+        unit_output_text=output_text,
+        unit_output_omit={"output_sha256"},
+    )
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.payload_output_digest_missing",
+        "severity": "error",
+        "path": "artifacts/unit-test.json",
+        "message": (
+            "proof-artifact-integrity: proof artifact output_path must declare "
+            f"output_sha256 for artifacts/unit-output.txt (expected {_sha256_text(output_text)})"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_json_proof_artifact_output_bytes_are_missing(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    output_text = "full unit proof transcript\n"
+    _write_structured_minimal_artifacts(
+        target,
+        unit_output_text=output_text,
+        unit_output_omit={"output_bytes"},
+    )
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.payload_output_bytes_missing",
+        "severity": "error",
+        "path": "artifacts/unit-test.json",
+        "message": (
+            "proof-artifact-integrity: proof artifact output_path must declare "
+            f"output_bytes for artifacts/unit-output.txt (expected {len(output_text.encode('utf-8'))})"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_json_proof_artifact_output_is_empty(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_structured_minimal_artifacts(target, unit_output_text="")
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.payload_output_empty",
+        "severity": "error",
+        "path": "artifacts/unit-output.txt",
+        "message": "proof-artifact-integrity: proof artifact output_path is empty: artifacts/unit-output.txt",
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_json_proof_artifact_output_bytes_do_not_match(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_structured_minimal_artifacts(
+        target,
+        unit_output_text="full unit proof transcript\n",
+        unit_overrides={"output_bytes": 999},
+    )
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.payload_output_bytes_mismatch",
+        "severity": "error",
+        "path": "artifacts/unit-output.txt",
+        "message": (
+            "proof-artifact-integrity: proof artifact output_path size mismatch "
+            "for artifacts/unit-output.txt: expected 999, got 27"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_json_proof_artifact_output_digest_does_not_match(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_structured_minimal_artifacts(
+        target,
+        unit_output_text="full unit proof transcript\n",
+        unit_overrides={"output_sha256": "0" * 64},
+    )
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert any(
+        issue["code"] == "proof_artifact.payload_output_digest_mismatch"
+        and issue["path"] == "artifacts/unit-output.txt"
+        and issue["message"].startswith(
+            "proof-artifact-integrity: proof artifact output_path sha256 mismatch for "
+            "artifacts/unit-output.txt: expected 0000000000000000000000000000000000000000000000000000000000000000, got "
+        )
+        for issue in payload["issues"]
+    )
+
+
 def test_check_report_fails_when_proof_artifact_path_escapes_root(tmp_path: Path) -> None:
     target = tmp_path / "minimal"
     shutil.copytree(MINIMAL_EXAMPLE, target)
@@ -1279,6 +1394,8 @@ def _write_structured_minimal_artifacts(
     schema_overrides: dict[str, Any] | None = None,
     unit_omit: set[str] | None = None,
     schema_omit: set[str] | None = None,
+    unit_output_text: str | None = None,
+    unit_output_omit: set[str] | None = None,
 ) -> None:
     unit_artifact = _proof_artifact_payload(
         command="test checkout.checkout_service.rejects_negative_total",
@@ -1288,6 +1405,12 @@ def _write_structured_minimal_artifacts(
         command="test schemas/checkout-decision.schema.json",
         stdout_excerpt="test schemas/checkout-decision.schema.json: pass",
     )
+    if unit_output_text is not None:
+        _write(root / "artifacts" / "unit-output.txt", unit_output_text)
+        unit_artifact["output_path"] = "artifacts/unit-output.txt"
+        _set_output_metadata(unit_artifact, unit_output_text)
+        for key in unit_output_omit or set():
+            unit_artifact.pop(key, None)
     unit_artifact.update(unit_overrides or {})
     schema_artifact.update(schema_overrides or {})
     for key in unit_omit or set():
@@ -1328,10 +1451,20 @@ def _artifact_json(payload: dict[str, Any]) -> str:
     return json.dumps(payload, indent=2, sort_keys=True) + "\n"
 
 
+def _set_output_metadata(proof_artifact: dict[str, Any], content: str) -> None:
+    payload = content.encode("utf-8")
+    proof_artifact["output_sha256"] = hashlib.sha256(payload).hexdigest()
+    proof_artifact["output_bytes"] = len(payload)
+
+
 def _set_artifact_metadata(proof_result: dict[str, Any], content: str) -> None:
     payload = content.encode("utf-8")
     proof_result["artifact_sha256"] = hashlib.sha256(payload).hexdigest()
     proof_result["artifact_bytes"] = len(payload)
+
+
+def _sha256_text(content: str) -> str:
+    return hashlib.sha256(content.encode("utf-8")).hexdigest()
 
 
 def _assert_matches_report_schema(schema_name: str, payload: dict[str, Any]) -> None:

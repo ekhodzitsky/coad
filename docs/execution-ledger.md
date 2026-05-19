@@ -26,7 +26,8 @@ against `schema/proof-artifact.schema.json`, and their `command` and `status`
 must match the ledger proof result they support. The validator also checks that
 JSON artifact `exit_code` agrees with `status`, artifact timestamps are ordered
 and fit inside the ledger entry window, and `tool`, `cwd`, and `output_path`
-stay inside the checked root. A declared `output_path` must exist.
+stay inside the checked root. A declared `output_path` must exist, be
+non-empty, and match declared `output_sha256` plus `output_bytes` metadata.
 
 ## Completion Rule
 

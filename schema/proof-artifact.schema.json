@@ -15,6 +15,16 @@
     "completed_at"
   ],
   "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "required": ["output_path"]
+      },
+      "then": {
+        "required": ["output_sha256", "output_bytes"]
+      }
+    }
+  ],
   "properties": {
     "schema_version": {
       "const": 1
@@ -58,6 +68,14 @@
     "output_path": {
       "type": "string",
       "minLength": 1
+    },
+    "output_sha256": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "output_bytes": {
+      "type": "integer",
+      "minimum": 1
     },
     "assertions": {
       "type": "array",
