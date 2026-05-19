@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -80,6 +81,8 @@ def _collect_ledger_artifacts(
             continue
         event_id = _string_value(entry.get("event_id"))
         task_id = _string_value(entry.get("task_id"))
+        ledger_started_at = _string_value(entry.get("started_at"))
+        ledger_completed_at = _string_value(entry.get("completed_at"))
         for proof_result in _list_value(entry.get("proof_results")):
             if not isinstance(proof_result, dict):
                 continue
@@ -107,6 +110,8 @@ def _collect_ledger_artifacts(
                 status == "pass" and not artifact_sha256,
                 command,
                 status,
+                ledger_started_at,
+                ledger_completed_at,
                 schema_dir,
                 issues,
             )
@@ -156,6 +161,8 @@ def _validate_artifact(
     needs_sha256_hint: bool,
     command: str,
     status: str,
+    ledger_started_at: str,
+    ledger_completed_at: str,
     schema_dir: Path,
     issues: list[dict[str, str]],
 ) -> ArtifactValidation:
@@ -228,15 +235,33 @@ def _validate_artifact(
             )
             ok = False
     if artifact_path.suffix == ".json":
-        ok = _validate_structured_artifact(artifact_path, artifact, command, status, schema_dir, issues) and ok
+        ok = (
+            _validate_structured_artifact(
+                root,
+                base_dir,
+                artifact_path,
+                artifact,
+                command,
+                status,
+                ledger_started_at,
+                ledger_completed_at,
+                schema_dir,
+                issues,
+            )
+            and ok
+        )
     return ArtifactValidation(ok=ok, actual_sha256=actual_sha256, actual_bytes=actual_bytes)
 
 
 def _validate_structured_artifact(
+    root: Path,
+    base_dir: Path,
     artifact_path: Path,
     artifact: str,
     command: str,
     status: str,
+    ledger_started_at: str,
+    ledger_completed_at: str,
     schema_dir: Path,
     issues: list[dict[str, str]],
 ) -> bool:
@@ -274,7 +299,160 @@ def _validate_structured_artifact(
             )
         )
         ok = False
+    ok = _validate_exit_code(payload, artifact, issues) and ok
+    ok = _validate_times(payload, artifact, ledger_started_at, ledger_completed_at, issues) and ok
+    ok = _validate_payload_path(root, base_dir, artifact, payload, "cwd", "proof_artifact.payload_cwd_invalid", issues) and ok
+    ok = _validate_tool(payload, artifact, issues) and ok
+    ok = _validate_output_path(root, base_dir, artifact, payload, issues) and ok
     return ok
+
+
+def _validate_exit_code(payload: dict[str, Any], artifact: str, issues: list[dict[str, str]]) -> bool:
+    status = _string_value(payload.get("status"))
+    exit_code = _int_value(payload.get("exit_code"))
+    if status == "pass" and exit_code != 0:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_exit_code_mismatch",
+                artifact,
+                f"proof artifact status pass requires exit_code 0 for {artifact}, got {exit_code}",
+            )
+        )
+        return False
+    if status == "fail" and exit_code == 0:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_exit_code_mismatch",
+                artifact,
+                f"proof artifact status fail requires non-zero exit_code for {artifact}, got 0",
+            )
+        )
+        return False
+    return True
+
+
+def _validate_times(
+    payload: dict[str, Any],
+    artifact: str,
+    ledger_started_at: str,
+    ledger_completed_at: str,
+    issues: list[dict[str, str]],
+) -> bool:
+    ok = True
+    started_at = _timestamp(payload.get("started_at"), "started_at", artifact, issues)
+    completed_at = _timestamp(payload.get("completed_at"), "completed_at", artifact, issues)
+    ledger_started = _timestamp(ledger_started_at, "ledger.started_at", artifact, issues) if ledger_started_at else None
+    ledger_completed = _timestamp(ledger_completed_at, "ledger.completed_at", artifact, issues) if ledger_completed_at else None
+
+    if started_at is None or completed_at is None:
+        return False
+    if completed_at < started_at:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_time_order",
+                artifact,
+                f"proof artifact completed_at is before started_at for {artifact}",
+            )
+        )
+        ok = False
+    if ledger_started is not None and started_at < ledger_started:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_time_outside_ledger",
+                artifact,
+                f"proof artifact started_at is outside ledger entry window for {artifact}",
+            )
+        )
+        ok = False
+    if ledger_completed is not None and completed_at > ledger_completed:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_time_outside_ledger",
+                artifact,
+                f"proof artifact completed_at is outside ledger entry window for {artifact}",
+            )
+        )
+        ok = False
+    return ok
+
+
+def _validate_tool(payload: dict[str, Any], artifact: str, issues: list[dict[str, str]]) -> bool:
+    tool = _string_value(payload.get("tool"))
+    if not tool:
+        return True
+    candidate = Path(tool)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_tool_invalid",
+                artifact,
+                f"proof artifact tool is not a safe relative value: {tool}",
+            )
+        )
+        return False
+    return True
+
+
+def _validate_output_path(
+    root: Path,
+    base_dir: Path,
+    artifact: str,
+    payload: dict[str, Any],
+    issues: list[dict[str, str]],
+) -> bool:
+    output_path = _string_value(payload.get("output_path"))
+    if not output_path:
+        return True
+    resolved = _safe_payload_path(root, base_dir, output_path)
+    if resolved is None:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_output_path_invalid",
+                output_path,
+                f"proof artifact output_path escapes COAD root: {output_path}",
+            )
+        )
+        return False
+    if not resolved.is_file():
+        issues.append(
+            _issue(
+                "proof_artifact.payload_output_path_missing",
+                output_path,
+                f"proof artifact output_path does not exist: {output_path}",
+            )
+        )
+        return False
+    return True
+
+
+def _validate_payload_path(
+    root: Path,
+    base_dir: Path,
+    artifact: str,
+    payload: dict[str, Any],
+    field: str,
+    code: str,
+    issues: list[dict[str, str]],
+) -> bool:
+    value = _string_value(payload.get(field))
+    if not value:
+        return True
+    if _safe_payload_path(root, base_dir, value) is None:
+        issues.append(_issue(code, artifact, f"proof artifact {field} escapes COAD root: {value}"))
+        return False
+    return True
+
+
+def _safe_payload_path(root: Path, base_dir: Path, value: str) -> Path | None:
+    candidate = Path(value)
+    if candidate.is_absolute() or ".." in candidate.parts:
+        return None
+    resolved = (base_dir / candidate).resolve(strict=False)
+    try:
+        resolved.relative_to(root)
+    except ValueError:
+        return None
+    return resolved
 
 
 def _validate_artifact_schema(
@@ -363,6 +541,25 @@ def _string_value(value: object, fallback: str = "") -> str:
 
 def _int_value(value: object) -> int | None:
     return value if type(value) is int and value >= 0 else None
+
+
+def _timestamp(value: object, field: str, artifact: str, issues: list[dict[str, str]]) -> datetime | None:
+    if not isinstance(value, str) or not value:
+        return None
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        issues.append(
+            _issue(
+                "proof_artifact.payload_timestamp_invalid",
+                artifact,
+                f"proof artifact {field} timestamp is invalid for {artifact}: {value}",
+            )
+        )
+        return None
+    if parsed.tzinfo is None:
+        return parsed.replace(tzinfo=timezone.utc)
+    return parsed.astimezone(timezone.utc)
 
 
 def _sha256(path: Path) -> str:

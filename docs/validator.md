@@ -60,7 +60,10 @@ executable before heavier orchestration tooling exists.
   results are ignored, but declared paths are still validated. Missing digest
   metadata issues include the computed value when the artifact can be read.
   Artifacts ending in `.json` must also match `proof-artifact.schema.json`, and
-  their `command` and `status` must match the ledger proof result.
+  their `command` and `status` must match the ledger proof result. JSON proof
+  artifacts also validate basic provenance: status/exit-code consistency,
+  timestamp order and ledger-window bounds, safe relative `tool`, `cwd`, and
+  `output_path`, plus existence of declared `output_path`.
 - Cross-contract graph references:
   - goal to modules, tasks, proofs, reviews, and integration;
   - task to modules and proof contracts;

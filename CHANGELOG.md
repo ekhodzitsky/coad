@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+## 0.7.1 - 2026-05-19
+
+### Added
+
+- `coad check .` now validates JSON proof artifact provenance: status must
+  match `exit_code`, artifact timestamps must be ordered and fit within the
+  ledger entry window, and `tool`, `cwd`, and `output_path` must be safe
+  repository-relative values.
+
 ## 0.7.0 - 2026-05-18
 
 ### Added

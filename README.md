@@ -34,7 +34,9 @@ When an `EXECUTION_LEDGER.json` is present, passing proof results must also
 point at non-empty artifacts whose SHA-256 digest and byte size match the
 ledger. If a passing result omits that metadata, the JSON issue output includes
 the expected value to record. JSON proof artifacts are validated as structured
-proof payloads and must agree with the ledger command and status.
+proof payloads and must agree with the ledger command and status. Their exit
+code, timestamps, working directory, tool, and output path are checked for basic
+execution provenance.
 
 ## 60-Second Demo
 

@@ -2,7 +2,7 @@
 
 Reference validator for COAD contract files.
 
-Current released package version: `0.7.0`.
+Current released package version: `0.7.1`.
 
 ## Usage
 
@@ -31,7 +31,8 @@ inside the checked root and match their declared SHA-256 digest plus byte size.
 When a passing result omits digest metadata but the artifact exists, the
 structured issue message includes the expected value to record.
 JSON proof artifacts are also validated against the proof artifact schema, and
-their command/status must match the ledger proof result.
+their command/status must match the ledger proof result. The validator also
+checks JSON artifact exit-code, timestamp, cwd, tool, and output-path provenance.
 
 Internal report builders remain available to this package's tests, but they are
 not user-facing CLI commands.

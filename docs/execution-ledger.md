@@ -23,7 +23,10 @@ Passing proof results must point at durable proof artifacts with declared
 `artifact_sha256` and `artifact_bytes`. Text artifacts remain valid when they
 are non-empty and digest-bound. JSON artifacts are additionally validated
 against `schema/proof-artifact.schema.json`, and their `command` and `status`
-must match the ledger proof result they support.
+must match the ledger proof result they support. The validator also checks that
+JSON artifact `exit_code` agrees with `status`, artifact timestamps are ordered
+and fit inside the ledger entry window, and `tool`, `cwd`, and `output_path`
+stay inside the checked root. A declared `output_path` must exist.
 
 ## Completion Rule
 

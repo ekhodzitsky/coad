@@ -773,6 +773,132 @@ def test_check_report_fails_when_json_proof_artifact_schema_is_invalid(tmp_path:
     } in payload["issues"]
 
 
+def test_check_report_fails_when_json_proof_artifact_pass_has_nonzero_exit_code(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_structured_minimal_artifacts(target, unit_overrides={"exit_code": 1})
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.payload_exit_code_mismatch",
+        "severity": "error",
+        "path": "artifacts/unit-test.json",
+        "message": (
+            "proof-artifact-integrity: proof artifact status pass requires "
+            "exit_code 0 for artifacts/unit-test.json, got 1"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_json_proof_artifact_fail_has_zero_exit_code(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_structured_minimal_artifacts(target, unit_overrides={"status": "fail", "exit_code": 0})
+    ledger = _read_ledger(target)
+    ledger["entries"][0]["proof_results"][0]["status"] = "fail"
+    _write_ledger(target, ledger)
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.payload_exit_code_mismatch",
+        "severity": "error",
+        "path": "artifacts/unit-test.json",
+        "message": (
+            "proof-artifact-integrity: proof artifact status fail requires "
+            "non-zero exit_code for artifacts/unit-test.json, got 0"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_json_proof_artifact_times_are_reversed(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_structured_minimal_artifacts(
+        target,
+        unit_overrides={
+            "started_at": "2026-05-16T11:04:30Z",
+            "completed_at": "2026-05-16T11:04:00Z",
+        },
+    )
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.payload_time_order",
+        "severity": "error",
+        "path": "artifacts/unit-test.json",
+        "message": (
+            "proof-artifact-integrity: proof artifact completed_at is before "
+            "started_at for artifacts/unit-test.json"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_json_proof_artifact_time_is_outside_ledger_entry(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_structured_minimal_artifacts(
+        target,
+        unit_overrides={"started_at": "2026-05-16T10:59:59Z"},
+    )
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.payload_time_outside_ledger",
+        "severity": "error",
+        "path": "artifacts/unit-test.json",
+        "message": (
+            "proof-artifact-integrity: proof artifact started_at is outside "
+            "ledger entry window for artifacts/unit-test.json"
+        ),
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_json_proof_artifact_cwd_escapes_root(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_structured_minimal_artifacts(target, unit_overrides={"cwd": "../outside"})
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.payload_cwd_invalid",
+        "severity": "error",
+        "path": "artifacts/unit-test.json",
+        "message": "proof-artifact-integrity: proof artifact cwd escapes COAD root: ../outside",
+    } in payload["issues"]
+
+
+def test_check_report_fails_when_json_proof_artifact_output_path_is_missing(tmp_path: Path) -> None:
+    target = tmp_path / "minimal"
+    shutil.copytree(MINIMAL_EXAMPLE, target)
+    _write_structured_minimal_artifacts(target, unit_overrides={"output_path": "artifacts/missing-output.txt"})
+
+    payload = build_check_report(target, schema_dir=SCHEMA_DIR)
+
+    assert payload["ok"] is False
+    assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
+    assert {
+        "code": "proof_artifact.payload_output_path_missing",
+        "severity": "error",
+        "path": "artifacts/missing-output.txt",
+        "message": "proof-artifact-integrity: proof artifact output_path does not exist: artifacts/missing-output.txt",
+    } in payload["issues"]
+
+
 def test_check_report_fails_when_proof_artifact_path_escapes_root(tmp_path: Path) -> None:
     target = tmp_path / "minimal"
     shutil.copytree(MINIMAL_EXAMPLE, target)
@@ -1192,8 +1318,8 @@ def _proof_artifact_payload(command: str, stdout_excerpt: str) -> dict[str, Any]
         "exit_code": 0,
         "tool": "pytest",
         "cwd": ".",
-        "started_at": "2026-05-18T20:00:00Z",
-        "completed_at": "2026-05-18T20:00:01Z",
+        "started_at": "2026-05-16T11:04:00Z",
+        "completed_at": "2026-05-16T11:04:01Z",
         "stdout_excerpt": stdout_excerpt,
     }
 
