@@ -250,7 +250,9 @@ The JSON output from `coad check . --format json` includes `schema_version: 1`,
 Internal report payload schemas also live in `schema/reports/` for this
 repository's tests and implementation.
 
-See `docs/tool-output-schemas.md` and `docs/report-versioning.md`.
+See `docs/archive/tool-output-schemas.md.v0.7.7` and
+`docs/archive/report-versioning.md.v0.7.7` for the pre-v2 prose on these
+JSON payloads.
 
 ## Test Suite
 
@@ -279,4 +281,5 @@ jq empty ../../schema/*.json ../../schema/reports/*.json
 External GitHub Actions in `.github/workflows/ci.yml` are pinned by commit SHA.
 Update those pins deliberately when refreshing the CI supply chain.
 
-See `docs/release-gates.md` for the release gate manifest contract.
+See `docs/archive/release-gates.md.v0.7.7` for the release-gate manifest
+contract (Evidence).

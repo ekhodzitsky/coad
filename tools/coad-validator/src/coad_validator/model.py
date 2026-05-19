@@ -4,6 +4,23 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
+# Non-error severities for rules that do not block `coad check .`.
+# Keys are stable issue codes; values are "warning" or "info".
+NON_BLOCKING_SEVERITY: dict[str, str] = {
+    "semantic.surface_missing": "warning",
+    "semantic.public_surface_without_consumer": "warning",
+    "semantic.placeholder": "warning",
+    "semantic.proof_placeholder": "warning",
+    "semantic.context_file_empty": "warning",
+    "semantic.purpose_too_generic": "info",
+    "workcell.budget_exceeded": "warning",
+}
+
+
+def severity_for(code: str) -> str:
+    """Return the severity level for a stable issue code."""
+    return NON_BLOCKING_SEVERITY.get(code, "error")
+
 
 @dataclass(frozen=True)
 class ContractDocument:

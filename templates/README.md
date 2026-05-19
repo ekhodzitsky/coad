@@ -1,14 +1,22 @@
 # templates
 
-Purpose: provide copyable COAD starter files.
+Copyable Core starters for a repository adopting COAD.
 
-Public API:
+- `MODULE_CONTRACT.md` — root template for a workcell contract.
+- `TODO.md` — root template for a workcell TODO list.
+- `onboarding/` — the smallest passing shape: `AGENTS.md`,
+  `MODULE_CONTRACT.md`, plus a `module/` directory with `README.md` and
+  `TODO.md`.
 
-- base contract templates;
-- onboarding templates under `templates/onboarding/`.
+Templates carry placeholder values. Replace every `<...>` and `TODO`
+before committing — `coad check .` will warn on residual placeholders
+(`semantic.placeholder`, `semantic.purpose_too_generic`, severity
+`warning`/`info`).
 
-Consumers: GETTING_STARTED.md, ADOPTION.md, and agents adopting COAD.
+See [`AGENT_ONBOARDING.md`](../AGENT_ONBOARDING.md) for the minimal
+end-to-end recipe.
 
-Invariants: templates are examples with placeholders, not live repository
-contracts. Use `docs/module-contract-checklist.md` to review whether a filled
-`MODULE_CONTRACT.md` is semantically useful to an agent.
+Pre-v2 Evidence templates (`GOAL_CONTRACT.md`, `TASK_CONTRACT.md`,
+`PROOF.md`, `HANDOFF.md`, `REVIEW.md`, `INTEGRATION.md`) were removed in
+v2. Their schemas remain available under `schema/extensions/`; copy from
+the schema example sections if a repository needs them.

@@ -9,12 +9,19 @@ from .text_io import read_utf8
 
 
 def validate_release_metadata(root: Path) -> list[ValidationIssue]:
+    """COAD self-check for release-metadata consistency.
+
+    Activated only when a repository contains the COAD validator package
+    (``tools/coad-validator/pyproject.toml``) — i.e. for the COAD repo
+    itself and forks. Adopters with their own ``VERSION``/``CHANGELOG.md``
+    are not subject to these checks.
+    """
     version_path = root / "VERSION"
     changelog_path = root / "CHANGELOG.md"
     pyproject_path = root / "tools" / "coad-validator" / "pyproject.toml"
     package_init_path = root / "tools" / "coad-validator" / "src" / "coad_validator" / "__init__.py"
 
-    if not any(path.exists() for path in (version_path, changelog_path, pyproject_path, package_init_path)):
+    if not pyproject_path.exists():
         return []
 
     issues: list[ValidationIssue] = []

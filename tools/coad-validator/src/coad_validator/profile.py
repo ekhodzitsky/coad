@@ -12,6 +12,7 @@ from .ledger import build_ledger_report
 from .policy import build_policy_report
 from .report import versioned_report
 from .schedule import build_schedule_report
+from .schema import resolve_schema_path
 from .text_io import read_utf8
 from .validate import ValidationReport, find_schema_dir, validate_path
 
@@ -79,9 +80,9 @@ def _load_profile(
         issues.append(ProfileIssue(path, f"invalid conformance profile JSON: {exc.msg}"))
         return {}
 
-    schema_path = schema_dir / "conformance-profile.schema.json"
-    if not schema_path.is_file():
-        issues.append(ProfileIssue(schema_path, "missing conformance profile schema"))
+    schema_path = resolve_schema_path(schema_dir, "conformance-profile.schema.json")
+    if schema_path is None:
+        issues.append(ProfileIssue(schema_dir / "conformance-profile.schema.json", "missing conformance profile schema"))
         return payload if isinstance(payload, dict) else {}
 
     schema = json.loads(schema_path.read_text(encoding="utf-8"))

@@ -14,7 +14,7 @@ workcell:
   context_path: tools/coad-validator
   children: []
   owns_paths:
-    - tools/coad-validator/src/coad_validator/schema/conformance-profile.schema.json
+    - tools/coad-validator/src/coad_validator/schema/extensions/conformance-profile.schema.json
     - tools/coad-validator/src/coad_validator/schema/lease-manifest.schema.json
     - tools/coad-validator/src/coad_validator/schema/release-manifest.json
     - tools/coad-validator/src/coad_validator/schema/release-manifest.schema.json

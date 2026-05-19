@@ -7,14 +7,8 @@
     "schema_version",
     "kind",
     "module",
-    "level",
     "purpose",
-    "status",
-    "surface",
-    "dependencies",
-    "consumers",
-    "invariants",
-    "verification"
+    "workcell"
   ],
   "properties": {
     "schema_version": { "const": 1 },
@@ -97,7 +91,6 @@
     },
     "surface": {
       "type": "array",
-      "minItems": 1,
       "items": {
         "type": "object",
         "required": ["name", "kind", "visibility", "contract", "proof"],
@@ -114,7 +107,6 @@
     },
     "dependencies": {
       "type": "object",
-      "required": ["internal", "external"],
       "properties": {
         "internal": {
           "type": "array",
@@ -175,7 +167,6 @@
     },
     "verification": {
       "type": "object",
-      "required": ["pre_change", "full"],
       "properties": {
         "pre_change": {
           "type": "array",

@@ -14,15 +14,15 @@ workcell:
   context_path: tools/coad-validator
   children: []
   owns_paths:
-    - tools/coad-validator/src/coad_validator/schema/execution-ledger.schema.json
-    - tools/coad-validator/src/coad_validator/schema/goal-contract.schema.json
-    - tools/coad-validator/src/coad_validator/schema/handoff-contract.schema.json
-    - tools/coad-validator/src/coad_validator/schema/integration-contract.schema.json
+    - tools/coad-validator/src/coad_validator/schema/extensions/execution-ledger.schema.json
+    - tools/coad-validator/src/coad_validator/schema/extensions/goal-contract.schema.json
+    - tools/coad-validator/src/coad_validator/schema/extensions/handoff-contract.schema.json
+    - tools/coad-validator/src/coad_validator/schema/extensions/integration-contract.schema.json
     - tools/coad-validator/src/coad_validator/schema/module-contract.schema.json
-    - tools/coad-validator/src/coad_validator/schema/proof-artifact.schema.json
-    - tools/coad-validator/src/coad_validator/schema/proof-contract.schema.json
-    - tools/coad-validator/src/coad_validator/schema/review-contract.schema.json
-    - tools/coad-validator/src/coad_validator/schema/task-contract.schema.json
+    - tools/coad-validator/src/coad_validator/schema/extensions/proof-artifact.schema.json
+    - tools/coad-validator/src/coad_validator/schema/extensions/proof-contract.schema.json
+    - tools/coad-validator/src/coad_validator/schema/extensions/review-contract.schema.json
+    - tools/coad-validator/src/coad_validator/schema/extensions/task-contract.schema.json
   context_budget:
     max_files: 12
     max_source_lines: 1500

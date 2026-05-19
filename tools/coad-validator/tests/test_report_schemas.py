@@ -18,8 +18,16 @@ from coad_validator.validate import validate_path
 
 ROOT = Path(__file__).resolve().parents[3]
 SCHEMA_DIR = ROOT / "schema"
+EXTENSION_SCHEMA_DIR = ROOT / "schema" / "extensions"
 BUNDLED_SCHEMA_DIR = ROOT / "tools" / "coad-validator" / "src" / "coad_validator" / "schema"
 FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def _schema_file(name: str) -> Path:
+    primary = SCHEMA_DIR / name
+    if primary.exists():
+        return primary
+    return EXTENSION_SCHEMA_DIR / name
 
 
 def test_validate_json_output_matches_report_schema() -> None:
@@ -330,7 +338,7 @@ def test_release_manifest_matches_manifest_schema() -> None:
 
 def test_example_execution_ledger_matches_ledger_schema() -> None:
     ledger_path = ROOT / "examples" / "minimal" / "EXECUTION_LEDGER.json"
-    ledger_schema_path = SCHEMA_DIR / "execution-ledger.schema.json"
+    ledger_schema_path = _schema_file("execution-ledger.schema.json")
     ledger = json.loads(ledger_path.read_text(encoding="utf-8"))
     ledger_schema = json.loads(ledger_schema_path.read_text(encoding="utf-8"))
 
@@ -339,7 +347,7 @@ def test_example_execution_ledger_matches_ledger_schema() -> None:
 
 
 def test_example_proof_artifacts_match_artifact_schema() -> None:
-    artifact_schema_path = SCHEMA_DIR / "proof-artifact.schema.json"
+    artifact_schema_path = _schema_file("proof-artifact.schema.json")
     artifact_schema = json.loads(artifact_schema_path.read_text(encoding="utf-8"))
 
     Draft202012Validator.check_schema(artifact_schema)
@@ -351,7 +359,7 @@ def test_example_proof_artifacts_match_artifact_schema() -> None:
 
 def test_conformance_profile_matches_profile_schema() -> None:
     profile_path = ROOT / "COAD_PROFILE.json"
-    profile_schema_path = SCHEMA_DIR / "conformance-profile.schema.json"
+    profile_schema_path = _schema_file("conformance-profile.schema.json")
     profile = json.loads(profile_path.read_text(encoding="utf-8"))
     profile_schema = json.loads(profile_schema_path.read_text(encoding="utf-8"))
 

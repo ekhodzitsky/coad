@@ -39,8 +39,8 @@ def validate_schemas(
 
         validator = validators.get(schema_name)
         if validator is None:
-            schema_path = schema_dir / schema_name
-            if not schema_path.exists():
+            schema_path = resolve_schema_path(schema_dir, schema_name)
+            if schema_path is None:
                 issues.append(
                     document_issue(
                         document,
@@ -73,6 +73,25 @@ def document_issue(
     code: str = "validation.error",
 ) -> ValidationIssue:
     return ValidationIssue(document.path, message, code=code)
+
+
+def resolve_schema_path(schema_dir: Path, schema_name: str) -> Path | None:
+    """Resolve a schema filename inside ``schema_dir``.
+
+    Core schemas (``module-contract.schema.json``, ``lease-manifest.schema.json``)
+    live at the top of ``schema_dir``. Evidence schemas live in
+    ``schema_dir / "extensions"``. Lookup tries the primary location first
+    and then the extensions directory, so the validator works the same
+    against repository ``schema/`` and against the bundled validator
+    schemas.
+    """
+    primary = schema_dir / schema_name
+    if primary.exists():
+        return primary
+    extension = schema_dir / "extensions" / schema_name
+    if extension.exists():
+        return extension
+    return None
 
 
 def _read_json(path: Path) -> dict[str, Any]:

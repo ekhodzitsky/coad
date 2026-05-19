@@ -1,6 +1,38 @@
 # Changelog
 
-## Unreleased
+## 0.8.0 - 2026-05-20
+
+### Changed
+
+- Collapsed COAD into a fifteen-rule standard. `STANDARD.md` is now the
+  source of truth for what `coad check .` enforces. Pre-v2 prose
+  (`SPEC.md`, `PRINCIPLES.md`, `AGENT_FLOW.md`, `COAD_PROJECT_STANDARD.md`,
+  `ADOPTION.md`, `GETTING_STARTED.md`, `GLOSSARY.md`, plus most files
+  under `docs/`) moved to `docs/archive/` as historical context.
+- `schema/module-contract.schema.json` shrank to five required fields:
+  `schema_version`, `kind`, `module`, `purpose`, and `workcell`. Everything
+  else is now optional. `surface.minItems`, `dependencies.required`, and
+  `verification.required` were dropped from the schema.
+- `coad check .` now distinguishes severity levels. Six rules were
+  downgraded from `error` to `warning`/`info`:
+  `semantic.surface_missing`,
+  `semantic.public_surface_without_consumer`, `semantic.placeholder`,
+  `semantic.proof_placeholder`, `semantic.context_file_empty`, and
+  `workcell.budget_exceeded` (warning); `semantic.purpose_too_generic`
+  (info). A run with only warnings exits zero.
+- Evidence-layer schemas (`goal-contract`, `task-contract`,
+  `proof-contract`, `handoff-contract`, `review-contract`,
+  `integration-contract`, `proof-artifact`, `execution-ledger`,
+  `conformance-profile`) moved to `schema/extensions/`. The validator
+  resolves them with a `schema/` → `schema/extensions/` fallback so the
+  default `coad check .` still works.
+- `coad_validator.extensions.evidence` namespace re-exports the
+  evidence-layer report builders for callers that want to opt in
+  explicitly. The underlying implementation modules did not move.
+- `examples/minimal/` collapsed to the Core shape (AGENTS.md +
+  MODULE_CONTRACT.md + checkout/README.md + checkout/TODO.md). The
+  evidence-heavy variant moved to `docs/archive/` (see the
+  pre-v2 minimal example referenced from `docs/archive/README.md`).
 
 ## 0.7.7 - 2026-05-19
 

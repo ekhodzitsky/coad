@@ -14,7 +14,7 @@ workcell:
   context_path: schema
   children: []
   owns_paths:
-    - schema/conformance-profile.schema.json
+    - schema/extensions/conformance-profile.schema.json
     - schema/lease-manifest.schema.json
     - schema/release-manifest.json
     - schema/release-manifest.schema.json

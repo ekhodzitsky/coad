@@ -1,163 +1,78 @@
-# COAD Agent Onboarding
+# Agent Onboarding
 
-If a user sent you this repository link, they should not need to paste snippets,
-copy templates, or wire COAD by hand.
+You are an agent. A human asked you to adopt COAD in their repository.
 
-Your job as the agent is to adopt COAD in the target repository, make the
-minimal useful Core changes, and prove the result with:
+## Your task
 
-```bash
-coad check .
+1. Pick one real module/workcell — public API, fragile invariants, or
+   frequent edits.
+2. Update target `AGENTS.md` with the snippet below.
+3. Add one root `MODULE_CONTRACT.md` (schema below).
+4. Ensure the workcell directory has `README.md` + `TODO.md` with one
+   line of real content each.
+5. Run `coad check .`. Fix what it reports.
+6. Hand off: changed files, chosen workcell, validator output, gaps.
+
+Do not add Evidence files (`GOAL_CONTRACT.md`, `TASK_CONTRACT.md`,
+`PROOF.md`, `HANDOFF.md`, `REVIEW.md`, `INTEGRATION.md`,
+`EXECUTION_LEDGER.json`). They are not in the standard.
+
+## AGENTS.md snippet
+
+```text
+Use COAD for agent navigation. https://github.com/ekhodzitsky/coad
+Read the relevant MODULE_CONTRACT.md + workcell README.md + TODO.md
+before editing. Run `coad check .` before claiming completion.
+If .coad/leases.yml exists, declare your write lease. One leaf
+workcell, one active write agent.
 ```
 
-## Agent Task
+## Minimal MODULE_CONTRACT.md
 
-1. Read this file, `README.md`, `COAD_PROJECT_STANDARD.md`, `AGENT_FLOW.md`, and
-   `docs/workcells.md`.
-2. Inspect the target repository and choose one real module/workcell that is
-   worth documenting first.
-3. Add or update the target repository `AGENTS.md` with COAD guidance.
-4. Add one root `MODULE_CONTRACT.md` for that real workcell.
-5. Set `workcell.context_path` to the workcell directory and ensure that
-   directory has `README.md` and `TODO.md`.
-6. Run the workcell verification commands listed in `MODULE_CONTRACT.md`.
-7. Run `coad check .`.
-8. Fix any reported COAD adoption issues.
-9. Report changed files, selected workcell, verification output, and remaining
-   adoption gaps.
+Required fields: `schema_version`, `kind`, `module`, `purpose`, `workcell`.
+Everything else is optional.
 
-Do not ask the user to paste files manually. Ask only when repository access,
-network access, package installation, or write authority is blocked.
+```yaml
+---
+schema_version: 1
+kind: module_contract
+module: checkout
+purpose: Convert validated carts into payment-ready checkout decisions.
+workcell:
+  type: leaf
+  owns_paths:
+    - src/checkout/
+surface:
+  - name: CheckoutDecision
+    kind: data
+    visibility: public
+    contract: Stable read model consumed by payment and fulfillment.
+    proof:
+      kind: schema
+      target: schemas/checkout-decision.schema.json
+      command: test schemas/checkout-decision.schema.json
+consumers:
+  - path: payment
+    uses: [CheckoutDecision]
+---
 
-Do not add task, handoff, ledger, proof-artifact, or other Evidence files during
-first adoption unless the target repository already needs an audited agent task
-loop. Core adoption is intentionally just guidance, one module contract, and
-local module context.
+# checkout
 
-## Validator
+Application-level checkout decisions. Does not own pricing rules,
+payment capture, or fulfillment side effects.
+```
 
-The COAD repository is public. Run the validator directly from the public HTTPS
-URL:
+## Run the validator
 
 ```bash
 uvx --from 'git+https://github.com/ekhodzitsky/coad.git#subdirectory=tools/coad-validator' coad check .
 ```
 
-If `coad` is already installed:
+Expect `coad check: pass`. The validator bundles schemas; do not copy
+`schema/` into the target. If `uv` is unavailable, report it as a blocker.
 
-```bash
-coad check .
-```
+## Done when
 
-If you are working from a local COAD clone:
-
-```bash
-uvx --from /path/to/coad/tools/coad-validator coad check /path/to/target/repository
-```
-
-The validator bundles COAD schemas. Do not copy this repository's `schema/`
-directory into the target project unless the user explicitly wants to vendor
-schemas.
-
-If network or Python package tooling prevents the command from running, report
-that as an onboarding blocker instead of asking the user to perform manual
-COAD setup.
-
-## Minimal Target Shape
-
-The smallest useful adoption looks like this:
-
-```text
-AGENTS.md
-MODULE_CONTRACT.md
-<workcell>/
-  README.md
-  TODO.md
-```
-
-Choose a real workcell. Good first choices have clear ownership, real consumers,
-fragile invariants, public surfaces, side effects, or frequent edits.
-
-For first adoption, keep `MODULE_CONTRACT.md` at the repository root and point
-it at the chosen module with `workcell.context_path`. Contracts may move inside
-modules later when the repository has a deeper workcell tree.
-
-Avoid creating a fake `example` module only to satisfy the checker.
-JSON schemas, execution ledgers, and proof artifacts are not part of this
-minimal target shape; they are for agent/CI evidence loops after Core adoption.
-
-## AGENTS.md Guidance
-
-Add this guidance to the target repository `AGENTS.md`, preserving existing
-local instructions:
-
-````markdown
-Use COAD for agent development coordination.
-
-COAD repository: https://github.com/ekhodzitsky/coad
-
-Before editing, identify the relevant workcell and read its
-root `MODULE_CONTRACT.md`, plus the workcell `README.md` and `TODO.md`.
-
-Before claiming completion:
-
-```bash
-coad check .
-```
-
-One leaf workcell may have only one active write agent. Read-only agents may
-investigate, review, or verify in parallel. Composite workcell agents orchestrate
-child work but do not directly edit child implementation files.
-
-If the repository has `.coad/leases.yml`, declare your active write lease there
-before editing so `coad check .` can catch ownership conflicts.
-
-Keep at least one root `MODULE_CONTRACT.md` for the module being changed. Point
-it at the module directory with `workcell.context_path`. The module is a
-workcell: one bounded agent workspace with ownership, surfaces, consumers,
-invariants, verification, and write authority. The module directory must include
-`README.md` and `TODO.md` for future agents.
-````
-
-## Workcell Files
-
-Start from `templates/onboarding/MODULE_CONTRACT.md` when possible, but adapt it
-to the target repository instead of copying placeholders.
-
-The workcell `README.md` should be a short operating brief:
-
-```markdown
-# <workcell>
-
-## Purpose
-## Surfaces
-## Dependencies
-## Invariants
-## Verification
-## Notes
-```
-
-The workcell `TODO.md` should stay current:
-
-```markdown
-# <workcell> TODO
-
-## Current
-## Next
-## Known Gaps
-## Deferred
-```
-
-## Done
-
-COAD onboarding is done when:
-
-- the target repository has COAD guidance in `AGENTS.md`;
-- the target repository has a root `MODULE_CONTRACT.md` that points to one real
-  workcell with `workcell.context_path`;
-- that workcell directory has `README.md` and `TODO.md`;
-- the selected workcell verification commands have been run or explicitly
-  reported as blocked;
-- `coad check .` passes;
-- the handoff tells the user what was adopted and what remains outside the
-  initial workcell.
+`AGENTS.md` mentions `coad check` + COAD URL; root `MODULE_CONTRACT.md`
+points at a real `owns_paths` directory that has real `README.md` +
+`TODO.md`; `coad check .` prints `pass`.

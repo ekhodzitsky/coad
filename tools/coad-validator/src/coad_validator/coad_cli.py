@@ -49,7 +49,30 @@ def _check(args: argparse.Namespace) -> int:
         print(json.dumps(payload, indent=2, sort_keys=True))
     else:
         print(f"coad check: {payload['status']}")
+        if payload["ok"]:
+            _print_text_warnings(payload)
     return 0 if payload["ok"] else 1
+
+
+def _print_text_warnings(payload: dict[str, object]) -> None:
+    actions = payload.get("next_actions")
+    if not isinstance(actions, list):
+        return
+    warnings = [
+        action
+        for action in actions
+        if isinstance(action, dict)
+        and action.get("severity") in {"warning", "info"}
+        and action.get("blocks_completion") is False
+    ]
+    if not warnings:
+        return
+    print(f"  {len(warnings)} non-blocking issue(s):")
+    for action in warnings:
+        severity = action.get("severity", "warning")
+        path = action.get("target_path", ".")
+        minimal_fix = action.get("minimal_fix", action.get("action_code", ""))
+        print(f"  - [{severity}] {path}: {minimal_fix}")
 
 
 if __name__ == "__main__":

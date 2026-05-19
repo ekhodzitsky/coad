@@ -3,7 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from .model import ContractDocument, ValidationIssue
+from .model import ContractDocument, ValidationIssue, severity_for
 from .module_context import (
     module_context_path,
     module_directory,
@@ -70,6 +70,8 @@ def validate_workcell_budgets(documents: list[ContractDocument], root: Path) -> 
                     ValidationIssue(
                         document.path,
                         f"workcell budget exceeded: {metric} actual {actual} > max {limit}",
+                        code="workcell.budget_exceeded",
+                        severity=severity_for("workcell.budget_exceeded"),
                     )
                 )
     return issues

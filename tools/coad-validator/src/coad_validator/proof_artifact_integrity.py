@@ -10,6 +10,7 @@ from typing import TYPE_CHECKING, Any
 from jsonschema import Draft202012Validator
 
 from .report import versioned_report
+from .schema import resolve_schema_path
 from .text_io import read_utf8
 from .validate import find_schema_dir
 
@@ -520,7 +521,8 @@ def _validate_artifact_schema(
     schema_dir: Path,
     issues: list[dict[str, str]],
 ) -> bool:
-    schema_path = schema_dir / "proof-artifact.schema.json"
+    resolved_path = resolve_schema_path(schema_dir, "proof-artifact.schema.json")
+    schema_path = resolved_path if resolved_path is not None else schema_dir / "proof-artifact.schema.json"
     text, read_error = read_utf8(schema_path)
     if read_error is not None:
         issues.append(_issue("proof_artifact.schema_read_failed", "proof-artifact.schema.json", f"proof artifact schema {read_error}"))

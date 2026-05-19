@@ -22,7 +22,15 @@ class ValidationReport:
 
     @property
     def ok(self) -> bool:
-        return not self.issues
+        return not any(issue.severity == "error" for issue in self.issues)
+
+    @property
+    def errors(self) -> list[ValidationIssue]:
+        return [issue for issue in self.issues if issue.severity == "error"]
+
+    @property
+    def warnings(self) -> list[ValidationIssue]:
+        return [issue for issue in self.issues if issue.severity != "error"]
 
     def raise_if_failed(self) -> None:
         if self.issues:

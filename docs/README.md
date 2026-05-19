@@ -1,26 +1,18 @@
 # docs
 
-Purpose: explain COAD Core adoption, optional Evidence workflows,
-orchestration, reports, and operating rules.
+Reference material for the COAD standard. The standard itself lives in
+[`STANDARD.md`](../STANDARD.md) at the repository root.
 
-Public API:
-
-- `AGENT_ONBOARDING.md`
-- `COAD_PROJECT_STANDARD.md`
-- `AGENT_FLOW.md`
-- `workcells.md`
-- `landscape.md`
-- `module-contract-checklist.md`
-- `agent-integration.md`
-- `demo-transcripts.md`
-- `adoption-smoke-tests.md`
-- `validator.md`
-- `contract-graph.md`
-- `proof-matrix.md`
-- `context-packs.md`
-- report and release gate documentation
-
-Consumers: humans, agents, README, AGENTS.md, and future orchestrators.
-
-Invariants: public docs keep `coad check .` as the normal integration command
-and keep the human adoption path focused on Core before Evidence.
+- [`validator.md`](validator.md) — full `coad check .` behavior, JSON
+  output format, and stable issue codes.
+- [`landscape.md`](landscape.md) — adjacent projects (Spec Kit, BMAD,
+  Agent OS, Repomix) and how COAD compares.
+- [`module-contract-checklist.md`](module-contract-checklist.md) —
+  semantic quality checklist for a filled `MODULE_CONTRACT.md`.
+- [`demo-transcripts.md`](demo-transcripts.md) — reproducible
+  `coad check` output for the adoption gate and quality gate examples.
+- [`adoption-smoke-tests.md`](adoption-smoke-tests.md) — one-link
+  adoption smoke tests against external repositories.
+- [`archive/`](archive/README.md) — pre-v2 prose (principles, agent
+  flow, project-standard, glossary, proof matrix, ...). Useful as
+  background, not required for adoption.

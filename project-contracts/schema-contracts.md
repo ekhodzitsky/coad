@@ -14,15 +14,15 @@ workcell:
   context_path: schema
   children: []
   owns_paths:
-    - schema/execution-ledger.schema.json
-    - schema/goal-contract.schema.json
-    - schema/handoff-contract.schema.json
-    - schema/integration-contract.schema.json
+    - schema/extensions/execution-ledger.schema.json
+    - schema/extensions/goal-contract.schema.json
+    - schema/extensions/handoff-contract.schema.json
+    - schema/extensions/integration-contract.schema.json
     - schema/module-contract.schema.json
-    - schema/proof-artifact.schema.json
-    - schema/proof-contract.schema.json
-    - schema/review-contract.schema.json
-    - schema/task-contract.schema.json
+    - schema/extensions/proof-artifact.schema.json
+    - schema/extensions/proof-contract.schema.json
+    - schema/extensions/review-contract.schema.json
+    - schema/extensions/task-contract.schema.json
   context_budget:
     max_files: 12
     max_source_lines: 1500
@@ -42,7 +42,7 @@ surface:
     contract: Validates COAD contract frontmatter and execution ledgers.
     proof:
       kind: schema
-      target: schema/*-contract.schema.json schema/execution-ledger.schema.json
+      target: schema/*-contract.schema.json schema/extensions/execution-ledger.schema.json
       command: jq empty schema/*.json schema/reports/*.json
 dependencies:
   internal:

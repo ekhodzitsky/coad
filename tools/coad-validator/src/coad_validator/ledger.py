@@ -10,6 +10,7 @@ from jsonschema import Draft202012Validator
 from .graph_index import ContractIndex
 from .model import ContractDocument
 from .report import versioned_report
+from .schema import resolve_schema_path
 from .text_io import read_utf8
 from .validate import ValidationReport, find_schema_dir, validate_path
 
@@ -166,9 +167,9 @@ def _validate_ledger_schema(
     schema_dir: Path,
     issues: list[LedgerIssue],
 ) -> None:
-    schema_path = schema_dir / "execution-ledger.schema.json"
-    if not schema_path.is_file():
-        issues.append(LedgerIssue(schema_path, "missing execution ledger schema"))
+    schema_path = resolve_schema_path(schema_dir, "execution-ledger.schema.json")
+    if schema_path is None:
+        issues.append(LedgerIssue(schema_dir / "execution-ledger.schema.json", "missing execution ledger schema"))
         return
     schema = json.loads(schema_path.read_text(encoding="utf-8"))
     validator = Draft202012Validator(schema)

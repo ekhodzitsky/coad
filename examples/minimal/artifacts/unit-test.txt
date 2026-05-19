@@ -1,1 +1,0 @@
-test checkout.checkout_service.rejects_negative_total: pass

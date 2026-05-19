@@ -1093,6 +1093,9 @@ def test_release_metadata_reports_invalid_package_init_python(tmp_path: Path) ->
 
 def test_release_metadata_reports_invalid_utf8_version_without_crashing(tmp_path: Path) -> None:
     (tmp_path / "VERSION").write_bytes(b"\xff")
+    pyproject = tmp_path / "tools" / "coad-validator" / "pyproject.toml"
+    pyproject.parent.mkdir(parents=True)
+    pyproject.write_text('[project]\nname = "coad-validator"\nversion = "0.1.0"\n', encoding="utf-8")
 
     report = validate_path(tmp_path, schema_dir=SCHEMA_DIR, check_graph=False)
 

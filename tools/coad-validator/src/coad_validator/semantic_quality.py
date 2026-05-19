@@ -4,7 +4,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from .model import ContractDocument, ValidationIssue
+from .model import ContractDocument, ValidationIssue, severity_for
 from .module_context import (
     REQUIRED_AGENT_CONTEXT_FILES,
     module_context_path,
@@ -208,6 +208,7 @@ def _validate_context_files(root: Path, document: ContractDocument) -> list[Vali
                     path,
                     f"module agent context file has no meaningful guidance: {filename}",
                     code="semantic.context_file_empty",
+                    severity=severity_for("semantic.context_file_empty"),
                 )
             )
     return issues
@@ -311,4 +312,4 @@ def _dict_list(value: object) -> list[dict[str, Any]]:
 
 
 def _issue(document: ContractDocument, message: str, code: str) -> ValidationIssue:
-    return ValidationIssue(document.path, message, code=code)
+    return ValidationIssue(document.path, message, code=code, severity=severity_for(code))

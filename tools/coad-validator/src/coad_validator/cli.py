@@ -63,12 +63,21 @@ def main() -> int:
         return 0 if report.ok else 1
 
     if report.ok:
-        print(f"coad-validate: ok ({len(report.documents)} contract file(s))")
+        warning_count = len(report.warnings)
+        if warning_count:
+            print(
+                f"coad-validate: ok ({len(report.documents)} contract file(s), "
+                f"{warning_count} warning(s))"
+            )
+            for issue in report.warnings:
+                print(f"- [{issue.severity}] {issue.format(report.root)}")
+        else:
+            print(f"coad-validate: ok ({len(report.documents)} contract file(s))")
         return 0
 
-    print(f"coad-validate: failed ({len(report.issues)} issue(s))")
+    print(f"coad-validate: failed ({len(report.errors)} error(s))")
     for issue in report.issues:
-        print(f"- {issue.format(report.root)}")
+        print(f"- [{issue.severity}] {issue.format(report.root)}")
     return 1
 
 
