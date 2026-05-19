@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.7.5 - 2026-05-19
+
+### Added
+
+- Public `coad check --format json` output now includes `agent_status`,
+  `blocking_checks`, and machine-readable `next_actions` so agents can repair
+  evidence trail failures without parsing prose.
+
 ## 0.7.4 - 2026-05-19
 
 ### Added

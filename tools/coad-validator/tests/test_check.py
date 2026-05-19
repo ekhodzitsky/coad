@@ -70,6 +70,8 @@ def test_check_report_passes_for_two_minute_onboarding_shape() -> None:
 
     assert payload["ok"] is True
     assert payload["status"] == "pass"
+    assert payload["agent_status"] == "continue"
+    assert payload["blocking_checks"] == []
     check_names = {check["name"] for check in payload["checks"]}
     assert {"agent-guidance", "validation-report", "methodology-loop"}.issubset(check_names)
     assert _check(payload, "methodology-loop")["status"] == "skipped"
@@ -305,6 +307,9 @@ def test_check_report_methodology_loop_passes_for_complete_git_backed_loop(tmp_p
     payload = build_check_report(target, schema_dir=SCHEMA_DIR)
 
     assert payload["ok"] is True
+    assert payload["agent_status"] == "pass"
+    assert payload["blocking_checks"] == []
+    assert payload["next_actions"] == []
     methodology_loop_check = _check(payload, "methodology-loop")
     assert methodology_loop_check["ok"] is True
     assert methodology_loop_check["status"] == "pass"
@@ -355,6 +360,17 @@ def test_check_report_fails_when_handoff_changed_files_do_not_match_git_diff(tmp
     payload = build_check_report(target, schema_dir=SCHEMA_DIR)
 
     assert payload["ok"] is False
+    assert payload["agent_status"] == "repair_required"
+    assert "handoff-integrity" in payload["blocking_checks"]
+    assert _action(payload, "handoff-integrity", "HANDOFF.md") == {
+        "phase": "execute",
+        "severity": "error",
+        "source_check": "handoff-integrity",
+        "target_path": "HANDOFF.md",
+        "action": "repair_check_issue",
+        "minimal_fix": "changed file is not listed in handoff.changed_files: checkout/unlisted.py",
+        "blocks_completion": True,
+    }
     assert _check(payload, "handoff-integrity")["status"] == "mismatch"
     assert _check(payload, "methodology-loop")["status"] == "missing"
     assert {
@@ -656,6 +672,19 @@ def test_check_report_fails_when_passing_proof_result_omits_artifact(tmp_path: P
     payload = build_check_report(target, schema_dir=SCHEMA_DIR)
 
     assert payload["ok"] is False
+    assert payload["agent_status"] == "repair_required"
+    assert _action(payload, "proof-artifact-integrity", "EXECUTION_LEDGER.json") == {
+        "phase": "prove",
+        "severity": "error",
+        "source_check": "proof-artifact-integrity",
+        "target_path": "EXECUTION_LEDGER.json",
+        "action": "repair_check_issue",
+        "minimal_fix": (
+            "passing proof result must declare an artifact: "
+            "test checkout.checkout_service.rejects_negative_total"
+        ),
+        "blocks_completion": True,
+    }
     assert _check(payload, "proof-artifact-integrity")["status"] == "violation"
     assert {
         "code": "proof_artifact.missing",
@@ -1236,6 +1265,12 @@ def test_check_report_warns_when_contract_update_entry_is_not_changed(tmp_path: 
     payload = build_check_report(target, schema_dir=SCHEMA_DIR)
 
     assert payload["ok"] is True
+    assert payload["agent_status"] == "continue"
+    assert payload["blocking_checks"] == []
+    action = _action(payload, "contract-update-integrity", "TASK_CONTRACT.md")
+    assert action["phase"] == "update_knowledge"
+    assert action["severity"] == "warning"
+    assert action["blocks_completion"] is False
     contract_update_check = _check(payload, "contract-update-integrity")
     assert contract_update_check["ok"] is True
     assert contract_update_check["status"] == "warning"
@@ -1252,6 +1287,20 @@ def test_check_report_methodology_loop_flags_missing_task_contract(tmp_path: Pat
     payload = build_check_report(target, schema_dir=SCHEMA_DIR)
 
     assert payload["ok"] is False
+    assert payload["agent_status"] == "repair_required"
+    assert "methodology-loop" in payload["blocking_checks"]
+    assert _action(payload, "methodology-loop", "TASK_CONTRACT.md") == {
+        "phase": "scope",
+        "severity": "error",
+        "source_check": "methodology-loop",
+        "target_path": "TASK_CONTRACT.md",
+        "action": "repair_check_issue",
+        "minimal_fix": (
+            "Add or fix TASK_CONTRACT.md with target modules, write_scope, "
+            "forbidden_mutations, and required proof commands."
+        ),
+        "blocks_completion": True,
+    }
     assert _check(payload, "methodology-loop")["status"] == "missing"
     assert {
         "code": "methodology_loop.scope_missing",
@@ -1408,6 +1457,16 @@ def test_coad_check_json_output_matches_schema() -> None:
 def _check(payload: dict[str, Any], name: str) -> dict[str, Any]:
     matches = [check for check in payload["checks"] if check["name"] == name]
     assert len(matches) == 1
+    return matches[0]
+
+
+def _action(payload: dict[str, Any], source_check: str, target_path: str) -> dict[str, Any]:
+    matches = [
+        action
+        for action in payload["next_actions"]
+        if action["source_check"] == source_check and action["target_path"] == target_path
+    ]
+    assert matches
     return matches[0]
 
 

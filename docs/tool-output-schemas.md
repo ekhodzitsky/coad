@@ -2,6 +2,8 @@
 
 `coad check . --format json` emits JSON for orchestration control planes. That
 output is part of the methodology contract, not incidental CLI formatting.
+Agents should treat `agent_status`, `blocking_checks`, and `next_actions` as
+the primary repair loop: inspect, patch evidence, rerun.
 
 Report schemas live under `schema/reports/`:
 

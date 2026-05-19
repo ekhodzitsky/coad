@@ -166,11 +166,8 @@ If `coad` is already installed, the command is simply:
 coad check .
 ```
 
-For structured agent/orchestrator output:
-
-```bash
-coad check . --format json
-```
+Agent control-plane JSON is `coad check . --format json`. Agents read
+`agent_status`, `blocking_checks`, and `next_actions`, repair evidence, rerun.
 
 See [GETTING_STARTED.md](GETTING_STARTED.md) and
 [examples/onboarding/](examples/onboarding/) for the smallest passing setup.
@@ -250,9 +247,8 @@ ownership, proof, and safe write scope to any agent.
 ## Status
 
 Public early draft. The stable integration target is intentionally small:
-`coad check .`. Current released package version: `0.7.4`. This release makes
-the `methodology-loop` report explicit about evidence boundaries, source
-reports, blocking issues, and recommended repairs.
+`coad check .`. Current released package version: `0.7.5`. This release adds
+agent-facing `agent_status`, `blocking_checks`, and `next_actions` to JSON.
 The released version is recorded in [VERSION](VERSION), with release
 notes in [CHANGELOG.md](CHANGELOG.md).
 

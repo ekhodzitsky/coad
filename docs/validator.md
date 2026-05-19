@@ -141,7 +141,7 @@ ships COAD tooling or already has release metadata must keep it consistent.
 
 ## JSON Output
 
-Use JSON output for CI or orchestration tools:
+Use JSON output for CI or agent orchestration tools:
 
 ```bash
 uv run coad check ../.. --schema-dir ../../schema --format json
@@ -151,6 +151,8 @@ Successful output:
 
 ```json
 {
+  "agent_status": "pass",
+  "blocking_checks": [],
   "checks": [
     {
       "name": "agent-guidance",
@@ -161,16 +163,19 @@ Successful output:
     }
   ],
   "issues": [],
+  "next_actions": [],
   "ok": true,
   "schema_version": 1,
   "status": "pass"
 }
 ```
 
-Failed output includes structured issues:
+Failed output includes structured issues plus repair actions:
 
 ```json
 {
+  "agent_status": "repair_required",
+  "blocking_checks": ["agent-guidance"],
   "checks": [],
   "issues": [
     {
@@ -180,14 +185,29 @@ Failed output includes structured issues:
       "message": "agent-guidance: missing AGENTS.md with COAD onboarding guidance"
     }
   ],
+  "next_actions": [
+    {
+      "phase": "orient",
+      "severity": "error",
+      "source_check": "agent-guidance",
+      "target_path": "AGENTS.md",
+      "action": "repair_check_issue",
+      "minimal_fix": "missing AGENTS.md with COAD onboarding guidance",
+      "blocks_completion": true
+    }
+  ],
   "ok": false,
   "schema_version": 1,
   "status": "fail"
 }
 ```
 
-Issue `code` values are stable machine keys. Agents should branch on `code`
-instead of parsing English messages.
+`agent_status` is the primary machine route: `pass` means handoff can continue,
+`continue` means the run is non-blocking but has weak/unknown/skipped evidence,
+`repair_required` means the agent must apply `next_actions` and rerun, and
+`blocked` means the validator could not provide a safe automatic repair route.
+Issue `code` values remain stable machine keys. Agents should branch on `code`
+or `next_actions[].source_check`, not on English prose.
 
 Lease-related failures use codes such as `lease.workcell_unknown`,
 `lease.project_write_forbidden`, `lease.composite_write_forbidden`,
@@ -209,8 +229,9 @@ the public `BillingTotals` surface has no declared consumer.
 
 ## Tool Output Schemas
 
-The JSON output from `coad check . --format json` includes
-`schema_version: 1` and is covered by `schema/reports/check-report.schema.json`.
+The JSON output from `coad check . --format json` includes `schema_version: 1`,
+`agent_status`, `blocking_checks`, and `next_actions`. It is covered by
+`schema/reports/check-report.schema.json`.
 Internal report payload schemas also live in `schema/reports/` for this
 repository's tests and implementation.
 

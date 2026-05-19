@@ -3,7 +3,16 @@
   "$id": "https://coad.dev/schema/reports/check-report.schema.json",
   "title": "COAD Check Report",
   "type": "object",
-  "required": ["schema_version", "ok", "status", "checks", "issues"],
+  "required": [
+    "schema_version",
+    "ok",
+    "status",
+    "agent_status",
+    "blocking_checks",
+    "next_actions",
+    "checks",
+    "issues"
+  ],
   "additionalProperties": false,
   "properties": {
     "schema_version": {
@@ -14,6 +23,22 @@
     },
     "status": {
       "enum": ["pass", "fail"]
+    },
+    "agent_status": {
+      "enum": ["pass", "continue", "repair_required", "blocked"]
+    },
+    "blocking_checks": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "next_actions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/repair_action"
+      }
     },
     "checks": {
       "type": "array",
@@ -71,6 +96,45 @@
         "message": {
           "type": "string",
           "minLength": 1
+        }
+      }
+    },
+    "repair_action": {
+      "type": "object",
+      "required": [
+        "phase",
+        "severity",
+        "source_check",
+        "target_path",
+        "action",
+        "minimal_fix",
+        "blocks_completion"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "phase": {
+          "enum": ["orient", "scope", "execute", "prove", "update_knowledge", "handoff"]
+        },
+        "severity": {
+          "enum": ["error", "warning", "info"]
+        },
+        "source_check": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target_path": {
+          "type": "string"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "minimal_fix": {
+          "type": "string",
+          "minLength": 1
+        },
+        "blocks_completion": {
+          "type": "boolean"
         }
       }
     }
