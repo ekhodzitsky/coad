@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.9.3 - 2026-05-20
+
+### Added
+
+- `LICENSE` (MIT). Repository can now be adopted in commercial
+  projects.
+- README §«Compared to adjacent practices» — one comparison table
+  against Spec Kit, BMAD, Agent OS, Repomix, CODEOWNERS, ADR, and
+  `.cursorrules` / `CLAUDE.md`. Answers «why COAD and not X?» in the
+  first document a reader opens.
+- SPEC §3 — full reference `MODULE_CONTRACT.md` (~30 lines, Markdown
+  form) so AI agents see the target shape instead of imitating from
+  a YAML stub.
+- PRINCIPLES.md — each of the ten principles now ends with a
+  `→ SPEC …` pointer that names the section where it is defined or
+  worked through with an example.
+
+### Changed
+
+- README badge row now includes MIT license badge.
+- README repository map lists `LICENSE`.
+
 ## 0.9.2 - 2026-05-20
 
 ### Changed

@@ -109,6 +109,51 @@ A good module contract is short enough to read in two minutes. If a
 contract takes longer than that to read, the module is probably too
 large and should be split into smaller workcells.
 
+### Reference example (Markdown form)
+
+Drop this in `src/checkout/MODULE_CONTRACT.md` and edit. About 30
+lines, two minutes to read.
+
+```markdown
+# checkout
+
+## Purpose
+Accept validated carts and emit a payment-ready `CheckoutDecision`. Does
+not own pricing rules, payment capture, or fulfillment side effects.
+
+## Owns
+- src/checkout/
+
+## Public surface
+- **CheckoutDecision** — read model returned to consumers.
+  Contract: stable shape; consumers may rely on field names.
+
+## Internal surface
+- **CheckoutService** — orchestrates validation and decision assembly.
+
+## Dependencies
+- pricing — for canonical line totals.
+- inventory — for stock-check before reservation.
+
+## Consumers
+- payment — reads `CheckoutDecision.total` and `.currency`.
+- fulfillment — reads `CheckoutDecision.items` and `.shipping_address`.
+
+## Invariants
+- no-negative-total: `CheckoutDecision.total` is never negative.
+  Proof: `pytest tests/checkout/test_rejects_negative_total.py`
+- stable-id: a `CheckoutDecision.id` is unique per cart attempt.
+  Proof: `pytest tests/checkout/test_id_uniqueness.py`
+
+## Verification
+- Pre-change: `pytest tests/checkout/ -x`
+- Full: `pytest tests/`
+```
+
+The same contract in YAML-frontmatter form (see
+`AGENT_ONBOARDING.md`) is equivalent. Choose by what the team reads
+faster.
+
 ## 4. Lifecycle
 
 The COAD agent lifecycle has six phases. Each phase has one obligation

@@ -4,6 +4,7 @@
 ![Format](https://img.shields.io/badge/format-prose%20%2B%20markdown-111827)
 ![Status](https://img.shields.io/badge/status-public%20early%20draft-F59E0B)
 ![Reading time](https://img.shields.io/badge/reading%20time-15%20min-3B82F6)
+![License](https://img.shields.io/badge/license-MIT-10B981)
 
 **Contract-Orchestrated Agent Development** — a written methodology for
 keeping coding-agent work safe, reviewable, and bounded. No code, no
@@ -84,6 +85,24 @@ enough that a team can take, say, only «module contracts» and
 «proof-backed handoffs» and skip the rest. COAD is a menu, not a
 package.
 
+## Compared to adjacent practices
+
+| Practice                  | What it gives                                                 | What it does not                                  |
+| ------------------------- | ------------------------------------------------------------- | ------------------------------------------------- |
+| **Spec Kit** (GitHub)     | A spec format and workflow for agent-built features.          | Does not describe how the existing repo is shaped. |
+| **BMAD Method**           | A multi-agent operating model with roles and ceremonies.      | Heavier; assumes you commit to the whole framework. |
+| **Agent OS**              | A runtime layer for orchestrating agents.                     | Runtime concern, not a documentation pattern.      |
+| **Repomix**               | Packs the whole repository into one prompt-ready file.        | Context packaging, not boundaries.                 |
+| **CODEOWNERS**            | Who approves what.                                            | Does not say what to look for.                     |
+| **ADR**                   | History of horizontal architectural decisions.                | Does not describe a single module's contract.      |
+| **`.cursorrules` / `CLAUDE.md`** | Repo-wide instructions for a single agent vendor.      | Tied to one tool; no boundary model.               |
+| **COAD (this repo)**      | A repo shape: contracts beside modules, proof-backed handoffs, bounded scope. Prose only. | Not a runtime. Not an enforcement tool. Not opinionated about workflow. |
+
+COAD is the smallest and most prose-shaped of these. It composes with all
+of them: you can run Spec Kit's workflow against a repo that uses COAD's
+module contracts, point Repomix at a COAD-shaped repo, or anchor
+CODEOWNERS lines to COAD's contract owners.
+
 ## What is in this repository
 
 ```text
@@ -95,6 +114,7 @@ SPEC.md              vocabulary, lifecycle, worked examples,
 AGENT_ONBOARDING.md  single-page recipe for a coding agent
 AGENTS.md            house rules for contributors to this repository
 CHANGELOG.md         release notes
+LICENSE              MIT
 ```
 
 No code. No JSON schemas. No CLI. Nothing to install.
