@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.9.1 - 2026-05-20
+
+### Added
+
+- `SPEC.md` at the repository root. After v0.9.0 collapsed COAD to ten
+  principles plus a recipe, the methodology had no body — only slogans.
+  SPEC.md adds the vocabulary (module, workcell, surface, consumer,
+  invariant, proof, dependency, drift, lease, handoff, read/write
+  scope), the six-phase lifecycle, three worked examples (single-module
+  bug fix, public-surface change with consumer migration, parallel
+  leaf-workcell work), explicit when-to-use / when-not-to-use sections,
+  composition with code review, CODEOWNERS, ADRs, design docs, and
+  adjacent agent-development methods, plus an honest limitations
+  section and a five-step maturity ladder.
+
+### Changed
+
+- README, AGENT_ONBOARDING.md, and AGENTS.md reference SPEC.md as the
+  source of vocabulary.
+
 ## 0.9.0 - 2026-05-20
 
 ### Changed

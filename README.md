@@ -26,8 +26,11 @@ pieces that prevent that:
   agent. Read-only investigation is unbounded.
 
 The [principles](PRINCIPLES.md) state the ten rules the methodology
-rests on. The [agent onboarding](AGENT_ONBOARDING.md) page is the page
-you give to a coding agent when you want it to start working under COAD.
+rests on. The [specification](SPEC.md) is the body — vocabulary,
+lifecycle, three worked examples, when to use COAD, when not to use it,
+and how it composes with code review / CODEOWNERS / ADRs / design docs.
+The [agent onboarding](AGENT_ONBOARDING.md) page is what you give to a
+coding agent when you want it to start working under COAD.
 
 ## What COAD is not
 
@@ -65,4 +68,6 @@ specification prose) are preserved in git history at tags before
 ## See also
 
 - [PRINCIPLES.md](PRINCIPLES.md) — the ten principles.
+- [SPEC.md](SPEC.md) — vocabulary, lifecycle, worked examples,
+  when-to-use / when-not-to-use, integration with other practices.
 - [AGENT_ONBOARDING.md](AGENT_ONBOARDING.md) — single-page agent recipe.

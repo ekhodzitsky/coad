@@ -9,8 +9,9 @@ review.
 
 ## What to do
 
-1. Read [PRINCIPLES.md](PRINCIPLES.md). The work has to be consistent
-   with those ten rules.
+1. Read [PRINCIPLES.md](PRINCIPLES.md) and the vocabulary section of
+   [SPEC.md](SPEC.md). The work has to be consistent with those ten
+   principles and use the terms correctly.
 2. Inspect the target repository. Pick one real module/workcell with
    public API, fragile invariants, or frequent edits.
 3. Update target `AGENTS.md` with the snippet below.
