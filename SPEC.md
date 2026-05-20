@@ -55,9 +55,10 @@ Drift exists when the surface, dependencies, consumers, invariants, or
 verification commands change but the contract does not. Drift is a
 bug.
 
-**Lease.** An advisory note that an agent is currently writing inside a
-workcell. There is no enforcement; the value is in being visible. A
-team that wants enforcement can build it on top of leases.
+**Lease.** A visible declaration that an agent is currently writing
+inside a workcell. The value is in being visible to other agents and
+humans; how the team makes leases visible is up to them (a file, a
+ticket field, a chat channel — anything readable).
 
 **Handoff.** The artifact a worker leaves behind when its task exits.
 Lists changed files, surfaces touched, invariants checked, proof run,
@@ -137,11 +138,10 @@ Drift exists when:
 - an invariant is violated, weakened, or no longer has proof;
 - a proof command no longer runs.
 
-Detecting drift without a validator means: code review, periodic audits,
-and the «before editing, read the contract» habit. Drift detection is
-the part of COAD that benefits most from automation. Teams that adopt
-COAD widely usually build a small drift checker. That is fine; it is
-outside the methodology.
+Detecting drift relies on code review, periodic audits, and the
+«before editing, read the contract» habit. The methodology itself does
+not describe how to detect drift; that belongs to the team's review
+process.
 
 Resolving drift has two outcomes. Either the code is the source of
 truth and the contract changes, or the contract is the source of truth
@@ -270,7 +270,8 @@ agent-navigable for it.
 
 ## 10. Limitations
 
-- COAD does not enforce anything. Without automation, contracts drift.
+- COAD does not enforce anything. Contracts drift if no one looks
+  after them; that is review's job, not the methodology's.
 - A contract is only useful if someone reads it. If the team's habit
   is «edit first, read later», COAD has zero effect.
 - Module contracts can become aspirational. A contract that lists

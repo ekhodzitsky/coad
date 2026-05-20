@@ -3,9 +3,8 @@
 You are a coding agent. A human asked you to adopt COAD in their
 repository. This file is your single-page instruction.
 
-COAD is a methodology, not a tool. There is no `coad check` to run.
-Adoption means writing four files; correctness comes from judgment and
-review.
+COAD is a methodology — prose, not code. Adoption means writing four
+files; correctness comes from judgment and review.
 
 ## What to do
 
@@ -35,7 +34,8 @@ not a chat summary. One leaf workcell, one active write agent.
 
 ## MODULE_CONTRACT.md template
 
-This is a starter shape. There is no validator; adapt freely.
+A starter shape. Adapt the fields and the format (YAML frontmatter,
+plain Markdown sections, table — whatever the team will read).
 
 ```yaml
 ---
