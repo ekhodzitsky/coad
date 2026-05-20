@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.9.0 - 2026-05-20
+
+### Changed
+
+- COAD became a methodology, not a tool. The Python validator
+  (`tools/coad-validator/`, ~7600 LOC + 200 tests), every JSON schema
+  (`schema/`), every example (`examples/`), every starter template
+  (`templates/`), self-dogfooding contracts (`project-contracts/`),
+  CI workflow (`.github/workflows/ci.yml`), and the rule-based
+  `STANDARD.md` were removed from the active surface. The validator
+  source moved to `docs/archive/coad-validator.v0.8.0/` for git history;
+  schemas were deleted outright.
+- `PRINCIPLES.md` returned to the repository root as the methodology's
+  canonical statement.
+- README, AGENTS.md, and AGENT_ONBOARDING.md were rewritten around a
+  single message: COAD is prose. Adoption means writing four files and
+  using judgment, not running a checker.
+- No more `coad check .` integration point. Adopters that want
+  automation build their own.
+
 ## 0.8.0 - 2026-05-20
 
 ### Changed

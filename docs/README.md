@@ -1,18 +1,14 @@
 # docs
 
-Reference material for the COAD standard. The standard itself lives in
-[`STANDARD.md`](../STANDARD.md) at the repository root.
+There is no live `docs/` content. The methodology itself lives at the
+repository root:
 
-- [`validator.md`](validator.md) — full `coad check .` behavior, JSON
-  output format, and stable issue codes.
-- [`landscape.md`](landscape.md) — adjacent projects (Spec Kit, BMAD,
-  Agent OS, Repomix) and how COAD compares.
-- [`module-contract-checklist.md`](module-contract-checklist.md) —
-  semantic quality checklist for a filled `MODULE_CONTRACT.md`.
-- [`demo-transcripts.md`](demo-transcripts.md) — reproducible
-  `coad check` output for the adoption gate and quality gate examples.
-- [`adoption-smoke-tests.md`](adoption-smoke-tests.md) — one-link
-  adoption smoke tests against external repositories.
-- [`archive/`](archive/README.md) — pre-v2 prose (principles, agent
-  flow, project-standard, glossary, proof matrix, ...). Useful as
-  background, not required for adoption.
+- [`../PRINCIPLES.md`](../PRINCIPLES.md) — the ten principles.
+- [`../AGENT_ONBOARDING.md`](../AGENT_ONBOARDING.md) — single-page agent
+  recipe.
+- [`../README.md`](../README.md) — what COAD is for, what it is not.
+
+Pre-v0.9 prose, the deleted validator (`coad-validator.v0.8.0/`),
+schemas, templates, examples, and adjacent-projects landscape live in
+[`archive/`](archive/README.md). Treat them as historical reference,
+not as the current methodology.
