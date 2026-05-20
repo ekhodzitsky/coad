@@ -52,21 +52,17 @@ There is no install step.
 4. Add `README.md` and `TODO.md` next to it. Keep them current.
 5. When you give a task to an agent, point it at that contract first.
 
-That is the whole adoption path. Everything else is optional and lives
-in [docs/](docs/) or [docs/archive/](docs/archive/) for projects that
-want more structure.
+That is the whole adoption path. Nothing else is required.
 
 ## Status
 
-Public early draft. Current version: see [VERSION](VERSION). Release
-notes: [CHANGELOG.md](CHANGELOG.md). The methodology is stabilising;
-expect the prose to keep moving as we learn from real adoption.
+Public early draft. Release notes: [CHANGELOG.md](CHANGELOG.md). The
+methodology is stabilising; expect the prose to keep moving as we learn
+from real adoption. Earlier drafts (validator, JSON schemas, longer
+specification prose) are preserved in git history at tags before
+`v0.9.0`.
 
 ## See also
 
 - [PRINCIPLES.md](PRINCIPLES.md) — the ten principles.
 - [AGENT_ONBOARDING.md](AGENT_ONBOARDING.md) — single-page agent recipe.
-- [docs/archive/](docs/archive/) — pre-v0.9 prose: specification,
-  workcell model, full agent flow, adoption guide, landscape vs
-  adjacent projects, validator code, schemas. Background, not required
-  reading.
