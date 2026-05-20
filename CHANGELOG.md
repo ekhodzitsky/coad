@@ -1,5 +1,32 @@
 # Changelog
 
+## 0.9.4 - 2026-05-20
+
+### Added
+
+- SPEC §4 lifecycle now opens with a Mermaid flowchart showing the
+  six phases plus the escalation exit. Visual entry point for humans;
+  the prose table beneath is unchanged.
+- SPEC §12 «Measuring adoption» — five qualitative signals a team
+  can watch for to know whether COAD is actually getting used.
+- SPEC §13 «Influences and acknowledgements» names the sources COAD
+  synthesises: Domain-Driven Design (bounded contexts), Architecture
+  Decision Records, GitHub CODEOWNERS, contract testing, AI-agent
+  repo-instruction conventions.
+
+### Changed
+
+- `AGENTS.md` renamed to `CONTRIBUTING.md` to avoid collision with
+  the industry convention (`AGENTS.md` is widely used for instructions
+  to AI agents consuming the repository, not for contributors).
+  `CONTRIBUTING.md` is now structured as a standard contribution guide:
+  scope of welcome changes, scope requiring discussion, house rules,
+  PR conventions.
+- SPEC §1 vocabulary now states explicitly that «module» and «workcell»
+  are synonyms for the basic case, and that the distinction only
+  matters when one module contains sub-modules edited by different
+  agents. The rest of the document uses «module» by default.
+
 ## 0.9.3 - 2026-05-20
 
 ### Added

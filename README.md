@@ -112,7 +112,7 @@ SPEC.md              vocabulary, lifecycle, worked examples,
                      when-to-use, integration with code review /
                      CODEOWNERS / ADRs / design docs / Spec Kit etc.
 AGENT_ONBOARDING.md  single-page recipe for a coding agent
-AGENTS.md            house rules for contributors to this repository
+CONTRIBUTING.md      house rules for contributors to this repository
 CHANGELOG.md         release notes
 LICENSE              MIT
 ```

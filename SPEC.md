@@ -16,10 +16,13 @@ A module is not its directory — it is the boundary around its
 responsibility.
 
 **Workcell.** The smallest independently editable unit of agent work.
-For small projects, a workcell is the same as a module. For larger
-projects, a module can be a composite workcell whose children (sub-
-modules) are the actual leaf workcells. The normal write unit is a leaf
-workcell.
+**For the basic case, treat «module» and «workcell» as synonyms.** The
+distinction only matters when one module contains sub-modules edited by
+different agents — then the parent module becomes a composite workcell
+and its children are leaf workcells. The normal write unit is a leaf
+workcell. The rest of this document uses «module» when the distinction
+does not matter and «leaf workcell» / «composite workcell» when it
+does.
 
 **Module contract.** A short Markdown file (`MODULE_CONTRACT.md`)
 beside the module that names its purpose, public surface, internal
@@ -155,6 +158,17 @@ The same contract in YAML-frontmatter form (see
 faster.
 
 ## 4. Lifecycle
+
+```mermaid
+flowchart LR
+    Orient[Orient<br/>read contract] --> Scope[Scope<br/>lock read+write]
+    Scope --> Edit[Edit<br/>smallest change]
+    Edit --> Prove[Prove<br/>run proof]
+    Prove --> Update[Update knowledge<br/>fix drift]
+    Update --> Handoff[Handoff<br/>durable artifact]
+    Prove -. proof missing .-> Escalate{{Escalate<br/>with evidence}}
+    Escalate --> Handoff
+```
 
 The COAD agent lifecycle has six phases. Each phase has one obligation
 and one signal that it is done.
@@ -350,3 +364,49 @@ A team can adopt COAD incrementally:
 
 A team that gets stuck at step 2 has learned something useful: COAD
 does not match their pain.
+
+## 12. Measuring adoption
+
+There is no certifying body and no metric the methodology requires.
+Teams that have adopted COAD usefully tend to see these signals
+appear within a quarter:
+
+- **Contracts are read, not skipped.** Code review comments start
+  referencing module contracts («this changes the `CheckoutDecision`
+  surface — is the consumer list still right?»).
+- **Drift gets caught in review.** Reviewers ask «did the contract
+  change?» as a routine question, the way they currently ask «is there
+  a test?»
+- **Handoffs survive the night.** A handoff written by Friday is
+  enough for the Monday person — or the Monday agent — to continue
+  without DM-archeology.
+- **The «unknown» count goes down.** Early contracts list consumers as
+  «unknown» or invariants as «TODO». A healthy adoption shrinks these
+  to zero over time.
+- **Re-orgs start at the contract, not the code.** When the team
+  decides to split a module, the contract changes first; only then
+  the directories move.
+
+These are signals, not gates. A team can use COAD without measuring
+any of them.
+
+## 13. Influences and acknowledgements
+
+COAD is a synthesis, not new ideas. The concepts come from:
+
+- **Domain-Driven Design** (Eric Evans, 2003) — bounded contexts and
+  ubiquitous language. «Modules Are Ownership Boundaries» is a DDD
+  bounded context with the boundary written down in the repository.
+- **Architecture Decision Records** (Michael Nygard, 2011) — durable
+  decisions stored beside the code. Module contracts apply the same
+  durability principle to module-level invariants and surfaces.
+- **GitHub CODEOWNERS** — declarative ownership of code paths. COAD
+  adds *what* the owners should look for to *who* approves.
+- **Test pyramids and contract testing** — the «Proof Is Structured»
+  principle.
+- **Repo conventions for AI agents** — `.cursorrules`, `CLAUDE.md`,
+  Aider's `CONVENTIONS.md`. COAD generalises the agent-instructions
+  pattern from one file at the root to one file beside each module.
+
+The novelty in COAD is not in the parts; it is in the assembly and in
+the explicit goal of making a repository agent-navigable.
